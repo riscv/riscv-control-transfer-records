@@ -67,14 +67,14 @@ jobs:
       with:
         name: ${{ env.ARTIFACT_NAME }}
         path: ${{ env.ARTIFACT_PATH }}
-        retention-days: 7
+        retention-days: 30
 
     - name: Create Release
-      if: steps.build_files.outcome == 'success' && github.event_name == 'workflow_dispatch' && github.event.inputs.release_type != ''
+      if: steps.build_files.outcome == 'success' && github.event_name == 'workflow_dispatch' && github.event.inputs.create_release == 'true'
       uses: softprops/action-gh-release@v1
       with:
-        draft: ${{ github.event.inputs.release_type == 'draft' }}
-        tag_name: v${{ github.event.inputs.version }}
+        draft: false
+        tag_name: riscv-isa-release-${{ env.SHORT_SHA }}-${{ env.CURRENT_DATE }}
         name: ${{ env.CURRENT_DATE }}
         body: |
           This release was created by: ${{ github.event.sender.login }}
