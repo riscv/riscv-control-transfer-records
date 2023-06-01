@@ -133,6 +133,11 @@ See also <<_transfer_type_filtering, Transfer Type Filtering>>, for details on b
 
 In RV32, mctrcontrol[63:32] can be accessed via mctrcontrolh.
 
+[WARNING]
+====
+_More discussion needed on DEPTH.  Do we need variable depth?  Should HW reset CTR when it changes?  Should depth move to a separate CSR?  etc._
+====
+
 === Supervisor Control Transfer Record Control (sctrcontrol)
 
 The sctrcontrol register provides access to a subset of mctrcontrol. It
@@ -205,6 +210,11 @@ _To support nested virtualization uses, bits 6 and 4:3 should retain any
 values written. This allows a hypervisor to observe values that an
 unenlightened guest hypervisor intended to write to VSEN, VS, or VU._
 ====
+[WARNING]
+====
+_Do we want a VM to be able to change DEPTH?  Maybe a hypervisor would want to limit options?_
+====
+
 == Entry Registers
 
 CTR entries are accessed via the indirect register access mechanism
@@ -330,6 +340,11 @@ _Like the transfer type inhibit bits in mctrcontrol, the ctrdata.TYPE
 bits leverage the E-trace itype encodings, with the addition of External
 Trap._
 ====
+[WARNING]
+====
+_Do we need an External Trap type here?  Or just use Exception/Interrupt?  The target PC will be 0, so should be obvious this is an external trap.  Or maybe keeping External Trap type allows us to repurpose the target PC field?_
+====
+
 == Behavior
 
 Control transfers are recorded by CTR if the following conditions are
@@ -409,6 +424,11 @@ the external trap record includes all relevant information, and gives
 the trap handler (e.g., an emulator) the opportunity to modify the
 record._
 ====
+[WARNING]
+====
+_Should external traps also depend on EXCINH/INTRINH?_
+====
+
 
 The table below provides details on recording of privilege mode
 transfers. Standard dependencies on FROZEN and transfer type inhibits
@@ -451,6 +471,10 @@ using the following formula:
 ----
 (2^12^ + CCM) << CCE-1
 ----
+[WARNING]
+====
+_The 2^12^ is just a way to represent the leading 1.  Let me know if there's a better way to describe this._
+====
 
 When CCE>1, the cycle count granularity is reduced from 1 to 2^CCE-1^.
 The calculated value is the result of rounding the elapsed cycles down

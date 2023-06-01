@@ -46,6 +46,8 @@ RISC-V Control Transfer Records TG
 Assume everything can change. This draft specification will change before
 being accepted as standard, so implementations made to this draft
 specification will likely not conform to the future standard.
+
+Text blocks offset by a warning symbol, like this one, are temporary and are not intended to be included in the ratified spec.
 ====
 
 [preface]
