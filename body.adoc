@@ -1,3 +1,4 @@
+[[body]]
 == CSRs
 
 === Machine Control Transfer Record Control (mctrcontrol)
@@ -50,9 +51,9 @@ via siselect and sireg*.
 |CLR |When written to 1, zeroes all implemented CTR entries, regardless
 of the current CTR depth. Reads will always return 0 for this bit.
 
-|MTE |If ETEN=1, enables recording of traps to M-mode when M=0.
+|MTE |If ETEN=1, enables recording of traps to M-mode when M=0.  See <<External Traps>>.
 
-|STE |If ETEN=1, enables recording of traps to S-mode when S=0.
+|STE |If ETEN=1, enables recording of traps to S-mode when S=0.  See <<External Traps>>.
 
 |RASEMU |Enables <<_ras_emulation_mode, RAS Emulation Mode>>.
 
@@ -104,7 +105,7 @@ field, based on the depth options supported. See
 
 |ETEN |Enable recording of external traps, or traps from an enabled mode
 to an inhibited mode. If ETEN=MTE=1, external traps to M-mode will be
-recorded. If ETEN=STE=1, external traps to S-mode will be recorded.
+recorded. If ETEN=STE=1, external traps to S-mode will be recorded.  See <<External Traps>>.
 
 |INDCALLINH |Inhibit recording of indirect call instructions
 
