@@ -3,5 +3,9 @@
 This RISC-V specification has been contributed to directly or indirectly by:
 
 [%hardbreaks]
-* Author1 <required1@email.com>
-* Author2 <required2@email.com>
+* Beeman Strong <beeman@rivosinc.com>
+* Bruce Ableidinger <bruce.ableidinger@sifive.com>
+* Snehasish Kumar <snehasishk@google.com>
+* Robert Chyla <robert.chyla@sifive.com>
+* John Simpson <john.simpson@sifive.com>
+* Ved Shanbhogue <ved@rivosinc.com>

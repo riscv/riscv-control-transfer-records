@@ -1,16 +1,16 @@
 [[header]]
-:description: RISC-V Example Specification Document (Zexmpl)
+:description: RISC-V Control Transfer Records (Smctr/Ssctr)
 :company: RISC-V.org
-:revdate: 1/2022
-:revnumber: 1.0
-:revremark: This document is in development. Assume everything can change. See http://riscv.org/spec-state for details.
+:revdate: 06/01/2023
+:revnumber: 0.1
+:revremark: This document is in development.
 :url-riscv: http://riscv.org
 :doctype: book
 :preface-title: Preamble
 :colophon:
 :appendix-caption: Appendix
 :imagesdir: images
-:title-logo-image: image:risc-v_logo.svg[pdfwidth=3.25in,align=center]
+:title-logo-image: image:../docs-resources/images/risc-v_logo.svg[pdfwidth=3.25in,align=center]
 // Settings:
 :experimental:
 :reproducible:
@@ -36,8 +36,8 @@ endif::[]
 :footnote:
 :xrefstyle: short
 
-= RISC-V Example Specification Document (Zexmpl)
-Author 1; Author 2; RISC-V Task Group
+= RISC-V Control Transfer Records (Smctr/Ssctr)
+RISC-V Control Transfer Records TG
 
 // Preamble
 [WARNING]
@@ -61,7 +61,7 @@ Copyright 2022 by RISC-V International.
 include::contributors.adoc[]
 
 include::intro.adoc[]
-include::chapter2.adoc[]
+include::body.adoc[]
 //the index must precede the bibliography
-include::index.adoc[]
-include::bibliography.adoc[]
+//include::index.adoc[]
+//include::bibliography.adoc[]
