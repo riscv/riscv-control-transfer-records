@@ -318,8 +318,7 @@ ctrselect. Implementations that do not support this field will report 0.
 
 |WLRL |0
 
-|CCV |Cycle Count Valid. See link:#cycle-counting[[.underline]#Cycle
-Counting#]. |WARL |0
+|CCV |Cycle Count Valid. See <<_cycle_counting, Cycle Counting>>. |WARL |0
 
 |CC[15:0] |Cycle Count, composed of the Cycle Count Exponent (CCE, in
 CC[15:12]) and Cycle Count Mantissa (CCM, in CC[11:0]). See
