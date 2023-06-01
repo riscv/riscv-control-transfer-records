@@ -51,9 +51,9 @@ via siselect and sireg*.
 |CLR |When written to 1, zeroes all implemented CTR entries, regardless
 of the current CTR depth. Reads will always return 0 for this bit.
 
-|MTE |If ETEN=1, enables recording of traps to M-mode when M=0.  See <<External Traps>>.
+|MTE |If ETEN=1, enables recording of traps to M-mode when M=0.  See <<_external_traps, External Traps>>.
 
-|STE |If ETEN=1, enables recording of traps to S-mode when S=0.  See <<External Traps>>.
+|STE |If ETEN=1, enables recording of traps to S-mode when S=0.  See <<_external_traps, External Traps>>.
 
 |RASEMU |Enables <<_ras_emulation_mode, RAS Emulation Mode>>.
 
@@ -105,7 +105,7 @@ field, based on the depth options supported. See
 
 |ETEN |Enable recording of external traps, or traps from an enabled mode
 to an inhibited mode. If ETEN=MTE=1, external traps to M-mode will be
-recorded. If ETEN=STE=1, external traps to S-mode will be recorded.  See <<External Traps>>.
+recorded. If ETEN=STE=1, external traps to S-mode will be recorded.  See <<_external_traps, External Traps>>.
 
 |INDCALLINH |Inhibit recording of indirect call instructions
 
@@ -273,8 +273,8 @@ Unsupported fields are read-only 0.
 
 [width="100%",options="header",]
 |===
-4+|63:32 2+|31:28 3+|27:16 |15 |14:4 2+|3:0
-4+|_WPRI_ 2+|CCE 3+|CCM |CCV |_WPRI_ 2+|TYPE
+4+|63:32 3+|31:16|15 2+|14:4 2+|3:0
+4+|_WPRI_ 3+|CC |CCV 2+|_WPRI_ 2+|TYPE
 |===
 
 [width="100%",cols="22%,56%,12%,10%",options="header",]
@@ -556,6 +556,7 @@ entry 0, then reading them back. Unimplemented fields are read-only 0.
 
 == Opens
 
+* Deal with RASEMU stack corruption?
 * How to synthesize entries?
 * Want a TOS for stack stitching?
 * Want bit for missed transfer insts?
