@@ -541,6 +541,8 @@ samples may be able to assist in identifying matching stacks._
 ====
 === Freeze
 
+When mctrcontrol.FROZEN=1, transfer recording is inhibited.  This bit can be set by hardware, as described below, or by software.
+
 When mctrcontrol.LCOFIFRZ=1 and a local counter overflow interrupt
 (LCOFI) is taken, mctrcontrol.FROZEN is set by the CPU. This inhibits
 CTR recording until software clears FROZEN. The LCOFI trap itself is not
@@ -556,6 +558,10 @@ recording is desired._
 ====
 Similarly, on a breakpoint exception with xctrcontrol.BPFRZ=1, FROZEN is
 set by the CPU. The breakpoint exception itself is not recorded.
+[WARNING]
+====
+_There is potential for race conditions between software writes to xctrcontrol, and hardware updates to FROZEN.  Need to consider whether FROZEN should be moved to a separate CSR._
+====
 
 == Discovery
 
