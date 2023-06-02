@@ -104,7 +104,7 @@ field, based on the depth options supported. See
 |BRINH |Inhibit recording of taken branch instructions
 
 |ETEN |Enable recording of external traps, or traps from an enabled mode
-to an inhibited mode. If ETEN=MTE=1, external traps to M-mode will be
+to a disabled mode. If ETEN=MTE=1, external traps to M-mode will be
 recorded. If ETEN=STE=1, external traps to S-mode will be recorded.  See <<_external_traps, External Traps>>.
 
 |INDCALLINH |Inhibit recording of indirect call instructions
@@ -371,12 +371,12 @@ and target mode are enabled for recording, and the transfer type (trap
 or trap return).
 
 Traps, and trap returns, between enabled modes are recorded as normal.
-Traps from an inhibited mode to an enabled mode, and trap returns from
-an enabled mode back to an inhibited mode, are partially recorded. In
-such cases, the PC from the inhibited mode (source PC for traps, and
-target PC for trap returns) is 0. Trap returns from an inhibited mode to
+Traps from a disabled mode to an enabled mode, and trap returns from
+an enabled mode back to a disabled mode, are partially recorded. In
+such cases, the PC from the disabled mode (source PC for traps, and
+target PC for trap returns) is 0. Trap returns from a disabled mode to
 an enabled mode are not recorded. Traps from an enabled mode to an
-inhibited mode, known as external traps, are not recorded by default,
+disabled mode, known as external traps, are not recorded by default,
 but see <<_external_traps, External Traps>> for how they
 can be recorded.
 
