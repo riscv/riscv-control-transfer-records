@@ -588,3 +588,4 @@ entry 0, then reading them back. Unimplemented fields are read-only 0.
 * Option to record not-takens?
 * Context filtering?
 * Clear entries on depth change? Move depth field?
+* Should FROZEN be in a separate CSR, that is not written while recording is active?
