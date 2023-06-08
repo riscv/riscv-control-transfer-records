@@ -32,20 +32,20 @@ Reset value is 0.
 
 [width="100%",options="header",]
 |===
-|7 |6 |5 |4 |3 |2 |1 |0
-|CLR |VSEN |SEN |VU |VS |U |S |M
+|7 |6 |5 2+|4:3 |2 |1 |0
+|CLR |VSEN |SEN 2+|_WARL_ |U |S |M
 |===
 
 [width="100%",cols="21%,79%",options="header",]
 |===
 |Field |Description
-|M,S,U,VS,VU |Enable transfer recording in the selected privileged
-mode(s).
+|M,S,U |Enable transfer recording in the selected privileged
+mode(s).  VS and VU modes can be enabled from <<_virtual_supervisor_control_transfer_record_control_vsctrcontrol, vsctrcontrol>>.
 
 |SEN |Enable S-mode access to sctrcontrol, and access to CTR entries via
 siselect and sireg*.
 
-|VSEN |Enable VS-mode access to sctrcontrol, and access to CTR entries
+|VSEN |When SEN=1, enable VS-mode access to sctrcontrol, and access to CTR entries
 via siselect and sireg*.
 
 |CLR |When written to 1, zeroes all implemented CTR entries, regardless
@@ -95,41 +95,45 @@ implementation may opt to hardcode some or all of the bits in this
 field, based on the depth options supported. See
 <<_discovery, Discovery>>.
 
-|EXCINH |Inhibit recording of exceptions
+|EXCINH |Inhibit recording of exceptions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
 
-|INTRINH |Inhibit recording of interrupts
+|INTRINH |Inhibit recording of interrupts.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
 
-|TRETINH |Inhibit recording of trap return instructions
+|TRETINH |Inhibit recording of trap return instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
 
-|BRINH |Inhibit recording of taken branch instructions
+|BRINH |Inhibit recording of taken branch instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
 
 |ETEN |Enable recording of external traps, or traps from an enabled mode
 to a disabled mode. If ETEN=MTE=1, external traps to M-mode will be
 recorded. If ETEN=STE=1, external traps to S-mode will be recorded.  See <<_external_traps, External Traps>>.
 
-|INDCALLINH |Inhibit recording of indirect call instructions
+|INDCALLINH |Inhibit recording of indirect call instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
 
-|DIRCALLINH |Inhibit recording of direct call instructions
+|DIRCALLINH |Inhibit recording of direct call instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
 
-|INDJUMPINH |Inhibit recording of indirect jump instructions
+|INDJUMPINH |Inhibit recording of indirect jump instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
 
-|DIRJUMPINH |Inhibit recording of direct jump instructions
+|DIRJUMPINH |Inhibit recording of direct jump instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
 
-|CORSWAPINH |Inhibit recording of co-routine swap instructions
+|CORSWAPINH |Inhibit recording of co-routine swap instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
 
-|RETINH |Inhibit recording of function return instructions
+|RETINH |Inhibit recording of function return instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
 
-|INDOJMPINH |Inhibit recording of indirect other jump instructions
+|INDOJMPINH |Inhibit recording of indirect other jump instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
 
-|DIROJMPINH |Inhibit recording of direct other jump instructions
+|DIROJMPINH |Inhibit recording of direct other jump instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
 |===
 
 M, CLR, and DEPTH are required fields. S and SEN are required if S-mode
-is implemented. U is required if U-mode is implemented. VS, VU, and VSEN
-are required if the H extension is implemented. All other fields are
-optional. All unimplemented fields are read-only 0.
+is implemented. U is required if U-mode is implemented. VSEN
+is required if the H extension is implemented. All other fields are
+optional. 
 
-See also <<_transfer_type_filtering, Transfer Type Filtering>>, for details on bits 47:32.
+All fields, save for DEPTH, should be 0 upon reset.  DEPTH may optionally have some bits hardcoded to 1, see <<_discovery, Discovery>>.  All unimplemented fields are read-only 0, save for VSEN, which should always be writable.
+[NOTE]
+====
+_Making VSEN writable supports M-mode emulation of the H extension, by preserving the value a hypervisor intended to write._
+====
 
 In RV32, mctrcontrol[63:32] can be accessed via mctrcontrolh.
 
@@ -144,7 +148,7 @@ The sctrcontrol register provides access to a subset of mctrcontrol. It
 is accessible in S-mode when mctrcontrol.SEN=1; when SEN=0, S-mode
 access to sctrcontrol results in an illegal instruction exception. It is
 accessible in VS-mode when mctrcontrol.VSEN=mctrcontrol.SEN=1; when
-VSEN=0 or SEN=0, VS-mode access to sctrcontrol results in an virtual
+VSEN=0 or SEN=0, VS-mode access to sctrcontrol results in a virtual
 instruction exception.
 
 Bits 0, 5, and 8 in sctrcontrol are read-only 0. As a result, S-mode and
@@ -152,12 +156,12 @@ VS-mode do not have access to the M, SEN, and MTE fields in mctrcontrol.
 
 In RV32, sctrcontrol[63:32] can be accessed via sctrcontrolh.
 
-If S-mode is not supported, access to sctrcontrol(h) results in an
+If S-mode is not implemented, access to sctrcontrol(h) results in an
 illegal instruction exception.
 
 === Virtual Supervisor Control Transfer Record Control (vsctrcontrol)
 
-The vsctrcontrol register is active when V=1. VS-mode accesses to
+The vsctrcontrol register is active when V=1, such that the hardware applies the CTR configuration from vsctrcontrol rather than that from mctrcontrol. VS-mode accesses to
 sctrcontrol are redirected to vsctrcontrol.
 
 [width="100%",options="header",]
@@ -190,26 +194,29 @@ sctrcontrol are redirected to vsctrcontrol.
 |CLR |_WARL_ |0 2+|_WARL_ |VU |VS |0
 |===
 
-The VSTE bit enables recording of traps to VS-mode when VS=0, if ETEN=1.
+The VS and VU bits enable transfer recording in VS-mode and VU-mode, respectively.  The VSTE bit enables recording of traps to VS-mode when VS=0, if ETEN=1.
 Other field definitions match those of
 <<_machine_control_transfer_record_control_mctrcontrol, mctrcontrol>>.
-The optional fields supported in vsctrcontrol should match those
-supported in mctrcontrol.
+The optional fields implemented in vsctrcontrol should match those
+implemented in mctrcontrol.
+
+[NOTE]
+====
+_Bit positions for VSTE, VS, and VU in vsctrcontrol match those for STE, S, and U in sctrcontrol, respectively. This is to accommodate an (unenlightened) guest OS that is unaware it is running with V=1._
+====
+
+Bits 6 and 4:3 are writable.
+
+[NOTE]
+====
+_This supports nested virtualization use cases, by allowing a hypervisor to observe values that an unenlightened guest hypervisor intended to write to VSEN, VS, or VU._
+====
 
 In RV32, vsctrcontrol[63:32] can be accessed via vsctrcontrolh.
 
-If the H extension is not supported, access to vsctrcontrol(h) results
+If the H extension is not implemented, access to vsctrcontrol(h) results
 in an illegal instruction exception.
-[NOTE]
-====
-_Bit positions for VSTE, VS, and VU in vsctrcontrol match those for STE,
-S, and U in sctrcontrol, respectively. This is to accommodate an
-(unenlightened) guest OS that is unaware it is running with V=1._
 
-_To support nested virtualization uses, bits 6 and 4:3 should retain any
-values written. This allows a hypervisor to observe values that an
-unenlightened guest hypervisor intended to write to VSEN, VS, or VU._
-====
 [WARNING]
 ====
 _Do we want a VM to be able to change DEPTH?  Maybe a hypervisor would want to limit options?_
@@ -243,7 +250,10 @@ registers can be accessed from S-mode via sireg, sireg2, and sireg3. If
 mctrcontrol.SEN=1 and mctrcontrol.VSEN=1, CTR entry registers can be
 accessed from VS-mode via sireg, sireg2, and sireg3.
 
-CTR entry registers are WPRI. Status fields may be added by future
+Attempts to access vsireg* from M-mode or S-mode, while vsiselect is in 0x200..0x2FF,
+raise an illegal instruction exception.
+
+Undefined bits in CTR entry registers are WPRI. Status fields may be added by future
 extensions, and software should ignore but preserve any fields that it
 does not recognize.
 
@@ -267,7 +277,7 @@ The ctrtarget register contains the target (destination) virtual address
 of the recorded transfer. MISP is optional, it is set by the hardware
 when the recorded transfer is an instruction whose target or
 taken/not-taken direction was mispredicted by the branch predictor. MISP
-is read-only 0 when not supported.
+is read-only 0 when not implemented.
 
 [width="100%",cols="21%,70%,9%",options="header",]
 |===
@@ -279,7 +289,7 @@ is read-only 0 when not supported.
 
 The ctrdata register contains metadata for the recorded transfer. This
 register is required, though all fields within it are optional.
-Unsupported fields are read-only 0.
+Unimplemented fields are read-only 0.
 
 [width="100%",options="header",]
 |===
@@ -294,7 +304,7 @@ Unsupported fields are read-only 0.
 Identifies the type of the control flow change recorded in CTR entry
 ctrselect. Implementations that do not support this field will report 0.
 
-0000 - Undefined
+0000 - Reserved
 
 0001 - Exception
 
@@ -302,7 +312,7 @@ ctrselect. Implementations that do not support this field will report 0.
 
 0011 - Trap return
 
-0100 - Undefined
+0100 - Reserved
 
 0101 - Taken branch
 
@@ -385,10 +395,7 @@ never recorded.
 
 === Transfer Type Filtering
 
-An implementation may opt to include support for filtering which
-transfers are recorded, by transfer type. By default, all control
-transfers within enabled privileged modes are recorded, but transfer
-type filtering bits allow select types to be inhibited.
+By default, all control transfers within enabled privileged modes are recorded.  An implementation may opt to include support for filtering which transfers are recorded, by transfer type.  Bits 47:32 in mctrcontrol provide a means for software to opt-out of recording transfers of selected types.  When implemented, all transfer type filter are 0 upon reset.
 
 The transfer type inhibit bits leverage the type definitions specified
 in Table 4.4, and described in Section 4.1.1, of the
@@ -406,7 +413,7 @@ allow M-mode, S-mode, and VS-mode, respectively, to opt-in. Tools can
 request to record External Traps by setting the ETEN bit. When an
 External Trap occurs, only if both ETEN=1 and xTE=1, such that x is the
 target privilege mode of the trap, will CTR record the trap. In such
-cases, the target PC is 0, and the transfer type (if supported) is
+cases, the target PC is 0, and the transfer type (if implemented) is
 External Trap (6).
 [NOTE]
 ====
@@ -434,22 +441,18 @@ The table below provides details on recording of privilege mode
 transfers. Standard dependencies on FROZEN and transfer type inhibits
 also apply, but are not covered by the table.
 
-[width="100%",cols="18%,17%,30%,35%",options="header",]
+[width="100%",cols="18%,17%,30%,35%",]
 |===
-|*Transfer Type* a|
-*Target Mode>*
-
-*Source Mode*
-
+.2+|*Transfer Type* .2+| *Source Mode* 2+|*Target Mode*
 |*Enabled* |*Inhibited*
-|*Trap* |*Enabled* |Recorded. |Recorded if ETEN=xTE=1, where x is target
+.2+|*Trap* |*Enabled* |Recorded. |Recorded if ETEN=xTE=1, where x is target
 mode. Target PC is 0, type is External Trap.
 
-| |*Inhibited* |Recorded, Source PC is 0. |Not recorded.
+|*Inhibited* |Recorded, Source PC is 0. |Not recorded.
 
-|*Trap Return* |*Enabled* |Recorded. |Recorded, Target PC is 0.
+.2+|*Trap Return* |*Enabled* |Recorded. |Recorded, Target PC is 0.
 
-| |*Inhibited* |Not recorded. |Not recorded.
+|*Inhibited* |Not recorded. |Not recorded.
 |===
 
 If ETEN is implemented, MTE must be implemented as well, as must STE if
@@ -515,6 +518,7 @@ entry DEPTH-1, and entries 1:DEPTH-1 move to 0:DEPTH-2.
 * Co-routine swaps affect both a return and a call. Entry 0 is
 overwritten.
 * Other transfer types are inhibited
+* <<_transfer_type_filtering, Transfer Type Filtering>> bits are ignored
 
 [NOTE]
 ====
@@ -575,12 +579,11 @@ read represents the maximum supported depth.
 
 All depths between the minimum and maximum are supported.
 
-Software can discover implemented optional mctrcontrol fields by writing
-all 1s, then reading the value back. Unimplemented fields are read-only
+Software can discover implemented optional mctrcontrol fields by writing all 1s to all defined fields, then reading the value back. Unimplemented fields are read-only
 0.
 
 Software can discover implemented optional CTR entry fields by writing
-all 1s to the <<_entry_registers, Entry Registers>> at
+all 1s to all defined fields in the <<_entry_registers, Entry Registers>> at
 entry 0, then reading them back. Unimplemented fields are read-only 0.
 
 == Opens
@@ -595,3 +598,6 @@ entry 0, then reading them back. Unimplemented fields are read-only 0.
 * Context filtering?
 * Clear entries on depth change? Move depth field?
 * Should FROZEN be in a separate CSR, that is not written while recording is active?
+* Should SEN/VSEN be state enable bits?
+* Should abbreviation be CXR instead of CTR?
+* Need an h* CSR, for VSEN, HTE?
