@@ -1,10 +1,11 @@
 [[body]]
 == CSRs
 
+The CTR configuration is selected by the currently active CTR control register, which is mctrcontrol when V=0, and vsctrcontrol when V=1.  In this document, when referring to the currently active CTR control register, ctrcontrol is used.
+
 === Machine Control Transfer Record Control (mctrcontrol)
 
-The mctrcontrol register enables and configures the CTR capability.
-Reset value is 0.
+The mctrcontrol register enables and configures the CTR capability while V=0.  Reset value is 0.
 
 [width="100%",options="header",]
 |===
@@ -132,7 +133,7 @@ _More discussion needed on DEPTH.  Do we need variable depth?  Should HW reset C
 
 === Supervisor Control Transfer Record Control (sctrcontrol)
 
-The sctrcontrol register provides access to a subset of mctrcontrol. It is accessible from S-mode and VS-mode, though VS-mode accesses are redirected to vsctrcontrol.
+The sctrcontrol register provides access to a subset of ctrcontrol. It is accessible from S-mode and VS-mode, such that S-mode accesses are redirected to mctrcontrol and VS-mode accesses are redirected to vsctrcontrol.
 
 Bits 0 and 8 in sctrcontrol are read-only 0. As a result, S-mode and
 VS-mode do not have access to the M and MTE fields in mctrcontrol.
@@ -216,7 +217,7 @@ The mctrstatus register provides access to CTR status information, and is update
 |TOS |Top of Stack.  Indicates the physical CTR array entry to be written next.  Set to 0 on CSR writes that set ctrcontrol.CLR.  Incremented on new transfers recorded, and decremented on qualified returns when ctrcontrol.RASEMU=1.  Wraps on increment when the value is all 1s, and on decrement when the value is 0.
 
 The number of TOS bits supported is implementation-dependent, but must sufficient to index the array at the maximum depth supported (e.g., 4 bits for a max depth of 16).
-|WRAP   |TOS has wrapped.  Set when TOS has value depth-1 (where depth is based on ctrcontrol.DEPTH), and a CTR update causes TOS to be incremented.  Cleared when ctrcontrol.CLR is set, and when TOS has value zero and a CTR update causes TOS to be decremented (which only happens on returns when RASEMU=1).
+|WRAP   |TOS has wrapped.  Set when TOS has value depth-1 (where depth is based on ctrcontrol.DEPTH), and a CTR update causes TOS to be incremented.  Cleared when TOS has value zero and a CTR update causes TOS to be decremented (which only happens on returns when RASEMU=1), and on CSR writes that set ctrcontrol.CLR.
 |FROZEN |Inhibit transfer recording. See
 <<_freeze, Freeze>>.
 
@@ -230,7 +231,7 @@ _Logical entry 0, accessed via mireg* when miselect=0x200, is always the physica
 ====
 [NOTE]
 ====
-_Because the mctrstatus register is updated by hardware, writes should be performed with caution.  If a read-modify-write to mctrstatus is performed while CTR is active, such that a qualified transfer completes between the read and the write, a hardware update could be lost.  It is safest to write mctrcontrol only when CTR is not active._
+_Because the mctrstatus register is updated by hardware, writes should be performed with caution.  If a read-modify-write to mctrstatus is performed while CTR is active, such that a qualified transfer completes between the read and the write, a hardware update could be lost.  It is safest to write ctrcontrol only when CTR is not active._
 ====
 [NOTE]
 ====
@@ -365,7 +366,7 @@ Bits 63:60 are reserved for custom extensions.
 
 [NOTE]
 ====
-_Like the transfer type inhibit bits in mctrcontrol, the ctrdata.TYPE
+_Like the transfer type inhibit bits in ctrcontrol, the ctrdata.TYPE
 bits leverage the E-trace itype encodings, with the addition of External
 Trap._
 ====
@@ -376,9 +377,11 @@ _Do we need an External Trap type here?  Or just use Exception/Interrupt?  The t
 
 == State Enable Access Control
 
-When Smstateen is implemented, the mstateen0.CTR bit controls access to CTR register state from privilege modes less privileged than M-mode.  When mstateen0.CTR=0, attempts from privilege modes less privileged than M-mode to access sctrcontrol, vsctrcontrol, sctrstatus, or sireg* when siselect is in 0x200..0x2FF, raise an illegal instruction exception.  When mstateen0.CTR=1, accesses to CTR register state behave as described in <<_csrs, CSRs>> and <<_entry_registers, Entry Registers>> above.
+When Smstateen is implemented, the mstateen0.CTR bit controls access to CTR register state from privilege modes less privileged than M-mode.  When mstateen0.CTR=0, attempts from privilege modes less privileged than M-mode to access sctrcontrol, vsctrcontrol, sctrstatus, sireg* when siselect is in 0x200..0x2FF, or vsireg* when vsiselect is in 0x200..0x2FF, raise an illegal instruction exception.  When mstateen0.CTR=1, accesses to CTR register state behave as described in <<_csrs, CSRs>> and <<_entry_registers, Entry Registers>> above.
 
-If the H extension is implemented and mstateen0.CTR=1, the hstateen0.CTR bit controls access to supervisor CTR state (sctrcontrol, sctrstatus, and sireg* when siselect is in 0x200..0x2FF), when V=1.  When mstateen0.CTR=1 and hstateen0.CTR=1, VS-mode accesses to supervisor CTR state behave as described in <<_entry_registers, Entry Registers>>.  When mstateen0.CTR=1 and hstateen0.CTR=0, VS-mode accesses to supervisor CTR state that would have completed successfully if hstateen0.CTR was set raise a virtual instruction exception, while others raise an illegal instruction exception.
+If the H extension is implemented and mstateen0.CTR=1, the hstateen0.CTR bit controls access to supervisor CTR state (sctrcontrol, sctrstatus, and sireg* when siselect is in 0x200..0x2FF) when V=1.  When mstateen0.CTR=1 and hstateen0.CTR=1, VS-mode accesses to supervisor CTR state behave as described in <<_entry_registers, Entry Registers>>.  When mstateen0.CTR=1 and hstateen0.CTR=0, VS-mode accesses to supervisor CTR state that would have completed successfully if hstateen0.CTR was set raise a virtual instruction exception, while others raise an illegal instruction exception.
+
+Bit 60 in mstateen0, defined by Smcsrind, can also restricts access to sireg*/siselect and vsireg*/vsiselect from privilege modes less privileged than M-mode.
 
 == Behavior
 
@@ -416,7 +419,7 @@ never recorded.
 
 === Transfer Type Filtering
 
-By default, all control transfers within enabled privileged modes are recorded.  An implementation may opt to include support for filtering which transfers are recorded, by transfer type.  Bits 47:32 in mctrcontrol provide a means for software to opt-out of recording transfers of selected types.  When implemented, all transfer type filter bits have reset value 0.
+By default, all control transfers within enabled privileged modes are recorded.  An implementation may opt to include support for filtering which transfers are recorded, by transfer type.  Bits 47:32 in ctrcontrol provide a means for software to opt-out of recording transfers of selected types.  When implemented, all transfer type filter bits have reset value 0.
 
 The transfer type inhibit bits leverage the type definitions specified
 in Table 4.4, and described in Section 4.1.1, of the
@@ -531,7 +534,7 @@ The CC value saturates when CCM and all implemented bits in CCE are 1.
 
 === RAS Emulation Mode
 
-When mctrcontrol.RASEMU=1, transfer recording behavior is altered to
+When ctrcontrol.RASEMU=1, transfer recording behavior is altered to
 emulate the behavior of a return-address stack (RAS).
 
 * Indirect and direct calls are recorded as normal
@@ -573,7 +576,7 @@ an implementation may opt to record CCV=0 for all calls when RASEMU=1._
 
 When mctrstatus.FROZEN=1, transfer recording is inhibited.  This bit can be set by hardware, as described below, or by software.
 
-When mctrcontrol.LCOFIFRZ=1 and a local counter overflow interrupt
+When ctrcontrol.LCOFIFRZ=1 and a local counter overflow interrupt
 (LCOFI) is taken, mctrstatus.FROZEN is set by the CPU. This inhibits
 CTR recording until software clears FROZEN. The LCOFI trap itself is not
 recorded.
@@ -586,7 +589,7 @@ displace any recorded transfer history state. It is the responsibility
 of the ISR to clear FROZEN before xRET, if continued control transfer
 recording is desired._
 ====
-Similarly, on a breakpoint exception with xctrcontrol.BPFRZ=1, FROZEN is
+Similarly, on a breakpoint exception with ctrcontrol.BPFRZ=1, FROZEN is
 set by the CPU. The breakpoint exception itself is not recorded.
 
 == Discovery
@@ -594,14 +597,14 @@ set by the CPU. The breakpoint exception itself is not recorded.
 Software can discover supported CTR array depth values using the
 following method:
 
-* Write ‘0000 to mctrcontrol.DEPTH, then read back the value. The value
+* Write ‘0000 to ctrcontrol.DEPTH, then read back the value. The value
 read represents the minimum supported depth.
-* Write ‘1111 to mctrcontrol.DEPTH, then read back the value. The value
+* Write ‘1111 to ctrcontrol.DEPTH, then read back the value. The value
 read represents the maximum supported depth.
 
 All depths between the minimum and maximum are supported.
 
-Software can discover implemented optional mctrcontrol fields by writing all 1s to all defined fields, then reading the value back. Unimplemented fields are read-only
+Software can discover implemented optional ctrcontrol fields by writing all 1s to all defined fields, then reading the value back. Unimplemented fields are read-only
 0.
 
 Software can discover implemented optional CTR entry fields by writing
