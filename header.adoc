@@ -16,7 +16,7 @@
 :reproducible:
 // needs to be changed? bug discussion started
 //:WaveDromEditorApp: app/wavedrom-editor.app
-:imagesoutdir: images
+:imagesoutdir: docs-resources/images
 :bibtex-file: example.bib
 :bibtex-order: alphabetical
 :bibtex-style: apa
