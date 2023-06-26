@@ -617,4 +617,3 @@ entry 0, then reading them back. Unimplemented fields are read-only 0.
 * Context filtering?
 * Clear entries on depth change? Move depth field?
 * Should abbreviation be CXR instead of CTR?
-* Need an h* CSR for HTE
