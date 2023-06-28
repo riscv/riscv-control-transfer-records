@@ -5,12 +5,12 @@ The CTR configuration is selected by the currently active CTR control register, 
 
 === Machine Control Transfer Record Control (mctrcontrol)
 
-The mctrcontrol register enables and configures the CTR capability while V=0.  Reset value is 0.
+The mctrcontrol register enables and configures the CTR capability while V=0.  The reset value is 0.  The CSR number is 0x381.
 
 [width="100%",options="header",]
 |===
 4+|63:48 |47 |46
-4+|_WARL_ |DIROJMPINH |INDOJMPINH
+4+|_WPRI_ |DIROJMPINH |INDOJMPINH
 |===
 
 [width="100%",options="header",]
@@ -22,19 +22,19 @@ The mctrcontrol register enables and configures the CTR capability while V=0.  R
 [width="100%",options="header",]
 |===
 |39 |38 |37 |36 |35 |34 |33 |32:20
-|_WARL_ |ETEN |BRINH |_WARL_ |TRETINH |INTRINH |EXCINH |_WARL_
+|_WPRI_ |ETEN |BRINH |_WPRI_ |TRETINH |INTRINH |EXCINH |_WPRI_
 |===
 
 [width="100%",options="header",]
 |===
 2+|19:16 |15:13 |12 |11 |10 |9 |8
-2+|DEPTH |_WARL_ |LCOFIFRZ |BPFRZ |RASEMU |STE |MTE
+2+|DEPTH |_WPRI_ |LCOFIFRZ |BPFRZ |RASEMU |STE |MTE
 |===
 
 [width="100%",options="header",]
 |===
 |7 4+|6:3 |2 |1 |0
-|CLR 4+|_WARL_ |U |S |M
+|CLR 4+|_WPRI_ |U |S |M
 |===
 
 [width="100%",cols="21%,79%",options="header",]
@@ -133,7 +133,7 @@ _More discussion needed on DEPTH.  Do we need variable depth?  Should HW reset C
 
 === Supervisor Control Transfer Record Control (sctrcontrol)
 
-The sctrcontrol register provides access to a subset of ctrcontrol. It is accessible from S-mode and VS-mode, such that S-mode accesses are redirected to mctrcontrol and VS-mode accesses are redirected to vsctrcontrol.
+The sctrcontrol register provides access to a subset of ctrcontrol. It is accessible from S-mode and VS-mode, such that S-mode accesses are redirected to mctrcontrol and VS-mode accesses are redirected to vsctrcontrol.  The CSR number is 0x181.
 
 Bits 0 and 8 in sctrcontrol are read-only 0. As a result, S-mode and
 VS-mode do not have access to the M and MTE fields in mctrcontrol.
@@ -146,12 +146,12 @@ illegal instruction exception.
 === Virtual Supervisor Control Transfer Record Control (vsctrcontrol)
 
 The vsctrcontrol register is active when V=1, such that the hardware applies the CTR configuration from vsctrcontrol rather than that from mctrcontrol. VS-mode accesses to
-sctrcontrol are redirected to vsctrcontrol.
+sctrcontrol are redirected to vsctrcontrol.  The reset value is 0.  The CSR number is 0x281.
 
 [width="100%",options="header",]
 |===
 4+|63:48 |47 |46
-4+|_WARL_ |DIROJMPINH |INDOJMPINH
+4+|_WPRI_ |DIROJMPINH |INDOJMPINH
 |===
 
 [width="100%",options="header",]
@@ -163,19 +163,19 @@ sctrcontrol are redirected to vsctrcontrol.
 [width="100%",options="header",]
 |===
 |39 |38 |37 |36 |35 |34 |33 |32:20
-|_WARL_ |ETEN |BRINH |_WARL_ |TRETINH |INTRINH |EXCINH |_WARL_
+|_WPRI_ |ETEN |BRINH |_WPRI_ |TRETINH |INTRINH |EXCINH |_WPRI_
 |===
 
 [width="100%",options="header",]
 |===
 2+|19:16 |15:13 |12 |11 |10 |9 |8
-2+|DEPTH |_WARL_ |LCOFIFRZ |BPFRZ |RASEMU |VSTE |0
+2+|DEPTH |_WPRI_ |LCOFIFRZ |BPFRZ |RASEMU |VSTE |0
 |===
 
 [width="100%",options="header",]
 |===
 |7 4+|6:3 |2 |1 |0
-|CLR 4+|_WARL_ |VU |VS |0
+|CLR 4+|_WPRI_ |VU |VS |0
 |===
 
 The VS and VU bits enable transfer recording in VS-mode and VU-mode, respectively.  The VSTE bit enables recording of traps to VS-mode when VS=0, if ETEN=1.
@@ -203,7 +203,7 @@ _Do we want a VM to be able to change DEPTH?  Maybe a hypervisor would want to l
 
 === Machine Control Transfer Record Status (mctrstatus)
 
-The mctrstatus register provides access to CTR status information, and is updated by the hardware when CTR is active (in an enabled privilege mode and not frozen).  Reset value is 0.
+The mctrstatus register provides access to CTR status information, and is updated by the hardware when CTR is active (in an enabled privilege mode and not frozen).  The reset value is 0.  The CSR number is 0x382.
 
 [width="100%",options="header",cols="30%,10%,10%,20%,30%"]
 |===
@@ -242,7 +242,7 @@ _Exposing the TOS may also allow support for Linux perf's https://lwn.net/Articl
 
 === Supervisor Control Transfer Record Status (sctrstatus)
 
-The sctrstatus register is an S-mode and VS-mode (writable) alias to mctrstatus.
+The sctrstatus register is an S-mode and VS-mode (writable) alias to mctrstatus.  The CSR number is 0x182.
 
 == Entry Registers
 
@@ -380,6 +380,8 @@ _Do we need an External Trap type here?  Or just use Exception/Interrupt?  The t
 When Smstateen is implemented, the mstateen0.CTR bit controls access to CTR register state from privilege modes less privileged than M-mode.  When mstateen0.CTR=0, attempts from privilege modes less privileged than M-mode to access sctrcontrol, vsctrcontrol, sctrstatus, sireg* when siselect is in 0x200..0x2FF, or vsireg* when vsiselect is in 0x200..0x2FF, raise an illegal instruction exception.  When mstateen0.CTR=1, accesses to CTR register state behave as described in <<_csrs, CSRs>> and <<_entry_registers, Entry Registers>> above.
 
 If the H extension is implemented and mstateen0.CTR=1, the hstateen0.CTR bit controls access to supervisor CTR state (sctrcontrol, sctrstatus, and sireg* when siselect is in 0x200..0x2FF) when V=1.  When mstateen0.CTR=1 and hstateen0.CTR=1, VS-mode accesses to supervisor CTR state behave as described in <<_entry_registers, Entry Registers>>.  When mstateen0.CTR=1 and hstateen0.CTR=0, VS-mode accesses to supervisor CTR state that would have completed successfully if hstateen0.CTR was set raise a virtual instruction exception, while others raise an illegal instruction exception.
+
+Bit 55 is the position of CTR in mstateen0 and hstateen0.
 
 Bit 60 in mstateen0, defined by Smcsrind, can also restricts access to sireg*/siselect and vsireg*/vsiselect from privilege modes less privileged than M-mode.
 
