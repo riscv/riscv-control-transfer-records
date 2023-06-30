@@ -1,7 +1,7 @@
 [[intro]]
 == Introduction
 
-A method to record taken control transfer history is valuable for performance profiling usages, as well as for debug. Profiling tools like Linux perf collect control transfer history when sampling, enabling users, and tools like AutoFDO, to identify hot paths for optimization.
+A method to record control transfer history is valuable for performance profiling usages, as well as for debug. Control transfers include jump instructions, taken branch instructions, traps, and trap returns.  Profiling tools like Linux perf collect control transfer history when sampling, enabling users, and tools like AutoFDO, to identify hot paths for optimization.
 
 Control flow trace capabilities offer very deep transfer history, but for in-target use, the volume of data produced can result in significant performance overheads due to memory bandwidth consumption, buffer management, and decoder overhead. Control Transfer Records (CTRs) provide a method to record a limited history in internal chip storage, with the intent of dramatically reducing the performance overhead and complexity of collecting transfer history.
 
