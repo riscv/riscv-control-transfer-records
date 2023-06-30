@@ -287,7 +287,7 @@ ctrsource is a WARL register that must be able to hold all valid virtual address
 
 [WARNING]
 ====
-Should MXLEN-1:XLEN bits just be 0?  They are only accessible when XLEN>=64.  ctrtarget has same issue.
+_Should MXLEN-1:XLEN bits just be 0?  They are only accessible when XLEN>=64.  ctrtarget has same issue._
 ====
 
 === Control Transfer Record Target (ctrtarget)
@@ -370,9 +370,7 @@ Bits 63:60 are reserved for custom extensions.
 
 [NOTE]
 ====
-_Like the transfer type inhibit bits in ctrcontrol, the ctrdata.TYPE
-bits leverage the E-trace itype encodings, with the addition of External
-Trap._
+_Like the transfer type inhibit bits in ctrcontrol, the ctrdata.TYPE bits leverage the E-trace itype encodings, with the addition of External Trap._
 ====
 [WARNING]
 ====
@@ -405,7 +403,7 @@ optional.
 
 [NOTE]
 ====
-In order to collect accurate and representative performance profiles while using CTR, it is recommended that hardware recording of control transfers incurs no added performance overhead, e.g., in the form of retirement or instruction execution restrictions that are not present when CTR is not recording transfers.
+_In order to collect accurate and representative performance profiles while using CTR, it is recommended that hardware recording of control transfers incurs no added performance overhead, e.g., in the form of retirement or instruction execution restrictions that are not present when CTR is not recording transfers._
 ====
 
 === Privilege Mode Transitions
@@ -440,7 +438,7 @@ Efficient Trace Spec v2.0#]. An exception is the ETEN bit, discussed in
 
 [NOTE]
 ====
-For a given implementation, if support for any transfer type filter bit results in reduced software performance, perhaps due to additional retirement restrictions, it is strongly recommended that this reduced performance apply only when the bit is set.  Alternatively, support for the bit may be omitted.  Maintaining software performance for the default CTR configuration, when all transfer type bits are cleared, is paramount.
+_For a given implementation, if support for any transfer type filter bit results in reduced software performance, perhaps due to additional retirement restrictions, it is strongly recommended that this reduced performance apply only when the bit is set.  Alternatively, support for the bit may be omitted.  Maintaining software performance for the default CTR configuration, when all transfer type bits are cleared, is paramount._
 ====
 
 ==== External Traps
