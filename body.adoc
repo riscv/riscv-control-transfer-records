@@ -37,7 +37,7 @@ The mctrcontrol register enables and configures the CTR capability while V=0.  T
 |CLR 4+|_WPRI_ |U |S |M
 |===
 
-[width="100%",cols="15%,75%,10%",options="header",]
+[width="100%",cols="18%,72%,10%",options="header",]
 |===
 |Field |Description |Access 
 |M,S,U |Enable transfer recording in the selected privileged mode(s).  VS and VU modes can be enabled from <<_virtual_supervisor_control_transfer_record_control_vsctrcontrol, vsctrcontrol>>. |WLRL 
@@ -403,6 +403,11 @@ Recorded transfers will set the ctrsource.V bit to 1, and will update at
 least the ctrsource.PC and ctrtarget.PC fields. Other record fields are
 optional.
 
+[NOTE]
+====
+In order to collect accurate and representative performance profiles while using CTR, it is recommended that hardware recording of control transfers incurs no added performance overhead, e.g., in the form of retirement or instruction execution restrictions that are not present when CTR is not recording transfers.
+====
+
 === Privilege Mode Transitions
 
 Transfers that change the privilege mode are a special case. What is
@@ -624,10 +629,6 @@ entry 0, then reading them back. Unimplemented fields are read-only 0.
 
 == Opens
 
-* Want bit for missed transfer insts?
-* Want priv mode recorded?
-* CTR update performance event
-* Option to record not-takens?
 * Context filtering?
 * Clear entries on depth change? Move depth field?
 * Should abbreviation be CXR instead of CTR?
