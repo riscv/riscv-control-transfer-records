@@ -37,26 +37,22 @@ The mctrcontrol register enables and configures the CTR capability while V=0.  T
 |CLR 4+|_WPRI_ |U |S |M
 |===
 
-[width="100%",cols="21%,79%",options="header",]
+[width="100%",cols="15%,75%,10%",options="header",]
 |===
-|Field |Description
-|M,S,U |Enable transfer recording in the selected privileged
-mode(s).  VS and VU modes can be enabled from <<_virtual_supervisor_control_transfer_record_control_vsctrcontrol, vsctrcontrol>>.
+|Field |Description |Access 
+|M,S,U |Enable transfer recording in the selected privileged mode(s).  VS and VU modes can be enabled from <<_virtual_supervisor_control_transfer_record_control_vsctrcontrol, vsctrcontrol>>. |WLRL 
 
-|CLR |When written to 1, zeroes all implemented CTR entries, regardless
-of the current CTR depth. Reads will always return 0 for this bit.
+|CLR |When written to 1, zeroes all implemented CTR entries, regardless of the current CTR depth. Reads will always return 0 for this bit. |WLRL 
 
-|MTE |If ETEN=1, enables recording of traps to M-mode when M=0.  See <<_external_traps, External Traps>>.
+|MTE |If ETEN=1, enables recording of traps to M-mode when M=0.  See <<_external_traps, External Traps>>. |WLRL 
 
-|STE |If ETEN=1, enables recording of traps to S-mode when S=0.  See <<_external_traps, External Traps>>.
+|STE |If ETEN=1, enables recording of traps to S-mode when S=0.  See <<_external_traps, External Traps>>. |WARL 
 
-|RASEMU |Enables <<_ras_emulation_mode, RAS Emulation Mode>>.
+|RASEMU |Enables <<_ras_emulation_mode, RAS Emulation Mode>>. |WARL 
 
-|BPFRZ |Set FROZEN on a breakpoint exception. See
-<<_freeze, Freeze>>.
+|BPFRZ |Set FROZEN on a breakpoint exception. See <<_freeze, Freeze>>. |WLRL 
 
-|LCOFIFRZ |Set FROZEN on local counter overflow interrupt (LCOFI). See
-<<_freeze, Freeze>>.
+|LCOFIFRZ |Set FROZEN on local counter overflow interrupt (LCOFI). See <<_freeze, Freeze>>. |WARL 
 
 |DEPTH[3:0] a|
 WARL field that selects the depth of the CTR array. Encodings:
@@ -85,35 +81,33 @@ inaccessible upper entries (N..255).
 Which DEPTH values are supported is implementation-specific. An
 implementation may opt to hardcode some or all of the bits in this
 field, based on the depth options supported. See
-<<_discovery, Discovery>>.
+<<_discovery, Discovery>>. |WLRL 
 
-|EXCINH |Inhibit recording of exceptions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
+|EXCINH |Inhibit recording of exceptions.  See <<_transfer_type_filtering, Transfer Type Filtering>>. |WARL 
 
-|INTRINH |Inhibit recording of interrupts.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
+|INTRINH |Inhibit recording of interrupts.  See <<_transfer_type_filtering, Transfer Type Filtering>>. |WARL 
 
-|TRETINH |Inhibit recording of trap return instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
+|TRETINH |Inhibit recording of trap return instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>. |WARL 
 
-|BRINH |Inhibit recording of taken branch instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
+|BRINH |Inhibit recording of taken branch instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>. |WARL 
 
-|ETEN |Enable recording of external traps, or traps from an enabled mode
-to a disabled mode. If ETEN=MTE=1, external traps to M-mode will be
-recorded. If ETEN=STE=1, external traps to S-mode will be recorded.  See <<_external_traps, External Traps>>.
+|ETEN |Enable recording of external traps, or traps from an enabled mode to a disabled mode. If ETEN=MTE=1, external traps to M-mode will be recorded. If ETEN=STE=1, external traps to S-mode will be recorded.  See <<_external_traps, External Traps>>. |WARL 
 
-|INDCALLINH |Inhibit recording of indirect call instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
+|INDCALLINH |Inhibit recording of indirect call instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>. |WARL 
 
-|DIRCALLINH |Inhibit recording of direct call instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
+|DIRCALLINH |Inhibit recording of direct call instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>. |WARL 
 
-|INDJUMPINH |Inhibit recording of indirect jump instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
+|INDJUMPINH |Inhibit recording of indirect jump instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>. |WARL 
 
-|DIRJUMPINH |Inhibit recording of direct jump instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
+|DIRJUMPINH |Inhibit recording of direct jump instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>. |WARL 
 
-|CORSWAPINH |Inhibit recording of co-routine swap instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
+|CORSWAPINH |Inhibit recording of co-routine swap instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>. |WARL 
 
-|RETINH |Inhibit recording of function return instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
+|RETINH |Inhibit recording of function return instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>. |WARL 
 
-|INDOJMPINH |Inhibit recording of indirect other jump instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
+|INDOJMPINH |Inhibit recording of indirect other jump instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>. |WARL 
 
-|DIROJMPINH |Inhibit recording of direct other jump instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
+|DIROJMPINH |Inhibit recording of direct other jump instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>. |WARL 
 |===
 
 M, CLR, and DEPTH are required fields. S is required if S-mode
@@ -211,15 +205,14 @@ The mctrstatus register provides access to CTR status information, and is update
 |_WPRI_ |FROZEN |WRAP |_WPRI_ |TOS
 |===
 
-[width="100%",cols="15%,85%",options="header",]
+[width="100%",cols="15%,75%,10%",options="header",]
 |===
-|Field |Description
+|Field |Description |Access
 |TOS |Top of Stack.  Indicates the physical CTR array entry to be written next.  Set to 0 on CSR writes that set ctrcontrol.CLR.  Incremented on new transfers recorded, and decremented on qualified returns when ctrcontrol.RASEMU=1.  Wraps on increment when the value is all 1s, and on decrement when the value is 0.
 
-The number of TOS bits supported is implementation-dependent, but must sufficient to index the array at the maximum depth supported (e.g., 4 bits for a max depth of 16).
-|WRAP   |TOS has wrapped.  Set when TOS has value depth-1 (where depth is based on ctrcontrol.DEPTH), and a CTR update causes TOS to be incremented.  Cleared when TOS has value zero and a CTR update causes TOS to be decremented (which only happens on returns when RASEMU=1), and on CSR writes that set ctrcontrol.CLR.
-|FROZEN |Inhibit transfer recording. See
-<<_freeze, Freeze>>.
+The number of TOS bits supported is implementation-dependent, but must sufficient to index the array at the maximum depth supported (e.g., 4 bits for a max depth of 16).|WARL 
+|WRAP   |TOS has wrapped.  Set when TOS has value depth-1 (where depth is based on ctrcontrol.DEPTH), and a CTR update causes TOS to be incremented.  Cleared when TOS has value zero and a CTR update causes TOS to be decremented (which only happens on returns when RASEMU=1), and on CSR writes that set ctrcontrol.CLR. |WLRL 
+|FROZEN |Inhibit transfer recording. See <<_freeze, Freeze>>.|WLRL 
 
 |===
 
@@ -282,11 +275,18 @@ transfer is recorded in the selected CTR array entry, and implies that
 data in ctrsource, ctrtarget, and ctrdata is valid for this entry. All
 fields are required.
 
+ctrsource is a WARL register that must be able to hold all valid virtual addresses. It need not be capable of holding all possible invalid addresses. Prior to writing ctrsource, implementations may convert an invalid address into some other invalid address that ctrsource is capable of holding.
+
 [width="100%",cols="21%,70%,9%",options="header",]
 |===
 |MXLEN-1:XLEN |XLEN-1:1 |0
 |_WPRI_ |PC[XLEN-1:1] |V
 |===
+
+[WARNING]
+====
+Should MXLEN-1:XLEN bits just be 0?  They are only accessible when XLEN>=64.  ctrtarget has same issue.
+====
 
 === Control Transfer Record Target (ctrtarget)
 
@@ -295,6 +295,8 @@ of the recorded transfer. MISP is optional, it is set by the hardware
 when the recorded transfer is an instruction whose target or
 taken/not-taken direction was mispredicted by the branch predictor. MISP
 is read-only 0 when not implemented.
+
+ctrtarget is a WARL register that must be able to hold all valid virtual addresses. It need not be capable of holding all possible invalid addresses. Prior to writing ctrtarget, implementations may convert an invalid address into some other invalid address that ctrtarget is capable of holding.
 
 [width="100%",cols="21%,70%,9%",options="header",]
 |===
@@ -306,7 +308,7 @@ is read-only 0 when not implemented.
 
 The ctrdata register contains metadata for the recorded transfer. This
 register is required, though all fields within it are optional.
-Unimplemented fields are read-only 0.
+Unimplemented fields are read-only 0.  Reset value is 0.
 
 [width="100%",options="header",]
 |===
@@ -314,9 +316,9 @@ Unimplemented fields are read-only 0.
 4+|_WPRI_ 3+|CC |CCV 2+|_WPRI_ 2+|TYPE
 |===
 
-[width="100%",cols="22%,56%,12%,10%",options="header",]
+[width="100%",cols="15%,75%,10%",options="header",]
 |===
-|Field |Description |Access |Reset
+|Field |Description |Access 
 |TYPE[3:0] a|
 Identifies the type of the control flow change recorded in CTR entry
 ctrselect. Implementations that do not support this field will report 0.
@@ -353,13 +355,13 @@ ctrselect. Implementations that do not support this field will report 0.
 
 1111 - Other direct jump
 
-|WLRL |0
+|WLRL 
 
-|CCV |Cycle Count Valid. See <<_cycle_counting, Cycle Counting>>. |WARL |0
+|CCV |Cycle Count Valid. See <<_cycle_counting, Cycle Counting>>. |WARL 
 
 |CC[15:0] |Cycle Count, composed of the Cycle Count Exponent (CCE, in
 CC[15:12]) and Cycle Count Mantissa (CCM, in CC[11:0]). See
-<<_cycle_counting, Cycle Counting>>. |WARL |0
+<<_cycle_counting, Cycle Counting>>. |WARL 
 |===
 
 Bits 63:60 are reserved for custom extensions.
