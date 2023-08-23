@@ -15,5 +15,5 @@ Smctr is dependent on the Smcsrind extension. Ssctr is dependent on the Sscsrind
 
 [WARNING]
 ====
-Text in warning blocks such as this one are comments for the reader, included while the spec is in development.  They will be resolved and removed before the spec is frozen.
+_Text in warning blocks such as this one are comments for the reader, included while the spec is in development.  They will be resolved and removed before the spec is frozen._
 ====
