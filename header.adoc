@@ -1,8 +1,8 @@
 [[header]]
 :description: RISC-V Control Transfer Records (Smctr/Ssctr)
 :company: RISC-V.org
-:revdate: 06/26/2023
-:revnumber: 0.1.1
+:revdate: 08/25/2023
+:revnumber: 0.1.3
 :revremark: This document is in development.
 :url-riscv: http://riscv.org
 :doctype: book

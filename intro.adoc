@@ -5,10 +5,15 @@ A method to record control transfer history is valuable for performance profilin
 
 Control flow trace capabilities offer very deep transfer history, but for in-target use, the volume of data produced can result in significant performance overheads due to memory bandwidth consumption, buffer management, and decoder overhead. Control Transfer Records (CTRs) provide a method to record a limited history in internal chip storage, with the intent of dramatically reducing the performance overhead and complexity of collecting transfer history.
 
-The Smctr extension proposes a circular (FIFO) transfer history array.  Recorded transfers are inserted to the head of the array, while older recorded transfers may be overwritten once the array is full. The source PC, target PC, and optional metadata is stored for each recorded transfer.
+CTR defines a circular (FIFO) transfer history array.  Recorded transfers are inserted to the head of the array, while older recorded transfers may be overwritten once the array is full. The source PC, target PC, and some optional metadata is stored for each recorded transfer.
 
 The CTR array is accessible through an indirect CSR interface, such that software can specify which logical entry in the array it wishes to read or write.  Logical entry 0 is always the youngest recorded transfer, entry 1 is the next youngest, etc.
 
 The machine-level extension *Smctr* encompasses all added CSRs and all behavior modifications for a hart, over all privilege levels. The associated supervisor-level extension *Ssctr* is essentially the same as *Smctr* except for excluding the machine-level CSRs and behaviors that should not be directly visible to supervisor level.
 
 Smctr is dependent on the Smcsrind extension. Ssctr is dependent on the Sscsrind extension.
+
+[WARNING]
+====
+Text in warning blocks such as this one are comments for the reader, included while the spec is in development.  They will be resolved and removed before the spec is frozen.
+====
