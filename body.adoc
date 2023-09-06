@@ -10,7 +10,7 @@ _CSR field specifications (such as WARL and WPRI) can be found in the link:https
 
 === Machine Control Transfer Record Control (mctrcontrol)
 
-The mctrcontrol register enables and configures the CTR capability while V=0.  The CSR number is 0x381.
+The mctrcontrol register enables and configures the CTR capability while V=0.
 
 [width="100%",options="header",]
 |===
@@ -130,23 +130,23 @@ _When reducing CTR depth, by writing ctrcontrol.DEPTH to a smaller value, softwa
 
 All unimplemented fields are read-only 0.  Bits 63:60 are reserved for custom extensions.
 
-In RV32, mctrcontrol[63:32] can be accessed via mctrcontrolh (CSR 0x382).
+In RV32, mctrcontrol[63:32] can be accessed via mctrcontrolh.
 
 === Supervisor Control Transfer Record Control (sctrcontrol)
 
-The sctrcontrol register provides access to a subset of ctrcontrol. It is accessible from S-mode and VS-mode, such that S-mode accesses are redirected to mctrcontrol and VS-mode accesses are redirected to vsctrcontrol.  The CSR number is 0x181.
+The sctrcontrol register provides access to a subset of ctrcontrol. It is accessible from S-mode and VS-mode, such that S-mode accesses are redirected to mctrcontrol and VS-mode accesses are redirected to vsctrcontrol.
 
 Bits 0 and 8 in sctrcontrol are read-only 0. As a result, S-mode and
 VS-mode do not have access to the M and MTE fields in mctrcontrol.  All other ctrcontrol fields are accessible through sctrcontrol.
 
-In RV32, sctrcontrol[63:32] can be accessed via sctrcontrolh (CSR 0x182).
+In RV32, sctrcontrol[63:32] can be accessed via sctrcontrolh.
 
 If S-mode is not implemented, access to sctrcontrol(h) results in an
 illegal instruction exception.
 
 === Virtual Supervisor Control Transfer Record Control (vsctrcontrol)
 
-The vsctrcontrol register enables and configures the CTR capability while V=1.  VS-mode accesses to sctrcontrol are redirected to vsctrcontrol.  The CSR number is 0x281.
+The vsctrcontrol register enables and configures the CTR capability while V=1.  VS-mode accesses to sctrcontrol are redirected to vsctrcontrol.
 
 [width="100%",options="header",]
 |===
@@ -203,7 +203,7 @@ _vsctrcontrol.DEPTH is a read-only copy of mctrcontrol.DEPTH in order to allow a
 _Because vsctrcontrol is active only when V=1, writing a 1 to vsctrcontrol.CLR will affect a clear only when V=1._
 ====
 
-In RV32, vsctrcontrol[63:32] can be accessed via vsctrcontrolh (CSR 0x282).
+In RV32, vsctrcontrol[63:32] can be accessed via vsctrcontrolh.
 
 If the H extension is not implemented, access to vsctrcontrol(h) results in an illegal instruction exception.
 
@@ -214,7 +214,7 @@ _The TG considered making vsctrcontrol pass-through sctrcontrol fields other tha
 
 === Machine Control Transfer Record Status (mctrstatus)
 
-The mctrstatus register provides access to CTR status information, and is updated by the hardware when CTR is active (in an enabled privilege mode and not frozen).  The CSR number is 0x383.
+The mctrstatus register provides access to CTR status information, and is updated by the hardware when CTR is active (in an enabled privilege mode and not frozen).
 
 [width="100%",options="header",cols="30%,10%,10%,20%,30%"]
 |===
@@ -252,7 +252,26 @@ _Exposing the WRPTR may also allow support for Linux perf's https://lwn.net/Arti
 
 === Supervisor Control Transfer Record Status (sctrstatus)
 
-The sctrstatus register is an S-mode and VS-mode (writable) alias to mctrstatus.  The CSR number is 0x183.
+The sctrstatus register is an S-mode and VS-mode (writable) alias to mctrstatus.
+
+=== CSR Listing
+
+[width="100%",cols="^12%,18%,70%",options="header",]
+|===
+| CSR Number | Name | Description
+| 0x381 | mctrcontrol | Machine Control Transfer Records Control Register
+| 0x382 | mctrcontrolh* | Machine Control Transfer Records Control Register upper 32 bits
+| 0x383 | mctrstatus | Machine Control Transfer Records Status Register
+| 0x181 | sctrcontrol | Supervisor Control Transfer Records Control Register
+| 0x182 | sctrcontrolh* | Supervisor Control Transfer Records Control Register upper 32 bits
+| 0x183 | sctrstatus | Supervisor Control Transfer Records Status Register
+| 0x281 | vsctrcontrol | Virtual Supervisor Control Transfer Records Control Register
+| 0x282 | vsctrcontrolh* | Virtual Supervisor Control Transfer Records Control Register upper 32 bits
+|===
+[cols=">", frame=none, grid=none]
+|===
+|* For RV32 only
+|===
 
 == Entry Registers
 
