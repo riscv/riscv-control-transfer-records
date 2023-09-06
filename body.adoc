@@ -1,7 +1,12 @@
 [[body]]
 == CSRs
 
-The CTR configuration is selected by the currently active CTR control register, which is mctrcontrol when V=0, and vsctrcontrol when V=1.  In this document, when referring to the currently active CTR control register, ctrcontrol is used.
+The CTR configuration is selected by the currently active CTR control register, which is mctrcontrol when V=0 (that is, when in M-mode, S/HS-mode, or U-mode), and vsctrcontrol when V=1 (VS-mode or VU-mode).  In this document, when referring to the currently active CTR control register, ctrcontrol is used.
+
+[NOTE]
+====
+_CSR field specifications (such as WARL and WPRI) can be found in the link:https://riscv.org/technical/specifications/[RISC-V Instruction Set Manual] vol. II (Privileged Architecture), section 2.3._
+====
 
 === Machine Control Transfer Record Control (mctrcontrol)
 
@@ -107,9 +112,9 @@ field, based on the depth options supported. See
 
 |RETINH |Inhibit recording of function return instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>. |WARL 
 
-|INDOJMPINH |Inhibit recording of indirect other jump instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>. |WARL 
+|INDOJMPINH |Inhibit recording of other indirect jump instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>. |WARL 
 
-|DIROJMPINH |Inhibit recording of direct other jump instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>. |WARL 
+|DIROJMPINH |Inhibit recording of other direct jump instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>. |WARL 
 |===
 
 M, CLR, and DEPTH are required fields. S is required if S-mode
@@ -222,7 +227,7 @@ The mctrstatus register provides access to CTR status information, and is update
 |Field |Description |Access
 |WRPTR |Indicates the physical CTR array entry to be written next.  Incremented on new transfers recorded, and decremented on qualified returns when ctrcontrol.RASEMU=1.  Wraps on increment when the value is all 1s, and on decrement when the value is 0.
 
-The number of WRPTR bits supported is implementation-dependent, but must sufficient to index the array at the maximum depth supported (e.g., 4 bits for a max depth of 16).|WARL 
+The number of WRPTR bits supported is implementation-dependent, but must be sufficient to index the array at the maximum depth supported (e.g., 4 bits for a max depth of 16).|WARL 
 |WRAP   |Sticky indication that the WRPTR has wrapped.  Set when WRPTR has value depth-1 (where depth is based on ctrcontrol.DEPTH), and a CTR update causes WRPTR to be incremented. Cleared when WRPTR has value zero and a CTR update causes WRPTR to be decremented (which only happens on returns when RASEMU=1), and on CSR writes that set ctrcontrol.CLR. |WLRL 
 |FROZEN |Inhibit transfer recording. See <<_freeze, Freeze>>.|WLRL 
 
@@ -520,20 +525,19 @@ while executing in an enabled privilege mode, and when FROZEN=0.
 
 The elapsed cycle count value is represented by the CC field, which has
 a mantissa component (Cycle Count Mantissa, or CCM) and an exponent
-component (Cycle Count Exponent, or CCE). When CCE=0, CCM holds the raw
-number of elapsed cycles. When CCE>0, the cycle count can be calculated
+component (Cycle Count Exponent, or CCE). The elapsed cycle count can be calculated
 using the following formula:
 
 [subs="specialchars,quotes"]
 ----
-(2^12^ + CCM) << CCE-1
+CCE==0? CCM : ((2^12^ + CCM) << CCE-1)
 ----
 [WARNING]
 ====
 _The 2^12^ is just a way to represent the leading 1.  Let me know if there's a better way to describe this._
 ====
 
-When CCE>1, the cycle count granularity is reduced from 1 to 2^CCE-1^.
+When CCE<=1, including cases where 13 or fewer CC bits are implemented, the CC field provides a simple binary count of elapsed cycles.  When CCE>1, the cycle count granularity is reduced from 1 to 2^CCE-1^.
 The calculated value is the result of rounding the elapsed cycles down
 to the nearest multiple of 2^CCE-1^.
 [NOTE]
