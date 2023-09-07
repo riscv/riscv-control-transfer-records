@@ -259,14 +259,14 @@ The sctrstatus register is an S-mode and VS-mode (writable) alias to mctrstatus.
 [width="100%",cols="^12%,18%,70%",options="header",]
 |===
 | CSR Number | Name | Description
-| 0x381 | mctrcontrol | Machine Control Transfer Records Control Register
-| 0x382 | mctrcontrolh* | Machine Control Transfer Records Control Register upper 32 bits
-| 0x383 | mctrstatus | Machine Control Transfer Records Status Register
 | 0x181 | sctrcontrol | Supervisor Control Transfer Records Control Register
 | 0x182 | sctrcontrolh* | Supervisor Control Transfer Records Control Register upper 32 bits
 | 0x183 | sctrstatus | Supervisor Control Transfer Records Status Register
 | 0x281 | vsctrcontrol | Virtual Supervisor Control Transfer Records Control Register
 | 0x282 | vsctrcontrolh* | Virtual Supervisor Control Transfer Records Control Register upper 32 bits
+| 0x381 | mctrcontrol | Machine Control Transfer Records Control Register
+| 0x382 | mctrcontrolh* | Machine Control Transfer Records Control Register upper 32 bits
+| 0x383 | mctrstatus | Machine Control Transfer Records Status Register
 |===
 [cols=">", frame=none, grid=none]
 |===
@@ -556,9 +556,6 @@ CCE==0? CCM : ((2^12^ + CCM) << CCE-1)
 _The 2^12^ is just a way to represent the leading 1.  Let me know if there's a better way to describe this._
 ====
 
-When CCE<=1, including cases where 13 or fewer CC bits are implemented, the CC field provides a simple binary count of elapsed cycles.  When CCE>1, the cycle count granularity is reduced from 1 to 2^CCE-1^.
-The calculated value is the result of rounding the elapsed cycles down
-to the nearest multiple of 2^CCE-1^.
 [NOTE]
 ====
 _This rounding results in an undercount of elapsed cycles, for most
