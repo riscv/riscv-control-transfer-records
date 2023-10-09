@@ -10,3 +10,4 @@ This RISC-V specification has been contributed to directly or indirectly by:
 * John Simpson <john.simpson@sifive.com>
 * Ved Shanbhogue <ved@rivosinc.com>
 * Stefan O'Rear
+* Allen Baum <allen.baum@esperantotech.com>
