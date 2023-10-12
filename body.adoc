@@ -8,12 +8,12 @@ _CSR field specifications (such as WARL and WPRI) can be found in the link:https
 
 === Machine Control Transfer Record Control (mctrcontrol)
 
-The mctrcontrol register is an MXLEN-bit read/write register that enables and configures the CTR capability.
+The mctrcontrol register is a 64-bit read/write register that enables and configures the CTR capability.
 
-[width="100%",options="header",]
+[width="100%",options="header",cols="20%,46%,17%,17%"]
 |===
-4+|MXLEN-1:48 |47 |46
-4+|0 |DIROJMPINH |INDOJMPINH
+|63:60 |59:48 |47 |46
+|_Custom_ |0 |DIROJMPINH |INDOJMPINH
 |===
 
 [width="100%",options="header",]
@@ -28,7 +28,7 @@ The mctrcontrol register is an MXLEN-bit read/write register that enables and co
 |0 |ETEN |TKBRINH |NTBREN |TRETINH |INTRINH |EXCINH |0
 |===
 
-[width="100%",cols="18%,18%,12%,12%,12%,12%,12%",options="header",]
+[width="100%",cols="16%,20%,12%,12%,12%,12%,12%",options="header",]
 |===
 |19:17 |16:13 |12 |11 |10 |9 |8
 |DEPTH |0 |LCOFIFRZ |BPFRZ |RASEMU |STE |MTE
@@ -106,9 +106,10 @@ The maximum DEPTH value supported is implementation-specific, but all lesser val
 |INDOJMPINH |Inhibit recording of other indirect jump instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
 
 |DIROJMPINH |Inhibit recording of other direct jump instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
+|Custom | Designated for custom use.  WARL.
 |===
 
-All fields are optional save for M, CLR, and DEPTH.  All unimplemented fields are read-only 0, while other fields are writable, though DEPTH may have some read-only 1 bits.  S must be writable if S-mode is implemented, and U must be writable if U-mode is implemented.  Bits 63:60 are reserved for custom extensions.
+All fields are optional save for M, CLR, and DEPTH.  All unimplemented fields are read-only 0, while other fields are writable, though DEPTH may have some read-only 1 bits.  S must be writable if S-mode is implemented, and U must be writable if U-mode is implemented.
 
 In RV32, mctrcontrol[63:32] can be accessed via mctrcontrolh.
 
@@ -130,12 +131,12 @@ In RV32, sctrcontrol[63:32] can be accessed via sctrcontrolh.
 
 === Virtual Supervisor Control Transfer Record Control (vsctrcontrol)
 
-If the H extension is implemented, the vsctrcontrol register is a VSXLEN-bit read/write register that is VS-mode's version of supervisor register sctrcontrol.  When V=1, vsctrcontrol substitutes for the usual sctrcontrol, so instructions that normally read or modify sctrcontrol actually access vsctrcontrol instead.
+If the H extension is implemented, the vsctrcontrol register is a 64-bit read/write register that is VS-mode's version of supervisor register sctrcontrol.  When V=1, vsctrcontrol substitutes for the usual sctrcontrol, so instructions that normally read or modify sctrcontrol actually access vsctrcontrol instead.
 
-[width="100%",options="header",]
+[width="100%",options="header",cols="20%,46%,17%,17%"]
 |===
-4+|VSXLEN-1:48 |47 |46
-4+|0 |DIROJMPINH |INDOJMPINH
+|63:60 |59:48 |47 |46
+|Custom (WARL) |0 |DIROJMPINH |INDOJMPINH
 |===
 
 [width="100%",options="header",]
@@ -200,10 +201,10 @@ _The TG considered making vsctrcontrol pass-through sctrcontrol fields other tha
 
 The sctrstatus register provides access to CTR status information, and is updated by the hardware when CTR is active (in an enabled privilege mode and not frozen).
 
-[width="100%",options="header",cols="10%,10%,50%,30%"]
+[width="100%",options="header",cols="15%,10%,10%,35%,30%"]
 |===
-| 31 | 30 | 29:8 | 7:0
-|FROZEN |WRAP |_WPRI_ |WRPTR
+| 31:28 | 27 | 26 | 25:8 | 7:0
+|_Custom_ |FROZEN |WRAP |_WPRI_ |WRPTR
 |===
 
 [width="100%",cols="15%,75%,10%",options="header",]
@@ -212,7 +213,7 @@ The sctrstatus register provides access to CTR status information, and is update
 |WRPTR |Indicates the physical CTR buffer entry to be written next.  Incremented on new transfers recorded, and decremented on qualified returns when mctrcontrol.RASEMU=1.  Wraps on increment when the value matches the selected depth-1, and on decrement when the value is 0.  Bits above those needed to represent depth-1 (e.g., bits 7:4 for depth=16) are read-only 0. |WARL 
 |WRAP   |Sticky indication that the WRPTR has wrapped.  Set when WRPTR has value depth-1 (where depth is based on mctrcontrol.DEPTH), and a CTR update causes WRPTR to be incremented. Cleared when WRPTR has value zero and a CTR update causes WRPTR to be decremented (which only happens on returns when RASEMU=1), and on CSR writes that set mctrcontrol.CLR.  |WARL
 |FROZEN |Inhibit transfer recording. See <<_freeze, Freeze>>. |WARL
-
+|Custom |Designated for custom use. |WPRI
 |===
 
 Bits 31:28 are reserved for custom extensions.
@@ -384,7 +385,6 @@ CC[15:12]) and Cycle Count Mantissa (CCM, in CC[11:0]). See
 <<_cycle_counting, Cycle Counting>>. |WARL 
 |===
 
-Bits 14:12 are reserved for custom extensions.
 [WARNING]
 ====
 _The TG has debated the merits of including a 3-bit privilege mode field in ctrdata.  
