@@ -106,7 +106,7 @@ The maximum DEPTH value supported is implementation-specific, but all lesser val
 |INDOJMPINH |Inhibit recording of other indirect jump instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
 
 |DIROJMPINH |Inhibit recording of other direct jump instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
-|Custom | Designated for custom use.  WARL.
+|_Custom_ | WARL bits designated for custom use.  The reset value must be '0000, which corresponds to standard behavior.
 |===
 
 All fields are optional save for M, CLR, and DEPTH.  All unimplemented fields are read-only 0, while other fields are writable, though DEPTH may have some read-only 1 bits.  S must be writable if S-mode is implemented, and U must be writable if U-mode is implemented.
@@ -136,7 +136,7 @@ If the H extension is implemented, the vsctrcontrol register is a 64-bit read/wr
 [width="100%",options="header",cols="20%,46%,17%,17%"]
 |===
 |63:60 |59:48 |47 |46
-|Custom (WARL) |0 |DIROJMPINH |INDOJMPINH
+|_Custom_ |0 |DIROJMPINH |INDOJMPINH
 |===
 
 [width="100%",options="header",]
@@ -201,10 +201,10 @@ _The TG considered making vsctrcontrol pass-through sctrcontrol fields other tha
 
 The sctrstatus register provides access to CTR status information, and is updated by the hardware when CTR is active (in an enabled privilege mode and not frozen).
 
-[width="100%",options="header",cols="15%,10%,10%,35%,30%"]
+[width="100%",options="header",cols="12%,10%,53%,25%"]
 |===
-| 31:28 | 27 | 26 | 25:8 | 7:0
-|_Custom_ |FROZEN |WRAP |_WPRI_ |WRPTR
+| 31 | 30 | 29:8 | 7:0
+|FROZEN |WRAP |_WPRI_ |WRPTR
 |===
 
 [width="100%",cols="15%,75%,10%",options="header",]
@@ -213,10 +213,7 @@ The sctrstatus register provides access to CTR status information, and is update
 |WRPTR |Indicates the physical CTR buffer entry to be written next.  Incremented on new transfers recorded, and decremented on qualified returns when mctrcontrol.RASEMU=1.  Wraps on increment when the value matches the selected depth-1, and on decrement when the value is 0.  Bits above those needed to represent depth-1 (e.g., bits 7:4 for depth=16) are read-only 0. |WARL 
 |WRAP   |Sticky indication that the WRPTR has wrapped.  Set when WRPTR has value depth-1 (where depth is based on mctrcontrol.DEPTH), and a CTR update causes WRPTR to be incremented. Cleared when WRPTR has value zero and a CTR update causes WRPTR to be decremented (which only happens on returns when RASEMU=1), and on CSR writes that set mctrcontrol.CLR.  |WARL
 |FROZEN |Inhibit transfer recording. See <<_freeze, Freeze>>. |WARL
-|Custom |Designated for custom use. |WPRI
 |===
-
-Bits 31:28 are reserved for custom extensions.
 
 [NOTE]
 ====
@@ -225,12 +222,25 @@ _Logical entry 0, accessed via mireg* when miselect=0x200, is always the physica
 [NOTE]
 ====
 _Because the sctrstatus register is updated by hardware, writes should be performed with caution.  If a multi-instruction read-modify-write to sctrstatus is performed while CTR is active, such that a qualified transfer, or trap that causes CTR freeze, completes between the read and the write, a hardware update could be lost._
+
+_When restoring CTR state, sctrstatus should be written before CTR entry state is restored.  This ensures that the software writes to logical CTR entries modify the proper physical entries._
 ====
 [NOTE]
 ====
 _Exposing the WRPTR provides a more efficient means for synthesizing CTR entries.  If a qualified control transfer is emulated, the emulator can simply increment the WRPTR, then write the synthesized record to entry 0.  If a qualified function return is emulated while RASEMU=1, the emulator can clear ctrsource.V for entry 0, then decrement the WRPTR._
 
 _Exposing the WRPTR may also allow support for Linux perf's https://lwn.net/Articles/802821[[.underline]#stack stitching#] capability._
+====
+[WARNING]
+====
+_The TG considered adding the following bits to sctrstatus:_
+
+* _DIRTY - Set by hardware when CTR state is cleared as a result of setting *ctrcontrol.CLR.  Cleared by hardware when an implicit or explicit write to a CTR entry is performed._
+* _MODIFIED - Set by hardware when an implicit or explicit write to a CTR entry is performed.  Cleared by software._
+
+_These bits could support optimizations to reduce instances of CTR state save and restore.  For instance, on scheduling of a task that is using CTR, privileged software could clear the MODIFIED bit.  When the task is scheduled out, if MODIFIED=0, the CTR entry state was unchanged during the timeslice, and the CTR entry state values previously saved for the task can be retained.  Similarly, on schedule out, if DIRTY=0, privileged software could use that as an indication that the task is done using CTR, or simply to set a flag indicating that the CTR entries are empty._
+
+_Because it is unclear whether software would take advantage of these optimization opportunities (existing architectures do not have anything similar), these bits are left for a potential future extension.  It is likely that the MODIFIED bit will require a new CSR, since it could result in a virtualization hole if exposed to a guest._
 ====
 
 === CSR Listing
@@ -256,13 +266,7 @@ _Exposing the WRPTR may also allow support for Linux perf's https://lwn.net/Arti
 Control transfer records are stored in a CTR buffer, such that each buffer entry stores information about a single transfer.  The CTR buffer entries are logically accessed via the indirect register access mechanism defined by the
 https://docs.google.com/document/u/0/d/1ZxTSUWX_9_VafWeA0l1ci9RFjmivLuZn-US9IbFOEWY/edit[[.underline]#Smcsrind/Sscsrind#]
 extension. The miselect index range 0x200..0x2FF is reserved for CTR
-entries 0..255. When miselect holds a value in this range, mireg
-provides access to
-<<_control_transfer_record_source_ctrsource, ctrsource>>,
-mireg2 provides access to
-<<_control_transfer_record_target_ctrtarget, ctrtarget>>,
-and mireg3 provides access to
-<<_control_transfer_record_metadata_ctrdata, ctrdata>>.  mireg4, mireg5, and mireg6 are read-only zero.
+entries 0..255. When miselect holds a value in this range, mireg provides access to <<_control_transfer_record_source_ctrsource, ctrsource>>, mireg2 provides access to <<_control_transfer_record_target_ctrtarget, ctrtarget>>, and mireg[3456] provide access <<_control_transfer_record_source_ctrdata, ctrdata>>.
 
 The standard indirect register access rules specified by Smcsrind/Sscsrind apply for CTR.  S-mode is able to access CTR entries using the siselect/sireg* interface, with the same behavior described for M-mode above.  Similarly, VS-mode is able to access CTR entries using siselect (really vsiselect) and sireg* (really vsireg*).  See <<_state_enable_access_control, State Enable Access Control>> for cases where CTR access from S-mode and VS-mode may be restricted.  
 
@@ -327,14 +331,14 @@ _A transfer to an invalid address may report a valid address in ctrtarget.PC._
 === Control Transfer Record Metadata (ctrdata)
 
 The ctrdata register contains metadata for the recorded transfer. This
-register is required, though all fields within it are optional.
+register must be implemented, though all fields within it are optional.
 Unimplemented fields are read-only 0.
 
-ctrdata is an MXLEN-bit register.  When XLEN < MXLEN, software access via *ireg3 will access only the lower XLEN bits of ctrdata.  
+ctrdata is a 128-bit register.  
 
 [width="100%",options="header",]
 |===
-4+|MXLEN-1:32 3+|31:16 |15 2+|14:4 2+|3:0
+4+|127:32 3+|31:16 |15 2+|14:4 2+|3:0
 4+|_WPRI_ 3+|CC |CCV 2+|_WPRI_ 2+|TYPE
 |===
 
@@ -394,6 +398,16 @@ This would help in cases where multiple privilege modes are recorded, and existi
 ====
 _Like the <<_transfer_type_filtering, Transfer Type Filtering>> bits in mctrcontrol, the ctrdata.TYPE bits leverage the E-trace itype encodings._
 ====
+The indirect alias CSR(s) used to access to ctrdata depend on the mode of operation, as illustrated in the table below.
+
+[width="70%",options="header",]
+|===
+| Alias CSR | RV32 | RV64 | RV128
+| mireg3 | ctrdata[31:0] | ctrdata[63:0] | ctrdata[127:0]
+| mireg4 | ctrdata[63:32] | ctrdata[127:64] | 0
+| mireg5 | ctrdata[95:64] | 0 | 0
+| mireg6 | ctrdata[127:96] | 0 | 0
+|===
 
 == State Enable Access Control
 
@@ -625,6 +639,10 @@ set by the CPU. The breakpoint exception itself is not recorded.
 ====
 _Breakpoint exception refers to synchronous exceptions with a cause value of Breakpoint (3), regardless of source (ebreak, c.ebreak, Sdtrig); it does not include entry into Debug Mode, even in cores where this is implemented as an exception._
 ====
+
+== Custom Extensions
+
+Any custom CTR extension must be associated with an enable bit within the designated custom bits in *ctrcontrol.  The value of the custom enable bit in *ctrcontrol must be 0 out of reset, to ensure that any custom behavior is disabled by default.  When the enable bit is set to 1, the custom extension may alter <<_behavior, standard CTR behavior>>, and may define new custom status fields within <<_supervisor_control_transfer_record_status_sctrstatus, sctrstatus>> or the <<_entry_registers, CTR entry registers>>.  All such custom fields must revert to standard behavior when the enable bit is 0, including read-only zero behavior for any fields undefined by any implemented standard extesions.
 
 == Discovery
 
