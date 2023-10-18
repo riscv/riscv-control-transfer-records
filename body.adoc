@@ -220,7 +220,8 @@ The sctrstatus register provides access to CTR status information, and is update
 |FROZEN |Inhibit transfer recording. See <<_freeze, Freeze>>. |WARL
 |===
 
-Undefined (WPRI) bits must be read-only 0, unless a <<_custom_extensions, custom extension>> is implemented and enabled.
+Undefined bits in sctrstatus are WPRI. Status fields may be added by future extensions,
+and software should ignore but preserve any fields that it does not recognize.  Undefined  bits must be implemented as read-only 0, unless a <<_custom_extensions, custom extension>> is implemented and enabled.
 
 [NOTE]
 [%unbreakable]
@@ -405,6 +406,9 @@ CC[15:12]) and Cycle Count Mantissa (CCM, in CC[11:0]). See
 <<_cycle_counting, Cycle Counting>>. |WARL 
 |===
 
+Undefined bits in ctrdata are WPRI. Status fields may be added by future extensions,
+and software should ignore but preserve any fields that it does not recognize.  Undefined  bits must be implemented as read-only 0, unless a <<_custom_extensions, custom extension>> is implemented and enabled.
+
 [WARNING]
 [%unbreakable]
 ====
@@ -417,9 +421,7 @@ This would help in cases where multiple privilege modes are recorded, and existi
 _Like the <<_transfer_type_filtering, Transfer Type Filtering>> bits in mctrcontrol, the ctrdata.TYPE bits leverage the E-trace itype encodings._
 ====
 
-Undefined (WPRI) bits must be read-only 0, unless a <<_custom_extensions, custom extension>> is implemented and enabled.
-
-The indirect alias CSR(s) used to access to ctrdata depend on the XLEN, as illustrated in the table below.
+The indirect alias CSR(s) used to access to ctrdata depend on XLEN, as illustrated in the table below.
 
 [width="70%"]
 |===
