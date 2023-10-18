@@ -284,10 +284,6 @@ The standard indirect register access rules specified by Smcsrind/Sscsrind apply
 
 For \*iselect values in 0x200..0x2FF, vsireg* registers access the same entry register state as mireg* and sireg*, regardless of the privilege mode at the time of access.  There is not a separate set of entry registers for V=1.
 
-Undefined bits in CTR entry registers are WPRI. Status fields may be added by future
-extensions, and software should ignore but preserve any fields that it
-does not recognize.
-
 [WARNING]
 [%unbreakable]
 ====
