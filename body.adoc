@@ -112,8 +112,6 @@ The maximum DEPTH value supported is implementation-specific, but all lesser val
 
 All fields are optional save for M, CLR, BPFRZ, and DEPTH.  All unimplemented fields are read-only 0, while other defined fields are writable, though DEPTH may have some read-only 1 bits.  S must be writable if S-mode is implemented, U must be writable if U-mode is implemented, and LCOFIFRZ must be writable if the Smcofpmf/Sscofpmf extension is implemented.
 
-In RV32, mctrcontrol[63:32] can be accessed via mctrcontrolh.
-
 [NOTE]
 [%unbreakable]
 ====
@@ -127,8 +125,6 @@ _When reducing CTR depth, by writing mctrcontrol.DEPTH to a smaller value, softw
 The sctrcontrol register provides supervisor mode access to a subset of <<_machine_control_transfer_record_control_mctrcontrol, mctrcontrol>>.
 
 Bits 0 and 8 in sctrcontrol are read-only 0. As a result, the M and MTE fields in mctrcontrol are not accessible through sctrcontrol.  All other mctrcontrol fields are accessible through sctrcontrol.
-
-In RV32, sctrcontrol[63:32] can be accessed via sctrcontrolh.
 
 === Virtual Supervisor Control Transfer Record Control (vsctrcontrol)
 
@@ -191,8 +187,6 @@ _vsctrcontrol.DEPTH is a read-only copy of sctrcontrol.DEPTH in order to allow a
 ====
 _Because vsctrcontrol is active only when V=1, writing a 1 to vsctrcontrol.CLR in M-mode or S/HS-mode will not affect a clear._
 ====
-
-In RV32, vsctrcontrol[63:32] can be accessed via vsctrcontrolh.
 
 [WARNING]
 [%unbreakable]
@@ -261,17 +255,15 @@ _Because it is unclear whether software would take advantage of these optimizati
 |===
 | CSR Number | Name | Description
 | 0x181 | sctrcontrol | Supervisor Control Transfer Records Control Register
-| 0x182 | sctrcontrolh* | Supervisor Control Transfer Records Control Register upper 32 bits
 | 0x183 | sctrstatus | Supervisor Control Transfer Records Status Register
 | 0x281 | vsctrcontrol | Virtual Supervisor Control Transfer Records Control Register
-| 0x282 | vsctrcontrolh* | Virtual Supervisor Control Transfer Records Control Register upper 32 bits
 | 0x381 | mctrcontrol | Machine Control Transfer Records Control Register
-| 0x382 | mctrcontrolh* | Machine Control Transfer Records Control Register upper 32 bits
 |===
-[cols=">", frame=none, grid=none]
-|===
-|* For RV32 only
-|===
+
+[NOTE]
+====
+_Because the ROI of CTR is perceived to be low for RV32 implementations, CTR does not fully support RV32.  While control flow transfers in RV32 can be recorded, RV32 cannot access *ctrcontrol[63:32].  A future extension could add support for RV32, by adding 3 new CSRs (mctrcontrolh, sctrcontrolh, and vsctrcontrolh) to provide this access.  However, RV32 would still only be able to access the lower 128 bits of <<_control_transfer_record_metadata_ctrdata, ctrdata>>._
+====
 
 == Entry Registers
 
@@ -345,13 +337,11 @@ _A transfer to an invalid address may report a valid address in ctrtarget.PC._
 
 The ctrdata register contains metadata for the recorded transfer. This
 register must be implemented, though all fields within it are optional.
-Unimplemented fields are read-only 0.
-
-ctrdata is a 128-bit register.  
+Unimplemented fields are read-only 0.  ctrdata is a 256-bit register.  
 
 [width="100%",options="header",]
 |===
-4+|127:32 3+|31:16 |15 2+|14:4 2+|3:0
+4+|255:32 3+|31:16 |15 2+|14:4 2+|3:0
 4+|_WPRI_ 3+|CC |CCV 2+|_WPRI_ 2+|TYPE
 |===
 
@@ -402,8 +392,7 @@ CC[15:12]) and Cycle Count Mantissa (CCM, in CC[11:0]). See
 <<_cycle_counting, Cycle Counting>>. |WARL 
 |===
 
-Undefined bits in ctrdata are WPRI. Status fields may be added by future extensions,
-and software should ignore but preserve any fields that it does not recognize.  Undefined  bits must be implemented as read-only 0, unless a <<_custom_extensions, custom extension>> is implemented and enabled.
+Undefined bits in ctrdata are WPRI. Status fields may be added by future extensions, and software should ignore but preserve any fields that it does not recognize.  Undefined bits must be implemented as read-only 0, unless a <<_custom_extensions, custom extension>> is implemented and enabled.
 
 [WARNING]
 [%unbreakable]
@@ -424,9 +413,9 @@ The indirect alias CSR(s) used to access to ctrdata depend on XLEN, as illustrat
 .2+| *Alias CSR* 3+^|*XLEN*
 | *32* | *64* | *128*
 | mireg3 | ctrdata[31:0] | ctrdata[63:0] | ctrdata[127:0]
-| mireg4 | ctrdata[63:32] | ctrdata[127:64] | 0
-| mireg5 | ctrdata[95:64] | 0 | 0
-| mireg6 | ctrdata[127:96] | 0 | 0
+| mireg4 | ctrdata[63:32] | ctrdata[127:64] | ctrdata[255:128]
+| mireg5 | ctrdata[95:64] | ctrdata[191:128] | 0
+| mireg6 | ctrdata[127:96] | ctrdata[255:192] | 0
 |===
 
 == State Enable Access Control
