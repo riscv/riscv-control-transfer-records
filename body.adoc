@@ -200,17 +200,16 @@ _The TG considered making vsctrcontrol pass-through sctrcontrol fields other tha
 
 The sctrstatus register provides access to CTR status information, and is updated by the hardware when CTR is active (in an enabled privilege mode and not frozen).
 
-[width="100%",options="header",cols="12%,10%,53%,25%"]
+[width="100%",options="header",cols="10%,60%,30%"]
 |===
-| 31 | 30 | 29:8 | 7:0
-|FROZEN |WRAP |_WPRI_ |WRPTR
+| 31 | 30:8 | 7:0
+|FROZEN |_WPRI_ |WRPTR
 |===
 
 [width="100%",cols="15%,75%,10%",options="header",]
 |===
 |Field |Description |Access
 |WRPTR |Indicates the physical CTR buffer entry to be written next.  Incremented on new transfers recorded, and decremented on qualified returns when mctrcontrol.RASEMU=1.  Wraps on increment when the value matches the selected depth-1, and on decrement when the value is 0.  Bits above those needed to represent depth-1 (e.g., bits 7:4 for depth=16) are read-only 0. |WARL 
-|WRAP   |Sticky indication that the WRPTR has wrapped.  Set when WRPTR has value depth-1 (where depth is based on mctrcontrol.DEPTH), and a CTR update causes WRPTR to be incremented. Cleared when WRPTR has value zero and a CTR update causes WRPTR to be decremented (which only happens on returns when RASEMU=1), and on CSR writes that set mctrcontrol.CLR.  |WARL
 |FROZEN |Inhibit transfer recording. See <<_freeze, Freeze>>. |WARL
 |===
 
@@ -220,7 +219,7 @@ and software should ignore but preserve any fields that it does not recognize.  
 [NOTE]
 [%unbreakable]
 ====
-_Logical entry 0, accessed via mireg* when miselect=0x200, is always the physical entry preceding the WRPTR entry (WRPTR-1 % depth)._
+_Logical entry 0, accessed via mireg* when miselect=0x200, is always the physical entry preceding the WRPTR entry ((WRPTR-1) % depth)._
 ====
 [NOTE]
 [%unbreakable]
