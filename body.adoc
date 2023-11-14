@@ -573,7 +573,7 @@ endif
 _When CCE>1, the granularity of the reported cycle count is reduced. For example, when CCE=3, the bottom 2 bits of the cycle counter are not reported, and thus the reported value increments only every 4 cycles.  As a result, the reported value represents an undercount of elapsed cycles for most cases (when the unreported bits are non-zero).  On average, the undercount will be (2^CCE-1^-1)/2.  Software can reduce the average undercount to 0 by adding (2^CCE-1^-1)/2 to each computed cycle count value when CCE>1._
 ====
 
-The CC value is only valid when the Cycle Count Valid (CCV) bit is set. If CCV=0, the CC value may not hold the correct count of elapsed qualified cycles since the last recorded transfer.  Qualified cycles are those executed within an enabled privilege mode with FROZEN=0.  An implementation must clear CCV for the next recorded transfer upon a write to [ms]ctrcontrol, and in any other implementation-specific scenarios where qualified cycles may be not be counted.
+The CC value is only valid when the Cycle Count Valid (CCV) bit is set. If CCV=0, the CC value might not hold the correct count of elapsed qualified cycles since the last recorded transfer.  Qualified cycles are those executed within an enabled privilege mode with FROZEN=0.  An implementation must clear CCV for the next recorded transfer upon a write to [ms]ctrcontrol, and in any other implementation-specific scenarios where qualified cycles may be not be counted.
 
 An implementation that supports cycle counting must support CCV and all
 CCM bits, but may support 0..4 exponent bits in CCE. Unimplemented CCE
