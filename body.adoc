@@ -52,7 +52,7 @@ The mctrcontrol register is a 64-bit read/write register that enables and config
 
 |STE |If ETEN=1, enables recording of traps to S-mode when S=0.  See <<_external_traps, External Traps>>.
 
-|RASEMU |Enables <<_ras_emulation_mode, RAS Emulation Mode>>.
+|RASEMU |Enables <<RAS (Return Address Stack) Emulation Mode>>.
 
 |BPFRZ |Set sctrstatus.FROZEN on a breakpoint exception. See <<_freeze, Freeze>>.
 
@@ -115,8 +115,6 @@ All fields are optional save for M, CLR, BPFRZ, and DEPTH.  All unimplemented fi
 [NOTE]
 [%unbreakable]
 ====
-_Software may opt to use a depth less than the maximum supported in order to reduce the latency of saving and restoring CTR state, or to emulate the maximum depth supported by other implementations, e.g. in cases of VM-migration._
-
 _When reducing CTR depth, by writing mctrcontrol.DEPTH to a smaller value, software should set mctrcontrol.CLR.  This ensures that no transfer state is retained in the now-inaccessible entries above the new depth value._
 ====
 
@@ -209,7 +207,7 @@ The sctrstatus register provides access to CTR status information, and is update
 [width="100%",cols="15%,75%,10%",options="header",]
 |===
 |Field |Description |Access
-|WRPTR |Indicates the physical CTR buffer entry to be written next.  Incremented on new transfers recorded, and decremented on qualified returns when mctrcontrol.RASEMU=1.  Wraps on increment when the value matches the selected depth-1, and on decrement when the value is 0.  Bits above those needed to represent depth-1 (e.g., bits 7:4 for depth=16) are read-only 0. |WARL 
+|WRPTR |Indicates the physical CTR buffer entry to be written next.  Incremented on new transfers recorded (see <<Behavior>>), and decremented on qualified returns when mctrcontrol.RASEMU=1 (see <<RAS (Return Address Stack) Emulation Mode>>).  Wraps on increment when the value matches the selected depth-1, and on decrement when the value is 0.  Bits above those needed to represent depth-1 (e.g., bits 7:4 for depth=16) are read-only 0. |WARL 
 |FROZEN |Inhibit transfer recording. See <<_freeze, Freeze>>. |WARL
 |===
 
@@ -556,7 +554,11 @@ S-mode is implemented, and VSTE if VS-mode is implemented.
 === Cycle Counting
 
 The ctrdata register may optionally include a count of CPU cycles
-elapsed since the prior CTR record.  The elapsed cycle count value is represented by the CC field, which has a 12-bit mantissa component (Cycle Count Mantissa, or CCM) and a 4-bit exponent component (Cycle Count Exponent, or CCE). The elapsed cycle count can be calculated by software using the following formula:
+elapsed since the prior CTR record.  The elapsed cycle count value is represented by the CC field, which has a 12-bit mantissa component (Cycle Count Mantissa, or CCM) and a 4-bit exponent component (Cycle Count Exponent, or CCE). 
+
+The CC field is encoded such that CCE holds 0 if the binary cycle counter (CycleCounter) value is less than 4096, otherwise it holds the index of the most significant one bit in the CycleCounter value, minus 12.  CCM holds CycleCounter bits CCE+11:CCE.
+
+The elapsed cycle count can then be calculated by software using the following formula:
 
 [subs="specialchars,quotes"]
 ----
@@ -567,22 +569,34 @@ else:
 endif
 ----
 
+An implementation that supports cycle counting must support CCV and all
+CCM bits, but may support 0..4 exponent bits in CCE. Unimplemented CCE
+bits are read-only 0. For implementations that support transfer type
+filtering, it is recommended to support at least 3 exponent bits. This
+allows capturing the full latency of most functions, when recording only
+calls and returns.  
+
+The size of the CycleCounter required to support each CCE width is given in the table below.
+
+[width="60%", cols="10%,15%,15%", options="header",]
+|===
+| CCE bits | CycleCounter bits | Max CC value
+| 0 | 12 | 4095
+| 1 | 13 | 8191
+| 2 | 15 | 32764
+| 3 | 19 | 524224
+| 4 | 27 | 134201344
+|===
+
 [NOTE]
 [%unbreakable]
 ====
 _When CCE>1, the granularity of the reported cycle count is reduced. For example, when CCE=3, the bottom 2 bits of the cycle counter are not reported, and thus the reported value increments only every 4 cycles.  As a result, the reported value represents an undercount of elapsed cycles for most cases (when the unreported bits are non-zero).  On average, the undercount will be (2^CCE-1^-1)/2.  Software can reduce the average undercount to 0 by adding (2^CCE-1^-1)/2 to each computed cycle count value when CCE>1._
 ====
 
-The CC value is only valid when the Cycle Count Valid (CCV) bit is set. If CCV=0, the CC value may not hold the correct count of elapsed qualified cycles since the last recorded transfer.  Qualified cycles are those executed within an enabled privilege mode with FROZEN=0.  An implementation must clear CCV for the next recorded transfer upon a write to [ms]ctrcontrol, and in any other implementation-specific scenarios where qualified cycles may be not be counted.
-
-An implementation that supports cycle counting must support CCV and all
-CCM bits, but may support 0..4 exponent bits in CCE. Unimplemented CCE
-bits are read-only 0. For implementations that support transfer type
-filtering, it is recommended to support at least 3 exponent bits. This
-allows capturing the full latency of most functions, when recording only
-calls and returns.
-
 The CC value saturates when all implemented bits in CCM and CCE are 1.
+
+The CC value is only valid when the Cycle Count Valid (CCV) bit is set. If CCV=0, the CC value might not hold the correct count of elapsed qualified cycles since the last recorded transfer.  Qualified cycles are those executed within an enabled privilege mode with sctrstatus.FROZEN=0.  An implementation must clear CCV for the next recorded transfer upon a write to [ms]ctrcontrol, and in any other implementation-specific scenarios where qualified cycles might not be counted.
 
 [WARNING]
 [%unbreakable]
@@ -590,7 +604,7 @@ The CC value saturates when all implemented bits in CCM and CCE are 1.
 _The TG also considered the option of including an uncompressed 27-bit binary cycle counter value in ctrdata.  This would support the same maximum cycle value as the method described above, without any accuracy reduction.  However, it would consume all remaining bits in ctrdata[31:0], without adding meaningful value to users.  Though the uncompressed value would result in a slight reduction in hardware complexity, it would result in a non-trivial increase in area, to store an additional 11 bits per entry.  The TG agreed that the compressed mechanism is preferred._
 ====
 
-=== RAS Emulation Mode
+=== RAS (Return Address Stack) Emulation Mode
 
 When the optional mctrcontrol.RASEMU bit is implemented and set to 1, transfer recording behavior is altered to emulate the behavior of a return-address stack (RAS).
 
@@ -625,7 +639,7 @@ when CCV=1, the CC field provides the elapsed cycles since the prior CTR
 entry was recorded. This introduces implementation challenges when
 RASEMU=1 because, for each recorded call, there may have been several
 recorded calls (and returns which “popped” them) since the prior
-remaining call entry was recorded. The implication is that returns that
+remaining call entry was recorded (see <<RAS (Return Address Stack) Emulation Mode>>). The implication is that returns that
 pop a call entry not only do not reset the cycle counter, but instead
 add the CC field from the popped entry to the counter. For simplicity,
 an implementation may opt to record CCV=0 for all calls, or those whose parent call was popped, when RASEMU=1._
