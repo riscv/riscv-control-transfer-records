@@ -210,7 +210,7 @@ The sctrstatus register provides access to CTR status information, and is update
 [width="100%",cols="15%,75%,10%",options="header",]
 |===
 |Field |Description |Access
-|WRPTR |Indicates the physical CTR buffer entry to be written next.  Incremented on new transfers recorded (see <<Behavior>>), and decremented on qualified returns when mctrcontrol.RASEMU=1 (see <<RAS (Return Address Stack) Emulation Mode>>).  Wraps on increment when the value matches the selected depth-1, and on decrement when the value is 0.  Bits above those needed to represent depth-1 (e.g., bits 7:4 for depth=16) are read-only 0. |WARL 
+|WRPTR |Indicates the physical CTR buffer entry to be written next.  Incremented on new transfers recorded (see <<Behavior>>), and decremented on qualified returns when mctrcontrol.RASEMU=1 (see <<RAS (Return Address Stack) Emulation Mode>>).  Wraps on increment when the value matches the selected depth-1, and on decrement when the value is 0.  Bits above those needed to represent depth-1 (e.g., bits 7:4 for depth=16) are read-only 0. On depth changes, WRPTR holds an unspecified but legal value. |WARL 
 |FROZEN |Inhibit transfer recording. See <<_freeze, Freeze>>. |WARL
 |===
 
