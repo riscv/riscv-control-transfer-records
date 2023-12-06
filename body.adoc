@@ -25,8 +25,8 @@ The mctrcontrol register is a 64-bit read/write register that enables and config
 
 [width="100%",options="header",]
 |===
-|39 |38 |37 |36 |35 |34 |33 |32:20
-|0 |ETEN |TKBRINH |NTBREN |TRETINH |INTRINH |EXCINH |0
+2+|39:38 |37 |36 |35 |34 |33 |32:20
+2+|0 |TKBRINH |NTBREN |TRETINH |INTRINH |EXCINH |0
 |===
 
 [width="100%",cols="16%,20%,12%,12%,12%,12%,12%",options="header",]
@@ -48,9 +48,9 @@ The mctrcontrol register is a 64-bit read/write register that enables and config
 
 |CLR |When written to 1, zeroes all implemented CTR entries, regardless of the current CTR depth. Also zeroes <<_machine_control_transfer_record_status_sctrstatus, sctrstatus>>.  Reads will always return 0 for this bit.  
 
-|MTE |If ETEN=1, enables recording of traps to M-mode when M=0.  See <<_external_traps, External Traps>>.
+|MTE |Enables recording of traps to M-mode when M=0, if any intervening privilege modes are enabled for external traps as well.  See <<_external_traps, External Traps>>.
 
-|STE |If ETEN=1, enables recording of traps to S-mode when S=0.  See <<_external_traps, External Traps>>.
+|STE |Enables recording of traps to S-mode when S=0, if any intervening privilege modes are enabled for external traps as well.  See <<_external_traps, External Traps>>.
 
 |RASEMU |Enables <<RAS (Return Address Stack) Emulation Mode>>.
 
@@ -89,8 +89,6 @@ The maximum DEPTH value supported is implementation-specific, but all lesser val
 |NTBREN |Enable recording of not-taken branch instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
 
 |TKBRINH |Inhibit recording of taken branch instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
-
-|ETEN |Enable recording of external traps, or traps from an enabled mode to a disabled mode. If ETEN=MTE=1, external traps to M-mode will be recorded. If ETEN=STE=1, external traps to S-mode will be recorded.  See <<_external_traps, External Traps>>.
 
 |INDCALLINH |Inhibit recording of indirect call instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
 
@@ -142,8 +140,8 @@ If the H extension is implemented, the vsctrcontrol register is a 64-bit read/wr
 
 [width="100%",options="header",]
 |===
-|39 |38 |37 |36 |35 |34 |33 |32:20
-|0 |ETEN |TKBRINH |NTBREN |TRETINH |INTRINH |EXCINH |0
+2+|39:38 |37 |36 |35 |34 |33 |32:20
+2+|0 |TKBRINH |NTBREN |TRETINH |INTRINH |EXCINH |0
 |===
 
 [width="100%",cols="16%,20%,12%,12%,12%,12%,12%",options="header",]
@@ -163,7 +161,7 @@ If the H extension is implemented, the vsctrcontrol register is a 64-bit read/wr
 |Field |Description 
 |VS, VU |Enable transfer recording in the selected privileged mode(s).  
 
-|VSTE |If ETEN=1, enables recording of traps to VS-mode when VS=0.  See <<_external_traps, External Traps>>.  
+|VSTE |Enables recording of traps to VS-mode when VS=0.  See <<_external_traps, External Traps>>.  
 |DEPTH |Provides read-only access to the sctrcontrol.DEPTH field  
 2+|Other field definitions match those of <<_supervisor_control_transfer_record_control_sctrcontrol, sctrcontrol>>.  The optional fields implemented in vsctrcontrol should match those implemented in sctrcontrol.
 |===
@@ -478,14 +476,13 @@ Default CTR behavior, when all transfer type filter bits (mctrcontrol[47:32]) ar
 [NOTE]
 [%unbreakable]
 ====
-_Because External Traps and not-taken branches are not recorded by default, the polarity of the associated enable bits (ETEN and NTBREN) is the opposite of other bits associated with transfer type filtering (TKBRINH, RETINH, etc).  Non-default operations require opt-in rather than opt-out._
+_Because not-taken branches are not recorded by default, the polarity of the associated enable bit (NTBREN) is the opposite of other bits associated with transfer type filtering (TKBRINH, RETINH, etc).  Non-default operations require opt-in rather than opt-out._
 ====
 
 The transfer type filter bits leverage the type definitions specified
 in Table 4.4, and described in Section 4.1.1, of the
 https://github.com/riscv-non-isa/riscv-trace-spec/releases/download/v2.0rc2/riscv-trace-spec.pdf[[.underline]#RISC-V
-Efficient Trace Spec v2.0#]. An exception is the ETEN bit, discussed in
-<<_external_traps, External Traps>> below.
+Efficient Trace Spec v2.0#]. 
 
 [NOTE]
 [%unbreakable]
@@ -495,28 +492,16 @@ _If implementation of any transfer type filter bit results in reduced software p
 
 ==== External Traps
 
-External traps are traps from a privilege mode enabled for CTR recording to a privilege mode that is not enabled for CTR recording.  By default external traps are not recorded, but an optional handshake
-mechanism exists to allow partial recording. Software running in the
-target mode of the trap can opt-in to allowing CTR to record traps into
-that mode even when the mode is not enabled for CTR recording. The MTE, STE, and VSTE bits
-allow M-mode, S-mode, and VS-mode, respectively, to opt-in. Tools can
-request to record External Traps by setting the ETEN bit. When an
-External Trap occurs, only if both ETEN=1 and xTE=1, such that x is the
-target privilege mode of the trap, will CTR record the trap. In such
-cases, the target PC is 0.
+External traps are traps from a privilege mode enabled for CTR recording to a privilege mode that is not enabled for CTR recording.  By default external traps are not recorded, but privileged software running in the target mode of the trap can opt-in to allowing CTR to record external traps into
+that mode. The MTE, STE, and VSTE bits allow M-mode, S-mode, and VS-mode, respectively, to opt-in.  
+
+External trap recording depends not only on the target mode, but on any invtervening modes.  For instance, recording an external trap from U-mode to M-mode requires that MTE=STE=1.  Similarly, recording an external trap from VU-mode to HS-mode requires that STE=VSTE=1.
+
+In records for external traps, the target PC is 0.
 [NOTE]
 [%unbreakable]
 ====
-_The external trap handshake allows both system software and the tools
-control over what is exposed. M-mode firmware may always set
-mctrcontrol.MTE=1, but a user-mode profiler may not wish to see any
-traps. The driver can set sctrcontrol.ETEN=0 to ensure that external
-traps are not recorded. On the other hand, a guest may wish to record
-external traps from VU-mode to VS-mode, but the hypervisor may not wish to expose
-traps from VU/VS-mode to HS-mode. The guest will set ETEN=VSTE=1, but the hypervisor can
-clear sctrcontrol.STE._
-
-_No such mechanism exists for recording external trap returns, because
+_No mechanism exists for recording external trap returns, because
 the external trap record includes all relevant information, and gives
 the trap handler (e.g., an emulator) the opportunity to modify the
 record._
@@ -524,11 +509,10 @@ record._
 [WARNING]
 [%unbreakable]
 ====
-_Note that external trap recording does not depend on EXCINH/INTRINH, only on ETEN and MTE/STE.  Thus, when external traps are enabled, both external interrupts and external exceptions are recorded._
+_Note that external trap recording does not depend on EXCINH/INTRINH.  Thus, when external traps are enabled, both external interrupts and external exceptions are recorded._
 
 _STE allows recording of traps from U-mode to S-mode as well as from VS/VU-mode to HS-mode.  The hypervisor can flip STE before entering a guest if it wants different behavior for U-to-S vs VS/VU-to-HS.  A separate HTE bit could be defined, but ideally it would live in an hctrcontrol CSR, which is otherwise unneeded.  We could put it in [ms]ctrcontrol, but the bit position would need special treatment in vsctrcontrol (writable but has no impact on behavior)._
 ====
-
 
 The table below provides details on recording of privilege mode
 transfers. Standard dependencies on FROZEN and transfer type inhibits
@@ -538,8 +522,8 @@ also apply, but are not covered by the table.
 |===
 .2+|*Transfer Type* .2+| *Source Mode* 2+|*Target Mode*
 |*Enabled* |*Disabled*
-.2+|*Trap* |*Enabled* |Recorded. |Recorded if ETEN=xTE=1, where x is target
-mode. Target PC is 0, type is External Trap.
+.2+|*Trap* |*Enabled* |Recorded. |Recorded if xTE=1, where x is the target
+mode and any intervening modes. Target PC is 0, type is External Trap.
 
 |*Disabled* |Recorded, Source PC is 0. |Not recorded.
 
@@ -548,8 +532,7 @@ mode. Target PC is 0, type is External Trap.
 |*Disabled* |Not recorded. |Not recorded.
 |===
 
-If ETEN is implemented, MTE must be implemented as well, as must STE if
-S-mode is implemented, and VSTE if VS-mode is implemented.
+If external trap recording is implemented, MTE must be implemented, while STE must be implemented if S-mode is implemented, and VSTE must be implemented if the H extension is implemented.
 
 === Cycle Counting
 
