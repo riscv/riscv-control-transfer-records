@@ -116,6 +116,11 @@ All fields are optional save for M, CLR, BPFRZ, and DEPTH.  All unimplemented fi
 _When reducing CTR depth, by writing mctrcontrol.DEPTH to a smaller value, software should set mctrcontrol.CLR.  This ensures that no transfer state is retained in the now-inaccessible entries above the new depth value._
 ====
 
+[WARNING]
+====
+_DEPTH encodings above 256 are reserved, in order to avoid needing to reserve up to 2048 *iselect values for CTR._
+====
+
 === Supervisor Control Transfer Record Control (sctrcontrol)
 
 The sctrcontrol register provides supervisor mode access to a subset of <<_machine_control_transfer_record_control_mctrcontrol, mctrcontrol>>.
