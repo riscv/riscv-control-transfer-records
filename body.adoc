@@ -78,7 +78,7 @@ hardware will record transfers. For a depth of N, the hardware will
 record transfers to entries 0..N-1. All <<_entry_registers, entry registers>> are
 read-only 0 when the selected entry is in N..255.
 
-The maximum DEPTH value supported is implementation-specific, but all lesser values must also be supported.  If software writes a DEPTH value above the maximum supported, DEPTH must read back the maximum supported value.  An implementation may opt to hardcode some or all of the bits in this field, based on the depth options supported. See <<_discovery, Discovery>>.  
+The maximum and minimum DEPTH values supported by an implementation is implementation-specific, but all values in between must also be supported.  If software writes a DEPTH value above the maximum supported, DEPTH must read back the maximum supported value.  If software writes a DEPTH value below the minimum supported, DEPTH must read back the minimum supported value.  An implementation may opt to hardcode some or all of the bits in this field, based on the depth values supported. See <<_discovery, Discovery>>.  
 
 |EXCINH |Inhibit recording of exceptions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
 
@@ -662,7 +662,7 @@ Any custom CTR extension must be associated with an enable bit within the design
 
 == Discovery
 
-Software can discover the maximum supported CTR buffer depth value by writing '111 to [ms]ctrcontrol.DEPTH, then reading back the value.  The value read represents the maximum supported depth.
+Software can discover the maximum supported CTR buffer depth value by writing '111 to [ms]ctrcontrol.DEPTH, then reading back the value.  Software can discover the minimum supported CTR buffer depth value by writing '000 to [ms]ctrcontrol.DEPTH, then reading back the value.
 
 Software can discover implemented optional *ctrcontrol fields by writing all 1s to all defined fields, then reading the value back. Unimplemented fields are read-only
 0.
