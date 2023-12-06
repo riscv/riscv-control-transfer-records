@@ -461,10 +461,15 @@ Traps from a disabled mode to an enabled mode, and trap returns from
 an enabled mode back to a disabled mode, are partially recorded. In
 such cases, the PC from the disabled mode (source PC for traps, and
 target PC for trap returns) is 0. Trap returns from a disabled mode to
-a enabled mode are not recorded. Traps from an enabled mode to a
+an enabled mode are not recorded. Traps from an enabled mode to a
 disabled mode, known as external traps, are not recorded by default,
 but see <<_external_traps, External Traps>> for how they
 can be recorded.
+
+[NOTE]
+====
+_If privileged software is configuring CTR on behalf of less privileged software, it should ensure that its privilege mode enable bit (e.g., sctrcontrol.S for Supervisor software) is cleared before a trap return to the less privileged mode.  Otherwise the trap return will be recorded, leaking the privileged PC._
+====
 
 Recording in Debug Mode is always inhibited. Transfers into and out of Debug Mode are
 never recorded.
