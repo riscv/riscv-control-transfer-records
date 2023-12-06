@@ -105,7 +105,7 @@ The maximum and minimum DEPTH values supported by an implementation is implement
 |INDOJMPINH |Inhibit recording of other indirect jump instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
 
 |DIROJMPINH |Inhibit recording of other direct jump instructions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
-|_Custom_ | WARL bits designated for custom use.  The reset value must be '0000, which corresponds to standard behavior.
+|_Custom_ | WARL bits designated for custom use.  The reset value must correspond to standard behavior.  See <<Custom Extensions>>.
 |===
 
 All fields are optional save for M, CLR, BPFRZ, and DEPTH.  All unimplemented fields are read-only 0, while other defined fields are writable, though DEPTH may have some read-only 1 bits.  S must be writable if S-mode is implemented, U must be writable if U-mode is implemented, and LCOFIFRZ must be writable if the Smcofpmf/Sscofpmf extension is implemented.
@@ -424,7 +424,7 @@ When Smstateen is implemented, the mstateen0.CTR bit controls access to CTR regi
 
 When mstateen0.CTR=0, qualified control transfers executed in privilege modes less privileged than M-mode will continue to implicitly update <<_entry_registers, Entry Registers>> and <<_machine_control_transfer_record_status_sctrstatus, sctrstatus>>.
 
-If the H extension is implemented and mstateen0.CTR=1, the hstateen0.CTR bit controls access to supervisor CTR state (sctrcontrol, sctrstatus, and sireg* when siselect is in 0x200..0x2FF) when V=1.  hstateen0.CTR is read-only zero when mstateen0.CTR=0.
+If the H extension is implemented and mstateen0.CTR=1, the hstateen0.CTR bit controls access to supervisor CTR state (sctrcontrol, sctrstatus, and sireg* when siselect is in 0x200..0x2FF) when V=1.  hstateen0.CTR is read-only 0 when mstateen0.CTR=0.
 
 When mstateen0.CTR=1 and hstateen0.CTR=1, VS-mode accesses to supervisor CTR state behave as described in <<_csrs, CSRs>> and <<_entry_registers, Entry Registers>> above.  When mstateen0.CTR=1 and hstateen0.CTR=0, VS-mode accesses to supervisor CTR state raise a virtual instruction exception.
 
@@ -670,7 +670,7 @@ _Breakpoint exception refers to synchronous exceptions with a cause value of Bre
 
 == Custom Extensions
 
-Any custom CTR extension must be associated with an enable bit within the designated custom bits in *ctrcontrol.  The value of the custom enable bit in *ctrcontrol must be 0 at reset, to ensure that any custom behavior is disabled by default.  When the enable bit is set to 1, the custom extension may alter standard CTR behavior, and may define new custom status fields within <<_supervisor_control_transfer_record_status_sctrstatus, sctrstatus>> or the <<_entry_registers, CTR entry registers>>.  All custom status fields, and standard status fields whose behavior is altered by the custom extension, must revert to standard behavior when the enable bit is 0.  This includes read-only 0 behavior for any bits undefined by any implemented standard extensions.
+Any custom CTR extension must be associated with a non-default value within the designated custom bits in *ctrcontrol.  When custom bits hold a value that enables the custom extension, the extension may alter standard CTR behavior, and may define new custom status fields within <<_supervisor_control_transfer_record_status_sctrstatus, sctrstatus>> or the <<_entry_registers, CTR entry registers>>.  All custom status fields, and standard status fields whose behavior is altered by the custom extension, must revert to standard behavior when the custom bits hold their default (reset) value.  This includes read-only 0 behavior for any bits undefined by any implemented standard extensions.
 
 == Discovery
 
