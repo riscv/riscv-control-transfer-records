@@ -662,6 +662,13 @@ _Breakpoint exception refers to synchronous exceptions with a cause value of Bre
 
 If the H extension is implemented, freeze behavior for LCOFIs and breakpoint exceptions that trap to VS-mode is determined by LCOFIFRZ and BPFRZ values, respectively, in vsctrcontrol.  This includes virtual LCOFIs pended by a hypervisor.
 
+[NOTE]
+[%unbreakable]
+====
+_When a guest uses the SBI Supervisor Software Events (SSE) extension, the LCOFI will trap to HS-mode, which will then invoke a registered VS-mode LCOFI handler routine.  If vsctrcontrol.LCOFIFRZ=1, the HS-mode handler will need to emulate the freeze by setting sctrstatus.FROZEN=1 before invoking the registered handler routine._
+====
+
+
 == Custom Extensions
 
 Any custom CTR extension must be associated with a non-default value within the designated custom bits in *ctrcontrol.  When custom bits hold a value that enables the custom extension, the extension may alter standard CTR behavior, and may define new custom status fields within <<_supervisor_control_transfer_record_status_sctrstatus, sctrstatus>> or the <<_entry_registers, CTR entry registers>>.  All custom status fields, and standard status fields whose behavior is altered by the custom extension, must revert to standard behavior when the custom bits hold their default (reset) value.  This includes read-only 0 behavior for any bits undefined by any implemented standard extensions.
