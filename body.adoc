@@ -269,7 +269,7 @@ _Because it is unclear whether software would take advantage of these optimizati
 
 [NOTE]
 ====
-_Because the ROI of CTR is perceived to be low for RV32 implementations, CTR does not fully support RV32.  While control flow transfers in RV32 can be recorded, RV32 cannot access *ctrcontrol[63:32].  A future extension could add support for RV32, by adding 3 new CSRs (mctrcontrolh, sctrcontrolh, and vsctrcontrolh) to provide this access.  However, RV32 would still only be able to access the lower 128 bits of <<_control_transfer_record_metadata_ctrdata, ctrdata>>._
+_Because the ROI of CTR is perceived to be low for RV32 implementations, CTR does not fully support RV32.  While control flow transfers in RV32 can be recorded, RV32 cannot access *ctrcontrol[63:32].  A future extension could add support for RV32, by adding 3 new CSRs (mctrcontrolh, sctrcontrolh, and vsctrcontrolh) to provide this access._
 ====
 
 == Entry Registers
@@ -277,7 +277,7 @@ _Because the ROI of CTR is perceived to be low for RV32 implementations, CTR doe
 Control transfer records are stored in a CTR buffer, such that each buffer entry stores information about a single transfer.  The CTR buffer entries are logically accessed via the indirect register access mechanism defined by the
 https://docs.google.com/document/u/0/d/1ZxTSUWX_9_VafWeA0l1ci9RFjmivLuZn-US9IbFOEWY/edit[[.underline]#Smcsrind/Sscsrind#]
 extension. The miselect index range 0x200..0x2FF is reserved for CTR
-entries 0..255. When miselect holds a value in this range, mireg provides access to <<_control_transfer_record_source_ctrsource, ctrsource>>, mireg2 provides access to <<_control_transfer_record_target_ctrtarget, ctrtarget>>, and mireg[3456] provide access <<_control_transfer_record_source_ctrdata, ctrdata>>.
+entries 0..255. When miselect holds a value in this range, mireg provides access to <<_control_transfer_record_source_ctrsource, ctrsource>>, mireg2 provides access to <<_control_transfer_record_target_ctrtarget, ctrtarget>>, and mireg3 provides access <<_control_transfer_record_source_ctrdata, ctrdata>>.  In RV32, mireg4 accesses ctrdata[63:32], otherwise mireg4, mireg5, and mireg6 are read-only 0.
 
 The standard indirect register access rules specified by Smcsrind/Sscsrind apply for CTR.  S-mode is able to access CTR entries using the siselect/sireg* interface, with the same behavior described for M-mode above.  Similarly, VS-mode is able to access CTR entries using siselect (really vsiselect) and sireg* (really vsireg*).  See <<_state_enable_access_control, State Enable Access Control>> for cases where CTR accesses from S-mode and VS-mode may be restricted.  
 
@@ -344,11 +344,11 @@ _A transfer to an invalid address may report a valid address in ctrtarget.PC._
 
 The ctrdata register contains metadata for the recorded transfer. This
 register must be implemented, though all fields within it are optional.
-Unimplemented fields are read-only 0.  ctrdata is a 256-bit register.  
+Unimplemented fields are read-only 0.  ctrdata is a 64-bit register.  
 
 [width="100%",options="header",]
 |===
-4+|255:32 3+|31:16 |15 2+|14:4 2+|3:0
+4+|63:32 3+|31:16 |15 2+|14:4 2+|3:0
 4+|_WPRI_ 3+|CC |CCV 2+|_WPRI_ 2+|TYPE
 |===
 
@@ -412,18 +412,6 @@ This would help in cases where multiple privilege modes are recorded, and existi
 ====
 _Like the <<_transfer_type_filtering, Transfer Type Filtering>> bits in mctrcontrol, the ctrdata.TYPE bits leverage the E-trace itype encodings._
 ====
-
-The indirect alias CSR(s) used to access to ctrdata depend on XLEN, as illustrated in the table below.
-
-[width="70%"]
-|===
-.2+| *Alias CSR* 3+^|*XLEN*
-| *32* | *64* | *128*
-| mireg3 | ctrdata[31:0] | ctrdata[63:0] | ctrdata[127:0]
-| mireg4 | ctrdata[63:32] | ctrdata[127:64] | ctrdata[255:128]
-| mireg5 | ctrdata[95:64] | ctrdata[191:128] | 0
-| mireg6 | ctrdata[127:96] | ctrdata[255:192] | 0
-|===
 
 == State Enable Access Control
 
