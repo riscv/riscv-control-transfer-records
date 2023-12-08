@@ -550,10 +550,9 @@ If external trap recording is implemented, MTE must be implemented, while STE mu
 
 === Cycle Counting
 
-The ctrdata register may optionally include a count of CPU cycles
-elapsed since the prior CTR record.  The elapsed cycle count value is represented by the CC field, which has a 12-bit mantissa component (Cycle Count Mantissa, or CCM) and a 4-bit exponent component (Cycle Count Exponent, or CCE). 
+The ctrdata register may optionally include a count of CPU cycles elapsed since the prior CTR record.  The elapsed cycle count value is represented by the CC field, which has a 12-bit mantissa component (Cycle Count Mantissa, or CCM) and a 4-bit exponent component (Cycle Count Exponent, or CCE). 
 
-The CC field is encoded such that CCE holds 0 if the binary cycle counter (CycleCounter) value is less than 4096, otherwise it holds the index of the most significant one bit in the CycleCounter value, minus 12.  CCM holds CycleCounter bits CCE+11:CCE.
+The elapsed cycle counter (CtrCycleCounter) increments at the same rate as the mcycle counter.  The CC field is encoded such that CCE holds 0 if the CtrCycleCounter value is less than 4096, otherwise it holds the index of the most significant one bit in the CtrCycleCounter value, minus 12.  CCM holds CtrCycleCounter bits CCE+11:CCE.
 
 The elapsed cycle count can then be calculated by software using the following formula:
 
@@ -573,11 +572,11 @@ filtering, it is recommended to support at least 3 exponent bits. This
 allows capturing the full latency of most functions, when recording only
 calls and returns.  
 
-The size of the CycleCounter required to support each CCE width is given in the table below.
+The size of the CtrCycleCounter required to support each CCE width is given in the table below.
 
 [width="60%", cols="10%,15%,15%", options="header",]
 |===
-| CCE bits | CycleCounter bits | Max CC value
+| CCE bits | CtrCycleCounter bits | Max CC value
 | 0 | 12 | 4095
 | 1 | 13 | 8191
 | 2 | 15 | 32764
