@@ -289,7 +289,7 @@ _Implementations may opt not to preserve CTR entry state across clock-gated low-
 The ctrsource register contains the source PC, which is the PC of the recorded control transfer instruction, or the epc of the recorded trap.  The valid (V) bit is set by the hardware when a transfer is recorded in the selected CTR buffer entry, and implies that
 data in ctrsource, ctrtarget, and ctrdata is valid for this entry.
 
-ctrsource is an MXLEN-bit WARL register that must be able to hold all valid virtual addresses. It need not be able to hold an invalid address.  When XLEN < MXLEN, software access via *ireg will access only the lower XLEN bits of ctrsource, and implict writes (by recorded transfers) will be zero-extended.
+ctrsource is an MXLEN-bit WARL register that must be able to hold all valid virtual or physical addresses. It need not be able to hold any invalid addresses.  When XLEN < MXLEN, both explicit writes (by software) and implict writes (by recorded transfers) will be zero-extended.
 
 [width="100%",cols="18%,72%,10%",options="header",]
 |===
@@ -321,7 +321,7 @@ when the recorded transfer is an instruction whose target or
 taken/not-taken direction was mispredicted by the branch predictor. MISP
 is read-only 0 when not implemented.
 
-ctrtarget is an MXLEN-bit WARL register that must be able to hold all valid virtual addresses. It need not be capable of holding an invalid address. When XLEN < MXLEN, software access via *ireg2 will access only the lower XLEN bits of ctrtarget, and implict writes (by recorded transfers) will be zero-extended.
+ctrtarget is an MXLEN-bit WARL register that must be able to hold all valid virtual or physical addresses. It need not be able to hold any invalid addresses. When XLEN < MXLEN, both explicit writes (by software) and implict writes (by recorded transfers) will be zero-extended.
 
 [width="100%",cols="18%,72%,10%",options="header",]
 |===
