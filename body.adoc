@@ -54,9 +54,9 @@ The mctrcontrol register is a 64-bit read/write register that enables and config
 
 |RASEMU |Enables <<RAS (Return Address Stack) Emulation Mode>>.
 
-|BPFRZ |Set sctrstatus.FROZEN on a breakpoint exception. See <<_freeze, Freeze>>.
+|BPFRZ |Set sctrstatus.FROZEN on a breakpoint exception that traps to M-mode or S-mode. See <<_freeze, Freeze>>.
 
-|LCOFIFRZ |Set sctrstatus.FROZEN on local counter overflow interrupt (LCOFI). See <<_freeze, Freeze>>.
+|LCOFIFRZ |Set sctrstatus.FROZEN on local counter overflow interrupt (LCOFI) that traps to M-mode or S-mode. See <<_freeze, Freeze>>.
 
 |DEPTH[3:0] a|
 WARL field that selects the depth of the CTR buffer. Encodings:
@@ -168,7 +168,12 @@ If the H extension is implemented, the vsctrcontrol register is a 64-bit read/wr
 |Field |Description 
 |VS, VU |Enable transfer recording in the selected privileged mode(s).  
 
-|VSTE |Enables recording of traps to VS-mode when VS=0.  See <<_external_traps, External Traps>>.  
+|VSTE |Enables recording of traps to VS-mode when VS=0.  See <<_external_traps, External Traps>>.
+
+|BPFRZ |Set sctrstatus.FROZEN on a breakpoint exception that traps to VS-mode. See <<_freeze, Freeze>>.
+
+|LCOFIFRZ |Set sctrstatus.FROZEN on local counter overflow interrupt (LCOFI) that traps to VS-mode. See <<_freeze, Freeze>>.
+
 |DEPTH |Provides read-only access to the sctrcontrol.DEPTH field  
 2+|Other field definitions match those of <<_supervisor_control_transfer_record_control_sctrcontrol, sctrcontrol>>.  The optional fields implemented in vsctrcontrol should match those implemented in sctrcontrol.
 |===
@@ -646,8 +651,7 @@ an implementation may opt to record CCV=0 for all calls, or those whose parent c
 When sctrstatus.FROZEN=1, transfer recording is inhibited.  This bit can be set by hardware, as described below, or by software.
 
 When mctrcontrol.LCOFIFRZ=1 and a local counter overflow interrupt
-(LCOFI) traps (as a result of an HPM counter overflow), sctrstatus.FROZEN is set by the CPU. This inhibits CTR recording until software clears FROZEN. The LCOFI trap itself is not
-recorded.
+(LCOFI) traps (as a result of an HPM counter overflow) to M-mode or to S-mode, sctrstatus.FROZEN is set by hardware. This inhibits CTR recording until software clears FROZEN. The LCOFI trap itself is not recorded.
 [NOTE]
 [%unbreakable]
 ====
@@ -660,14 +664,15 @@ recording is desired._
 
 _LCOFI refers only to architectural traps directly caused by a local counter overflow. If a local counter overflow interrupt is recognized without a trap, for instance by reading mip, FROZEN is not automatically set._
 ====
-Similarly, on a breakpoint exception with mctrcontrol.BPFRZ=1, FROZEN is
-set by the CPU. The breakpoint exception itself is not recorded.  
+Similarly, on a breakpoint exception that traps to M-mode or S-mode with mctrcontrol.BPFRZ=1, FROZEN is set by hardware. The breakpoint exception itself is not recorded.  
 
 [NOTE]
 [%unbreakable]
 ====
 _Breakpoint exception refers to synchronous exceptions with a cause value of Breakpoint (3), regardless of source (ebreak, c.ebreak, Sdtrig); it does not include entry into Debug Mode, even in cores where this is implemented as an exception._
 ====
+
+If the H extension is implemented, freeze behavior for LCOFIs and breakpoint exceptions that trap to VS-mode is determined by LCOFIFRZ and BPFRZ values, respectively, in vsctrcontrol.
 
 == Custom Extensions
 
