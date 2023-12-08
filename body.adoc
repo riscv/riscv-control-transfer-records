@@ -660,7 +660,7 @@ Similarly, on a breakpoint exception that traps to M-mode or S-mode with mctrcon
 _Breakpoint exception refers to synchronous exceptions with a cause value of Breakpoint (3), regardless of source (ebreak, c.ebreak, Sdtrig); it does not include entry into Debug Mode, even in cores where this is implemented as an exception._
 ====
 
-If the H extension is implemented, freeze behavior for LCOFIs and breakpoint exceptions that trap to VS-mode is determined by LCOFIFRZ and BPFRZ values, respectively, in vsctrcontrol.
+If the H extension is implemented, freeze behavior for LCOFIs and breakpoint exceptions that trap to VS-mode is determined by LCOFIFRZ and BPFRZ values, respectively, in vsctrcontrol.  This includes virtual LCOFIs pended by a hypervisor.
 
 == Custom Extensions
 
