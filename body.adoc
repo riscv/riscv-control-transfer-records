@@ -232,7 +232,7 @@ _Logical entry 0, accessed via mireg* when miselect=0x200, is always the physica
 [NOTE]
 [%unbreakable]
 ====
-_Because the sctrstatus register is updated by hardware, writes should be performed with caution.  If a multi-instruction read-modify-write to sctrstatus is performed while CTR is active, such that a qualified transfer, or trap that causes CTR freeze, completes between the read and the write, a hardware update could be lost._
+_Because the sctrstatus register is updated by hardware, writes should be performed with caution.  If a multi-instruction read-modify-write to sctrstatus is performed while CTR is active, such that a qualified transfer, or trap that causes CTR freeze, completes between the read and the write, a hardware update could be lost.  Software may wish to ensure that either sctrstatus.FROZEN=1, or that the enable bit in *ctrcontrol corresponding to the current privilege mode is 0, before performing a read-modify-write._
 
 _When restoring CTR state, sctrstatus should be written before CTR entry state is restored.  This ensures that the software writes to logical CTR entries modify the proper physical entries._
 ====
