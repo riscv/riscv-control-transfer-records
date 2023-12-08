@@ -76,7 +76,7 @@ WARL field that selects the depth of the CTR buffer. Encodings:
 The depth of the CTR buffer dictates the number of entries to which the
 hardware will record transfers. For a depth of N, the hardware will
 record transfers to entries 0..N-1. All <<_entry_registers, entry registers>> are
-read-only 0 when the selected entry is in N..255.
+read-only 0 when the selected entry is in N..255.  When the depth is increased, the newly accessible entries contain unspecified but legal values.
 
 The maximum and minimum DEPTH values supported by an implementation is implementation-specific, but all values in between must also be supported.  If software writes a DEPTH value above the maximum supported, DEPTH must read back the maximum supported value.  If software writes a DEPTH value below the minimum supported, DEPTH must read back the minimum supported value.  An implementation may opt to hardcode some or all of the bits in this field, based on the depth values supported. See <<_discovery, Discovery>>.  
 
@@ -113,7 +113,9 @@ All fields are optional save for M, CLR, BPFRZ, and DEPTH.  All unimplemented fi
 [NOTE]
 [%unbreakable]
 ====
-_When reducing CTR depth, by writing mctrcontrol.DEPTH to a smaller value, software should set mctrcontrol.CLR.  This ensures that no transfer state is retained in the now-inaccessible entries above the new depth value._
+_Software may opt to use a depth less than the maximum supported in order to reduce the latency of saving and restoring CTR state, or to emulate the maximum depth supported by other implementations, e.g. in cases of VM-migration._
+
+_When altering CTR depth, by writing mctrcontrol.DEPTH to a different value, software should set mctrcontrol.CLR.  This avoids any risk of CTR entries containing non-deterministic values._
 ====
 
 [WARNING]
