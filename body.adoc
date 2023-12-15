@@ -62,7 +62,7 @@ The `mctrcontrol` register is a 64-bit read/write register that enables and conf
 
 |`LCOFIFRZ` |Set `sctrstatus.FROZEN` on local counter overflow interrupt (LCOFI) that traps to M-mode or S-mode. See <<_freeze, Freeze>>.
 
-|`DEPTH[3:0]` a|
+|`DEPTH[2:0]` a|
 WARL field that selects the depth of the CTR buffer. Encodings:
 
 ‘000 - 16
@@ -184,7 +184,7 @@ If the H extension is implemented, the `vsctrcontrol` register is a 64-bit read/
 
 |`LCOFIFRZ` |Set `sctrstatus.FROZEN` on local counter overflow interrupt (LCOFI) that traps to VS-mode. See <<_freeze, Freeze>>.
 
-|`DEPTH` |Provides read-only access to the `sctrcontrol.DEPTH` field  
+|`DEPTH[2:0]` |Provides read-only access to the `sctrcontrol.DEPTH` field  
 2+|Other field definitions match those of <<_supervisor_control_transfer_record_control_sctrcontrol, `sctrcontrol`>>.  The optional fields implemented in `vsctrcontrol` should match those implemented in `sctrcontrol`.
 |===
 
