@@ -1,11 +1,11 @@
 [[intro]]
 == Introduction
 
-A method to record control flow transfer history is valuable for performance profiling usages, as well as for debug. Control flow transfers refer to jump instructions (including function calls and returns), taken branch instructions, traps, and trap returns.  Profiling tools like Linux perf collect control transfer history when sampling software execution, enabling users, and tools like AutoFDO, to identify hot paths for optimization.
+A method for recording control flow transfer history is valuable not only for performance profiling but also for debugging. Control flow transfers refer to jump instructions (including function calls and returns), taken branch instructions, traps, and trap returns.  Profiling tools, such as Linux perf, collect control transfer history when sampling software execution, enabling tools, like AutoFDO, to identify hot paths for optimization.
 
 Control flow trace capabilities offer very deep transfer history, but the volume of data produced can result in significant performance overheads due to memory bandwidth consumption, buffer management, and decoder overhead. The Control Transfer Records (CTR) extension provides a method to record a limited history in register-accessible internal chip storage, with the intent of dramatically reducing the performance overhead and complexity of collecting transfer history.
 
-CTR defines a circular (FIFO) control transfer history buffer.  Each buffer entry holds a record for a single recorded control flow transfer.  The number of records that can be held in the buffer depends upon both the implementation (the maximum supported depth) and the CTR configuration (the software selected depth).
+CTR defines a circular (FIFO) buffer.  Each buffer entry holds a record for a single recorded control flow transfer.  The number of records that can be held in the buffer depends upon both the implementation (the maximum supported depth) and the CTR configuration (the software selected depth).
 
 [NOTE]
 [%unbreakable]
@@ -15,13 +15,18 @@ _Software may opt to use a depth less than the maximum supported in order to red
 
 Only qualified transfers are recorded.  Qualified transfers are those that meet the filtering criteria, which include the privilege mode and the transfer type.
 
-Recorded transfers are inserted to the head of the buffer, while older recorded transfers may be overwritten once the buffer is full. The source PC, target PC, and some optional metadata (transfer type, elapsed cycles) is stored for each recorded transfer.
+Recorded transfers are inserted to the head of the buffer, while older recorded transfers may be overwritten once the buffer is full. The source PC, target PC, and some optional metadata (transfer type, elapsed cycles) are stored for each recorded transfer.
 
-The CTR buffer is accessible through an indirect CSR interface, such that software can specify which logical entry in the buffer it wishes to read or write.  Logical entry 0 is always the youngest recorded transfer, entry 1 is the next youngest, etc.
+The CTR buffer is accessible through an indirect CSR interface, such that software can specify which logical entry in the buffer it wishes to read or write.  Logical entry 0 always corresponds to the youngest recorded transfer, followed by entry 1 as the next youngest, and so on.
 
-The machine-level extension *Smctr* encompasses all added CSRs and all behavior modifications for a hart, over all privilege levels. The associated supervisor-level extension *Ssctr* is essentially the same as *Smctr* except for excluding the machine-level CSRs and behaviors that should not be directly visible to supervisor level.
+The machine-level extension, *Smctr*, encompasses all newly added
+Control Status Registers (CSRs) and behavior modifications for a hart across all
+privilege levels.  The corresponding supervisor-level extension, *Ssctr*, is essentially
+identical to Smctr, except that it excludes machine-level CSRs and behaviors not
+intended to be directly accessible at the supervisor level.
 
-Smctr is dependent on the Smcsrind extension. Ssctr is dependent on the Sscsrind extension.
+Smctr depends on the Smcsrind extension, while Ssctr depends on the
+Sscsrind extension.
 
 [WARNING]
 ====
