@@ -78,11 +78,10 @@ WARL field that selects the depth of the CTR buffer. Encodings:
 '11x - reserved
 
 The depth of the CTR buffer dictates the number of entries to which the
-hardware will record transfers. For a depth of N, the hardware will
-record transfers to entries 0..N-1. All <<_entry_registers, entry registers>> are
-read-only 0 when the selected entry is in N..255.  When the depth is increased, the newly accessible entries contain unspecified but legal values.
+hardware records transfers. For a depth of N, the hardware
+records transfers to entries 0..N-1. All <<_entry_registers, entry registers>> read as '0' and are read-only when the selected entry is in the range N to 255.  When the depth is increased, the newly accessible entries contain unspecified but legal values.
 
-The maximum and minimum `DEPTH` values supported by an implementation is implementation-specific, but all values in between must also be supported.  If software writes a `DEPTH` value above the maximum supported, `DEPTH` must read back the maximum supported value.  If software writes a `DEPTH` value below the minimum supported, `DEPTH` must read back the minimum supported value.  An implementation may opt to hardcode some or all of the bits in this field, based on the depth values supported. See <<_discovery, Discovery>>.  
+The maximum and minimum `DEPTH` values supported by an implementation is implementation-specific, but all values in between must also be supported.  If software writes a `DEPTH` value above the maximum supported, `DEPTH` must read back the maximum supported value.  If software writes a `DEPTH` value below the minimum supported, `DEPTH` must read back the minimum supported value.  An implementation may opt to hardcode some or all of the bits in this field, depending on the supported depth value(s). See <<_discovery, Discovery>>.  
 
 |`EXCINH` |Inhibit recording of exceptions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
 
@@ -112,12 +111,12 @@ The maximum and minimum `DEPTH` values supported by an implementation is impleme
 |`Custom[3:0]` | WARL bits designated for custom use.  The reset value must correspond to standard behavior.  See <<Custom Extensions>>.
 |===
 
-All fields are optional save for `M`, `CLR`, `BPFRZ`, and `DEPTH`.  All unimplemented fields are read-only 0, while other defined fields are writable, though `DEPTH` may have some read-only 1 bits.  `S` must be writable if S-mode is implemented, `U` must be writable if U-mode is implemented, and `LCOFIFRZ` must be writable if the Smcofpmf/Sscofpmf extension is implemented.
+All fields are optional except for `M`, `CLR`, `BPFRZ`, and `DEPTH`.  All unimplemented fields are read-only 0.  All implemented fields are writable, though `DEPTH` may contain some read-only 1 bits.  `S` must be writable if S-mode is implemented, and `U` must be writable if U-mode is implemented.  If the Smcofpmf/Sscofpmf extension is implemented, `LCOFIFRZ` must be writable.
 
 [NOTE]
 [%unbreakable]
 ====
-_Software may opt to use a depth less than the maximum supported in order to reduce the latency of saving and restoring CTR state, or to emulate the maximum depth supported by other implementations, e.g. in cases of VM-migration._
+_Software may choose to use a depth less than the maximum supported to reduce the latency of saving and restoring CTR state, or to emulate the maximum depth supported by other implementations, for example, during VM migration._
 
 _When altering CTR depth, by writing `mctrcontrol.DEPTH` to a different value, software should set `mctrcontrol.CLR`.  This avoids any risk of CTR entries containing non-deterministic values._
 ====
@@ -216,7 +215,7 @@ _The TG considered making `vsctrcontrol` pass-through `sctrcontrol` fields other
 
 === Supervisor Control Transfer Record Status (`sctrstatus`)
 
-The `sctrstatus` register provides access to CTR status information, and is updated by the hardware when CTR is active (in an enabled privilege mode and not frozen).
+The `sctrstatus` register grants access to CTR status information and is updated by the hardware whenever CTR is active, which implies that the current privilege mode is enabled for recording and CTR is not frozen.
 
 .Supervisor Control Transfer Record Status Register Format
 [wavedrom, , ]
@@ -232,7 +231,7 @@ The `sctrstatus` register provides access to CTR status information, and is upda
 [width="100%",cols="15%,75%,10%",options="header",]
 |===
 |Field |Description |Access
-|`WRPTR` |Indicates the physical CTR buffer entry to be written next.  Incremented on new transfers recorded (see <<Behavior>>), and decremented on qualified returns when `mctrcontrol.RASEMU`=1 (see <<RAS (Return Address Stack) Emulation Mode>>).  Wraps on increment when the value matches the selected depth-1, and on decrement when the value is 0.  Bits above those needed to represent depth-1 (e.g., bits 7:4 for depth=16) are read-only 0. On depth changes, `WRPTR` holds an unspecified but legal value. |WARL 
+|`WRPTR` |Indicates the physical CTR buffer entry to be written next.  Incremented on new transfers recorded (see <<Behavior>>), and decremented on qualified returns when `mctrcontrol.RASEMU`=1 (see <<RAS (Return Address Stack) Emulation Mode>>).  For a given CTR depth (where depth = 2^(`DEPTH`+4)^), WRPTR wraps to 0 on an increment when the value matches depth-1, and to depth-1 on a decrement when the value is 0.  Bits above those needed to represent depth-1 (e.g., bits 7:4 for a depth of 16) are read-only 0. On depth changes, `WRPTR` holds an unspecified but legal value. |WARL 
 |`FROZEN` |Inhibit transfer recording. See <<_freeze, Freeze>>. |WARL
 |===
 
@@ -242,19 +241,19 @@ and software should ignore but preserve any fields that it does not recognize.  
 [NOTE]
 [%unbreakable]
 ====
-_Logical entry 0, accessed via `mireg*` when `miselect`=0x200, is always the physical entry preceding the `WRPTR` entry ((`WRPTR`-1) % depth)._
+_Logical entry 0, accessed via `mireg*` when `miselect`=0x200, is always the physical entry preceding the `WRPTR` entry ((`WRPTR`-1) % depth), where depth = 2^(`DEPTH`+4)^._
 ====
 [NOTE]
 [%unbreakable]
 ====
-_Because the `sctrstatus` register is updated by hardware, writes should be performed with caution.  If a multi-instruction read-modify-write to `sctrstatus` is performed while CTR is active, such that a qualified transfer, or trap that causes CTR freeze, completes between the read and the write, a hardware update could be lost.  Software may wish to ensure that either `sctrstatus.FROZEN`=1, or that the enable bit in `*ctrcontrol` corresponding to the current privilege mode is 0, before performing a read-modify-write._
+_Because the `sctrstatus` register is updated by hardware, writes should be performed with caution.  If a multi-instruction read-modify-write to `sctrstatus` is performed while CTR is active, and between the read and write a qualified transfer or trap that causes CTR freeze completes, a hardware update could be lost.  Software may wish to ensure that CTR is inactive before performing a read-modify-write, by ensuring that either `sctrstatus.FROZEN`=1, or that the current privilege mode is not enabled for recording._
 
 _When restoring CTR state, `sctrstatus` should be written before CTR entry state is restored.  This ensures that the software writes to logical CTR entries modify the proper physical entries._
 ====
 [NOTE]
 [%unbreakable]
 ====
-_Exposing the `WRPTR` provides a more efficient means for synthesizing CTR entries.  If a qualified control transfer is emulated, the emulator can simply increment the WRPTR, then write the synthesized record to entry 0.  If a qualified function return is emulated while `RASEMU`=1, the emulator can clear `ctrsource.V` for entry 0, then decrement the WRPTR._
+_Exposing the `WRPTR` provides a more efficient means for synthesizing CTR entries.  If a qualified control transfer is emulated, the emulator can simply increment the `WRPTR`, then write the synthesized record to entry 0.  If a qualified function return is emulated while `RASEMU`=1, the emulator can clear `ctrsource.V` for entry 0, then decrement the `WRPTR`._
 
 _Exposing the `WRPTR` may also allow support for Linux perf's https://lwn.net/Articles/802821[[.underline]#stack stitching#] capability._
 ====
@@ -291,12 +290,12 @@ _Because the ROI of CTR is perceived to be low for RV32 implementations, CTR doe
 
 Control transfer records are stored in a CTR buffer, such that each buffer entry stores information about a single transfer.  The CTR buffer entries are logically accessed via the indirect register access mechanism defined by the
 https://docs.google.com/document/u/0/d/1ZxTSUWX_9_VafWeA0l1ci9RFjmivLuZn-US9IbFOEWY/edit[[.underline]#Smcsrind/Sscsrind#]
-extension. The `miselect` index range 0x200..0x2FF is reserved for CTR
-entries 0..255. When `miselect` holds a value in this range, `mireg` provides access to <<_control_transfer_record_source_ctrsource, `ctrsource`>>, `mireg2` provides access to <<_control_transfer_record_target_ctrtarget, `ctrtarget`>>, and `mireg3` provides access <<_control_transfer_record_source_ctrdata, `ctrdata`>>.  In RV32, `mireg4` accesses `ctrdata[63:32]`, otherwise `mireg4`, `mireg5`, and `mireg6` are read-only 0.
+extension. The `miselect` index range 0x200 through 0x2FF is reserved for CTR
+entries 0 through 255. When `miselect` holds a value in this range, `mireg` provides access to <<_control_transfer_record_source_ctrsource, `ctrsource`>>, `mireg2` provides access to <<_control_transfer_record_target_ctrtarget, `ctrtarget`>>, and `mireg3` provides access to <<_control_transfer_record_source_ctrdata, `ctrdata`>>.  In RV32, `mireg4` accesses `ctrdata[63:32]`, otherwise `mireg4`, `mireg5`, and `mireg6` are read-only 0.
 
 The standard indirect register access rules specified by Smcsrind/Sscsrind apply for CTR.  S-mode is able to access CTR entries using the `siselect`/`sireg*` interface, with the same behavior described for M-mode above.  Similarly, VS-mode is able to access CTR entries using `siselect` (really `vsiselect`) and `sireg*` (really `vsireg*`).  See <<_state_enable_access_control, State Enable Access Control>> for cases where CTR accesses from S-mode and VS-mode may be restricted.  
 
-For \`*iselect` values in 0x200..0x2FF, `vsireg*` registers access the same entry register state as `mireg*` and `sireg*`, regardless of the privilege mode at the time of access.  There is not a separate set of entry registers for V=1.
+For `\*iselect` values in 0x200..0x2FF, `vsireg*` registers access the same entry register state as `mireg*` and `sireg*`, regardless of the privilege mode at the time of access.  There is not a separate set of entry registers for V=1.
 
 [WARNING]
 [%unbreakable]
@@ -306,10 +305,10 @@ _Implementations may opt not to preserve CTR entry state across clock-gated low-
 
 === Control Transfer Record Source (`ctrsource`)
 
-The `ctrsource` register contains the source PC, which is the PC of the recorded control transfer instruction, or the epc of the recorded trap.  The valid (V) bit is set by the hardware when a transfer is recorded in the selected CTR buffer entry, and implies that
+The `ctrsource` register contains the source program counter, which is the `pc` of the recorded control transfer instruction, or the epc of the recorded trap.  The valid (V) bit is set by the hardware when a transfer is recorded in the selected CTR buffer entry, and implies that
 data in `ctrsource`, `ctrtarget`, and `ctrdata` is valid for this entry.
 
-`ctrsource` is an MXLEN-bit WARL register that must be able to hold all valid virtual or physical addresses. It need not be able to hold any invalid addresses.  When XLEN < MXLEN, both explicit writes (by software) and implict writes (for recorded transfers) will be zero-extended.
+`ctrsource` is an MXLEN-bit WARL register that must be able to hold all valid virtual or physical addresses that can serve as a `pc`. It need not be able to hold any invalid addresses.  When XLEN < MXLEN, both explicit writes (by software) and implict writes (for recorded transfers) will be zero-extended.
 
 .Control Transfer Record Source Register Format (RV32)
 [wavedrom, , ]
@@ -347,7 +346,7 @@ _If we believe a future standard or custom extension may define 1-byte opcodes, 
 ====
 === Control Transfer Record Target (`ctrtarget`)
 
-The `ctrtarget` register contains the target (destination) PC
+The `ctrtarget` register contains the target (destination) program counter
 of the recorded transfer. The optional `MISP` bit is set by the hardware
 when the recorded transfer is an instruction whose target or
 taken/not-taken direction was mispredicted by the branch predictor. `MISP`
@@ -487,7 +486,8 @@ CTR records qualified control transfers.  Control transfers are qualified if the
 * The transfer type is not inhibited
 * `sctrstatus.FROZEN` is not set
 
-Such qualified transfers update the <<_entry_registers, Entry Registers>> at logical entry 0, such that older entries are pushed down the stack (the record previously in entry 0 is pushed to entry 1, the record previously in entry 1 is pushed to entry 2, etc). If the CTR buffer is full, the oldest recorded entry (previously at depth-1) is lost.
+Such qualified transfers update the <<_entry_registers, Entry Registers>> at logical entry 0.  As a result, older entries are pushed down the stack: the record previously in entry 0
+moves to entry 1, the record in entry 1 moves to entry 2, and so on.  If the CTR buffer is full, the oldest recorded entry (previously at entry depth-1) is lost.
 
 Recorded transfers will set the `ctrsource.V` bit to 1, and will update all implemented record fields. 
 
@@ -500,27 +500,20 @@ _In order to collect accurate and representative performance profiles while usin
 === Privilege Mode Transitions
 
 Transfers that change the privilege mode are a special case. What is
-recorded, if anything, depends on whether the source mode
-and/or target mode are enabled for recording, and on the transfer type (trap
+recorded, if anything, depends on whether the source privilege mode
+and/or target privilege mode are enabled for recording, and on the transfer type (trap
 or trap return).
 
-Traps and trap returns between enabled modes are recorded as normal.
-Traps from a disabled mode to an enabled mode, and trap returns from
-an enabled mode back to a disabled mode, are partially recorded. In
-such cases, the PC from the disabled mode (source PC for traps, and
-target PC for trap returns) is 0. Trap returns from a disabled mode to
-an enabled mode are not recorded. Traps from an enabled mode to a
-disabled mode, known as external traps, are not recorded by default,
-but see <<_external_traps, External Traps>> for how they
-can be recorded.
+Traps between enabled privilege modes are recorded as normal.  Traps from a disabled privilege mode to an enabled privilege mode are partially recorded, such that the `ctrsource.PC` is 0. Traps from an enabled mode to a disabled mode, known as external traps, are not recorded by default.  See <<_external_traps, External Traps>> for how they can be recorded.
+
+Trap returns have similar treatment.  Trap returns between enabled privilege modes are recorded as normal.  Trap returns from an enabled mode back to a disabled mode are partially recorded, such that `ctrtarget.PC` is 0.  Trap returns from a disabled mode to an enabled mode are not recorded.
 
 [NOTE]
 ====
-_If privileged software is configuring CTR on behalf of less privileged software, it should ensure that its privilege mode enable bit (e.g., `sctrcontrol.S` for Supervisor software) is cleared before a trap return to the less privileged mode.  Otherwise the trap return will be recorded, leaking the privileged PC._
+_If privileged software is configuring CTR on behalf of less privileged software, it should ensure that its privilege mode enable bit (e.g., `sctrcontrol.S` for Supervisor software) is cleared before a trap return to the less privileged mode.  Otherwise the trap return will be recorded, leaking the privileged source `pc`._
 ====
 
-Recording in Debug Mode is always inhibited. Transfers into and out of Debug Mode are
-never recorded.
+Recording in Debug Mode is always inhibited. Transfers into and out of Debug Mode are never recorded.
 
 === Transfer Type Filtering
 
@@ -550,7 +543,7 @@ that mode. The `MTE`, `STE`, and `VSTE` bits allow M-mode, S-mode, and VS-mode, 
 
 External trap recording depends not only on the target mode, but on any invtervening modes.  For instance, recording an external trap from U-mode to M-mode requires that `MTE`=`STE`=1.  Similarly, recording an external trap from VU-mode to HS-mode requires that `STE`=`VSTE`=1.
 
-In records for external traps, the target PC is 0.
+In records for external traps, the `ctrtarget.PC` is 0.
 [NOTE]
 [%unbreakable]
 ====
@@ -576,11 +569,11 @@ also apply, but are not covered by the table.
 .2+|*Transfer Type* .2+| *Source Mode* 2+|*Target Mode*
 |*Enabled* |*Disabled*
 .2+|*Trap* |*Enabled* |Recorded. |Recorded if `xTE`=1, where x is the target
-mode and any intervening modes. Target PC is 0, type is External Trap.
+mode and any intervening modes. `ctrtarget.PC` is 0, type is External Trap.
 
-|*Disabled* |Recorded, Source PC is 0. |Not recorded.
+|*Disabled* |Recorded, `ctrsource.PC` is 0. |Not recorded.
 
-.2+|*Trap Return* |*Enabled* |Recorded. |Recorded, Target PC is 0.
+.2+|*Trap Return* |*Enabled* |Recorded. |Recorded, `ctrtarget.PC` is 0.
 
 |*Disabled* |Not recorded. |Not recorded.
 |===
@@ -591,7 +584,7 @@ If external trap recording is implemented, `MTE` must be implemented, while `STE
 
 The `ctrdata` register may optionally include a count of CPU cycles elapsed since the prior CTR record.  The elapsed cycle count value is represented by the `CC` field, which has a 12-bit mantissa component (Cycle Count Mantissa, or CCM) and a 4-bit exponent component (Cycle Count Exponent, or CCE). 
 
-The elapsed cycle counter (CtrCycleCounter) increments at the same rate as the mcycle counter.  The `CC` field is encoded such that CCE holds 0 if the CtrCycleCounter value is less than 4096, otherwise it holds the index of the most significant one bit in the CtrCycleCounter value, minus 12.  CCM holds CtrCycleCounter bits CCE+11:CCE.
+The elapsed cycle counter (CtrCycleCounter) increments at the same rate as the mcycle counter.  Only cycles while CTR is active are counted, where active implies that the current privilege mode is enabled for recording and CTR is not frozen.  The `CC` field is encoded such that CCE holds 0 if the CtrCycleCounter value is less than 4096, otherwise it holds the index of the most significant one bit in the CtrCycleCounter value, minus 12.  CCM holds CtrCycleCounter bits CCE+11:CCE.
 
 The elapsed cycle count can then be calculated by software using the following formula:
 
@@ -604,10 +597,12 @@ else:
 endif
 ----
 
-An implementation that supports cycle counting must support `CCV` and all
-CCM bits, but may support 0..4 exponent bits in CCE. Unimplemented CCE
+The CtrCycleCounter is reset on writes to `[ms]ctrcontrol`, to ensure that any accumulated cycle counts do not persist across a context switch.
+
+An implementation that supports cycle counting must implement `CCV` and all
+CCM bits, but may implement 0..4 exponent bits in CCE. Unimplemented CCE
 bits are read-only 0. For implementations that support transfer type
-filtering, it is recommended to support at least 3 exponent bits. This
+filtering, it is recommended to implement at least 3 exponent bits. This
 allows capturing the full latency of most functions, when recording only
 calls and returns.  
 
@@ -631,7 +626,7 @@ _When CCE>1, the granularity of the reported cycle count is reduced. For example
 
 The `CC` value saturates when all implemented bits in CCM and CCE are 1.
 
-The `CC` value is only valid when the Cycle Count Valid (`CCV`) bit is set. If `CCV`=0, the `CC` value might not hold the correct count of elapsed qualified cycles since the last recorded transfer.  Qualified cycles are those executed within an enabled privilege mode with `sctrstatus.FROZEN`=0.  An implementation must clear `CCV` for the next recorded transfer upon a write to [ms]ctrcontrol, and in any other implementation-specific scenarios where qualified cycles might not be counted.
+The `CC` value is only valid when the Cycle Count Valid (`CCV`) bit is set.  If `CCV`=0, the `CC` value might not hold the correct count of elapsed active cycles since the last recorded transfer.  The next record will have `CCV`=0 after a write to `[ms]ctrcontrol`, since CtrCycleCounter was reset, and after any other implementation-specific scenarios where active cycles might not be counted in CtrCycleCounter.
 
 [WARNING]
 [%unbreakable]
