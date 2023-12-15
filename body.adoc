@@ -118,7 +118,7 @@ All fields are optional except for M, BPFRZ, and DEPTH.  All unimplemented field
 ====
 _Software may choose to use a depth less than the maximum supported to reduce the latency of saving and restoring CTR state, or to emulate the maximum depth supported by other implementations, for example, during VM migration._
 
-_Placeholder: when reducing depth, first execute the clear instruction._
+_When reducing CTR depth, software should execute <<_ctr_clear_operation, CTRCLEAR>>.  This ensures that newly accessible CTR entries have deterministic values._
 ====
 
 [WARNING]
@@ -598,11 +598,6 @@ endif
 
 The CtrCycleCounter is reset on writes to `[ms]ctrcontrol`, and on execution of <<_ctr_clear_operation, CTRCLEAR>>, to ensure that any accumulated cycle counts do not persist across a context switch.  
 
-[WARNING]
-====
-_Placeholder: CtrCycleCounter and CCV are cleared on execution of the clear instruction._
-====
-
 An implementation that supports cycle counting must implement CCV and all
 CCM bits, but may implement 0..4 exponent bits in CCE. Unimplemented CCE
 bits are read-only 0. For implementations that support transfer type
@@ -716,13 +711,13 @@ _When a guest uses the SBI Supervisor Software Events (SSE) extension, the LCOFI
 
 == Custom Extensions
 
-Any custom CTR extension must be associated with a non-default value within the designated custom bits in `*ctrcontrol`.  When custom bits hold a value that enables the custom extension, the extension may alter standard CTR behavior, and may define new custom status fields within <<_supervisor_control_transfer_record_status_sctrstatus, `sctrstatus`>> or the <<_entry_registers, CTR entry registers>>.  All custom status fields, and standard status fields whose behavior is altered by the custom extension, must revert to standard behavior when the custom bits hold their default (reset) value.  This includes read-only 0 behavior for any bits undefined by any implemented standard extensions.
+Any custom CTR extension must be associated with a non-default value within the designated custom bits in `__x__ctrcontrol`.  When custom bits hold a value that enables the custom extension, the extension may alter standard CTR behavior, and may define new custom status fields within <<_supervisor_control_transfer_record_status_sctrstatus, `sctrstatus`>> or the <<_entry_registers, CTR entry registers>>.  All custom status fields, and standard status fields whose behavior is altered by the custom extension, must revert to standard behavior when the custom bits hold their default (reset) value.  This includes read-only 0 behavior for any bits undefined by any implemented standard extensions.
 
 == Discovery
 
 Software can discover the maximum supported CTR buffer depth value by writing '111 to `[ms]ctrcontrol.DEPTH`, then reading back the value.  Software can discover the minimum supported CTR buffer depth value by writing '000 to `[ms]ctrcontrol.DEPTH`, then reading back the value.
 
-Software can discover implemented optional `*ctrcontrol` fields by writing all 1s to all defined fields, then reading the value back. Unimplemented fields are read-only
+Software can discover implemented optional `__x__ctrcontrol` fields by writing all 1s to all defined fields, then reading the value back. Unimplemented fields are read-only
 0.
 
 Software can discover implemented optional CTR entry fields by writing
