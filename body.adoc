@@ -18,21 +18,21 @@ The `mctrcontrol` register is a 64-bit read/write register that enables and conf
     {bits:  1, name: 'M'},
     {bits:  1, name: 'S'},
     {bits:  1, name: 'U'},
-    {bits:  4, name: '0'},
+    {bits:  4, name: '<i>WPRI</i>'},
     {bits:  1, name: 'RASEMU'},
     {bits:  1, name: 'MTE'},
     {bits:  1, name: 'STE'},
-    {bits:  1, name: '0'},
+    {bits:  1, name: '<i>WPRI</i>'},
     {bits:  1, name: 'BPFRZ'},
     {bits:  1, name: 'LCOFIFRZ'},
     {bits:  3, name: 'DEPTH'},
-    {bits:  17, name: '0'},
+    {bits:  17, name: '<i>WPRI</i>'},
     {bits:  1, name: 'EXCINH'},
     {bits:  1, name: 'INTRINH'},
     {bits:  1, name: 'TRETINH'},
     {bits:  1, name: 'NTBREN'},
     {bits:  1, name: 'TKBRINH'},
-    {bits:  2, name: '0'},
+    {bits:  2, name: '<i>WPRI</i>'},
     {bits:  1, name: 'INDCALLINH'},
     {bits:  1, name: 'DIRCALLINH'},
     {bits:  1, name: 'INDJMPINH'},
@@ -41,7 +41,7 @@ The `mctrcontrol` register is a 64-bit read/write register that enables and conf
     {bits:  1, name: 'RETINH'},
     {bits:  1, name: 'INDOJMPINH'},
     {bits:  1, name: 'DIROJMPINH'},
-    {bits:  12, name: '0'},
+    {bits:  12, name: '<i>WPRI</i>'},
     {bits:  4, name: 'Custom'},
 ], config:{lanes: 8, hspace:1024}}
 ....
@@ -140,24 +140,24 @@ If the H extension is implemented, the `vsctrcontrol` register is a 64-bit read/
 [wavedrom, , ]
 ....
 {reg: [    
-    {bits:  1, name: '0'},
+    {bits:  1, name: '<i>WPRI</i>'},
     {bits:  1, name: 'VS'},
     {bits:  1, name: 'VU'},
-    {bits:  4, name: '0'},
+    {bits:  4, name: '<i>WPRI</i>'},
     {bits:  1, name: 'RASEMU'},
-    {bits:  1, name: '0'},
+    {bits:  1, name: '<i>WPRI</i>'},
     {bits:  1, name: 'VSTE'},
-    {bits:  1, name: '0'},
+    {bits:  1, name: '<i>WPRI</i>'},
     {bits:  1, name: 'BPFRZ'},
     {bits:  1, name: 'LCOFIFRZ'},
     {bits:  3, name: 'DEPTH'},
-    {bits:  17, name: '0'},
+    {bits:  17, name: '<i>WPRI</i>'},
     {bits:  1, name: 'EXCINH'},
     {bits:  1, name: 'INTRINH'},
     {bits:  1, name: 'TRETINH'},
     {bits:  1, name: 'NTBREN'},
     {bits:  1, name: 'TKBRINH'},
-    {bits:  2, name: '0'},
+    {bits:  2, name: '<i>WPRI</i>'},
     {bits:  1, name: 'INDCALLINH'},
     {bits:  1, name: 'DIRCALLINH'},
     {bits:  1, name: 'INDJMPINH'},
@@ -166,7 +166,7 @@ If the H extension is implemented, the `vsctrcontrol` register is a 64-bit read/
     {bits:  1, name: 'RETINH'},
     {bits:  1, name: 'INDOJMPINH'},
     {bits:  1, name: 'DIROJMPINH'},
-    {bits:  12, name: '0'},
+    {bits:  12, name: '<i>WPRI</i>'},
     {bits:  4, name: 'Custom'},
 ], config:{lanes: 8, hspace:1024}}
 ....
@@ -265,7 +265,7 @@ _Exposing the WRPTR may also allow support for Linux perf's https://lwn.net/Arti
 
 [NOTE]
 ====
-_Because the ROI of CTR is perceived to be low for RV32 implementations, CTR does not fully support RV32.  While control flow transfers in RV32 can be recorded, RV32 cannot access `__x__ctrcontrol`[63:32].  A future extension could add support for RV32, by adding 3 new CSRs (`mctrcontrolh`, `sctrcontrolh`, and `vsctrcontrolh`) to provide this access._
+_Because the ROI of CTR is perceived to be low for RV32 implementations, CTR does not fully support RV32.  While control flow transfers in RV32 can be recorded, RV32 cannot access_ `x__ctrcontrol__` _bits 63:32.  A future extension could add support for RV32, by adding 3 new CSRs (`mctrcontrolh`, `sctrcontrolh`, and `vsctrcontrolh`) to provide this access._
 ====
 
 == Entry Registers
