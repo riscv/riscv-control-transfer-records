@@ -440,6 +440,22 @@ This would help in cases where multiple privilege modes are recorded, and existi
 _Like the <<_transfer_type_filtering, Transfer Type Filtering>> bits in `mctrcontrol`, the ctrdata.TYPE bits leverage the E-trace itype encodings._
 ====
 
+== Instructions
+=== CTR Clear Operation
+
+[WARNING]
+====
+_Instruction opcode and format TBD_
+====
+
+The CTRCLEAR instruction performs the following operations:
+
+* Clears all <<_entry_registers, CTR entry registers>>, for all DEPTH values.
+* Clears <<_supervisor_control_transfer_record_status_sctrstatus, `sctrstatus`>>.
+* Clears the CTR cycle counter and CCV.  See <<_cycle_counting, Cycle Counting>> for details.
+
+As a result, the next recorded transfer will have `ctrdata`.CCV=0.  If CTR is not active, any read of ctrsource, ctrtarget, ctrdata, or sctrstatus that follows CTRCLEAR will return the value 0.  
+
 == State Enable Access Control
 
 When Smstateen is implemented, the `mstateen0.CTR` bit controls access to CTR register state from privilege modes less privileged than M-mode.  When `mstateen0.CTR`=0 and the privilege mode is less privileged than M-mode, attempts to access `sctrcontrol`, `vsctrcontrol`, `sctrstatus`, `sireg*` when `siselect` is in 0x200..0x2FF, or `vsireg*` when `vsiselect` is in 0x200..0x2FF, raise an illegal instruction exception.  When `mstateen0.CTR`=1, accesses to CTR register state behave as described in <<_csrs, CSRs>> and <<_entry_registers, Entry Registers>> above.
@@ -580,7 +596,7 @@ else:
 endif
 ----
 
-The CtrCycleCounter is reset on writes to `[ms]ctrcontrol`, to ensure that any accumulated cycle counts do not persist across a context switch.
+The CtrCycleCounter is reset on writes to `[ms]ctrcontrol`, and on execution of <<_ctr_clear_operation, CTRCLEAR>>, to ensure that any accumulated cycle counts do not persist across a context switch.  
 
 [WARNING]
 ====
@@ -614,7 +630,7 @@ _When CCE>1, the granularity of the reported cycle count is reduced. For example
 
 The CC value saturates when all implemented bits in CCM and CCE are 1.
 
-The CC value is only valid when the Cycle Count Valid (CCV) bit is set.  If CCV=0, the CC value might not hold the correct count of elapsed active cycles since the last recorded transfer.  The next record will have CCV=0 after a write to `[ms]ctrcontrol`, since CtrCycleCounter was reset, and after any other implementation-specific scenarios where active cycles might not be counted in CtrCycleCounter.
+The CC value is only valid when the Cycle Count Valid (CCV) bit is set.  If CCV=0, the CC value might not hold the correct count of elapsed active cycles since the last recorded transfer.  The next record will have CCV=0 after a write to `[ms]ctrcontrol`, or execution of CTRCLEAR, since CtrCycleCounter is reset.  CCV should additionally be cleared after any other implementation-specific scenarios where active cycles might not be counted in CtrCycleCounter.
 
 [WARNING]
 [%unbreakable]
