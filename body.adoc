@@ -82,7 +82,7 @@ hardware will record transfers. For a depth of N, the hardware will
 record transfers to entries 0..N-1. All <<_entry_registers, entry registers>> are
 read-only 0 when the selected entry is in N..255.  When the depth is increased, the newly accessible entries contain unspecified but legal values.
 
-The maximum and minimum DEPTH values supported by an implementation is implementation-specific, but all values in between must also be supported.  If software writes a DEPTH value above the maximum supported, DEPTH must read back the maximum supported value.  If software writes a DEPTH value below the minimum supported, DEPTH must read back the minimum supported value.  An implementation may opt to hardcode some or all of the bits in this field, based on the depth values supported. See <<_discovery, Discovery>>.  
+The maximum and minimum `DEPTH` values supported by an implementation is implementation-specific, but all values in between must also be supported.  If software writes a `DEPTH` value above the maximum supported, `DEPTH` must read back the maximum supported value.  If software writes a `DEPTH` value below the minimum supported, `DEPTH` must read back the minimum supported value.  An implementation may opt to hardcode some or all of the bits in this field, based on the depth values supported. See <<_discovery, Discovery>>.  
 
 |`EXCINH` |Inhibit recording of exceptions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
 
@@ -112,7 +112,7 @@ The maximum and minimum DEPTH values supported by an implementation is implement
 |`Custom[3:0]` | WARL bits designated for custom use.  The reset value must correspond to standard behavior.  See <<Custom Extensions>>.
 |===
 
-All fields are optional save for M, CLR, BPFRZ, and DEPTH.  All unimplemented fields are read-only 0, while other defined fields are writable, though DEPTH may have some read-only 1 bits.  S must be writable if S-mode is implemented, U must be writable if U-mode is implemented, and LCOFIFRZ must be writable if the Smcofpmf/Sscofpmf extension is implemented.
+All fields are optional save for `M`, `CLR`, `BPFRZ`, and `DEPTH`.  All unimplemented fields are read-only 0, while other defined fields are writable, though `DEPTH` may have some read-only 1 bits.  `S` must be writable if S-mode is implemented, `U` must be writable if U-mode is implemented, and `LCOFIFRZ` must be writable if the Smcofpmf/Sscofpmf extension is implemented.
 
 [NOTE]
 [%unbreakable]
@@ -131,7 +131,7 @@ _DEPTH encodings above 256 are reserved, in order to avoid needing to reserve up
 
 The `sctrcontrol` register provides supervisor mode access to a subset of <<_machine_control_transfer_record_control_mctrcontrol, `mctrcontrol`>>.
 
-Bits 0 and 8 in `sctrcontrol` are read-only 0. As a result, the M and MTE fields in `mctrcontrol` are not accessible through `sctrcontrol`.  All other `mctrcontrol` fields are accessible through `sctrcontrol`.
+Bits 0 and 8 in `sctrcontrol` are read-only 0. As a result, the `M` and `MTE` fields in `mctrcontrol` are not accessible through `sctrcontrol`.  All other `mctrcontrol` fields are accessible through `sctrcontrol`.
 
 === Virtual Supervisor Control Transfer Record Control (`vsctrcontrol`)
 
@@ -211,7 +211,7 @@ _Because `vsctrcontrol` is active only when V=1, writing a 1 to `vsctrcontrol.CL
 ====
 _The TG deemed that, unlike the CTR status register or the CTR entry registers, the CTR control register should have a VS-mode version.  This allows a guest to manage the CTR configuration directly, without requiring traps to HS-mode, while ensuring that the guest configuration (most notably the privilege mode enable bits) do not impact CTR behavior when V=0._
 
-_The TG considered making `vsctrcontrol` pass-through `sctrcontrol` fields other than VS, VU, and VSTE.  This would simplify behavior on traps and trap returns between V=0 and V=1, since those shared CTR configuration fields would not change.  But this would be undesirable for host + guest usages, since it would require switching `sctrcontrol` on each V transition._
+_The TG considered making `vsctrcontrol` pass-through `sctrcontrol` fields other than `VS`, `VU`, and `VSTE`.  This would simplify behavior on traps and trap returns between V=0 and V=1, since those shared CTR configuration fields would not change.  But this would be undesirable for host + guest usages, since it would require switching `sctrcontrol` on each V transition._
 ====
 
 === Supervisor Control Transfer Record Status (`sctrstatus`)
@@ -254,7 +254,7 @@ _When restoring CTR state, `sctrstatus` should be written before CTR entry state
 [NOTE]
 [%unbreakable]
 ====
-_Exposing the WRPTR provides a more efficient means for synthesizing CTR entries.  If a qualified control transfer is emulated, the emulator can simply increment the WRPTR, then write the synthesized record to entry 0.  If a qualified function return is emulated while `RASEMU`=1, the emulator can clear `ctrsource.V` for entry 0, then decrement the WRPTR._
+_Exposing the `WRPTR` provides a more efficient means for synthesizing CTR entries.  If a qualified control transfer is emulated, the emulator can simply increment the WRPTR, then write the synthesized record to entry 0.  If a qualified function return is emulated while `RASEMU`=1, the emulator can clear `ctrsource.V` for entry 0, then decrement the WRPTR._
 
 _Exposing the `WRPTR` may also allow support for Linux perf's https://lwn.net/Articles/802821[[.underline]#stack stitching#] capability._
 ====
@@ -343,7 +343,7 @@ _A transfer from an invalid address (which could only occur on an exception) may
 [WARNING]
 [%unbreakable]
 ====
-_If we believe a future standard or custom extension may define 1-byte opcodes, then we should not use bit 0 of `ctrsource` for the V field, nor bit 0 of `ctrtarget` for MISP.  The V bit could be moved to `ctrdata`, but that would mean software would always need to read `ctrdata`._
+_If we believe a future standard or custom extension may define 1-byte opcodes, then we should not use bit 0 of `ctrsource` for the V field, nor bit 0 of `ctrtarget` for `MISP`.  The `V` bit could be moved to `ctrdata`, but that would mean software would always need to read `ctrdata`._
 ====
 === Control Transfer Record Target (`ctrtarget`)
 
