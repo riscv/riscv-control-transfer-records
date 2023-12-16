@@ -81,7 +81,7 @@ The depth of the CTR buffer dictates the number of entries to which the
 hardware records transfers. For a depth of N, the hardware
 records transfers to entries 0..N-1. All <<_entry_registers, entry registers>> read as '0' and are read-only when the selected entry is in the range N to 255.  When the depth is increased, the newly accessible entries contain unspecified but legal values.
 
-The maximum and minimum DEPTH values supported by an implementation is implementation-specific, but all values in between must also be supported.  If software writes a DEPTH value above the maximum supported, DEPTH must read back the maximum supported value.  If software writes a DEPTH value below the minimum supported, DEPTH must read back the minimum supported value.  An implementation may opt to hardcode some or all of the bits in this field, depending on the supported depth value(s). See <<_discovery, Discovery>>.  
+The maximum and minimum DEPTH values supported by an implementation is implementation-specific, but all values in between must also be supported.  If software writes a DEPTH value above the maximum supported, DEPTH must read back the maximum supported value.  If software writes a DEPTH value below the minimum supported, DEPTH must read back the minimum supported value.  An implementation may opt to hardcode some or all of the bits in this field, depending on the supported depth value(s).
 
 |EXCINH |Inhibit recording of exceptions.  See <<_transfer_type_filtering, Transfer Type Filtering>>.
 
@@ -694,15 +694,4 @@ _When a guest uses the SBI Supervisor Software Events (SSE) extension, the LCOFI
 == Custom Extensions
 
 Any custom CTR extension must be associated with a non-default value within the designated custom bits in `__x__ctrcontrol`.  When custom bits hold a value that enables the custom extension, the extension may alter standard CTR behavior, and may define new custom status fields within <<_supervisor_control_transfer_record_status_sctrstatus, `sctrstatus`>> or the <<_entry_registers, CTR entry registers>>.  All custom status fields, and standard status fields whose behavior is altered by the custom extension, must revert to standard behavior when the custom bits hold their default (reset) value.  This includes read-only 0 behavior for any bits undefined by any implemented standard extensions.
-
-== Discovery
-
-Software can discover the maximum supported CTR buffer depth value by writing '111 to `[ms]ctrcontrol.DEPTH`, then reading back the value.  Software can discover the minimum supported CTR buffer depth value by writing '000 to `[ms]ctrcontrol.DEPTH`, then reading back the value.
-
-Software can discover implemented optional `__x__ctrcontrol` fields by writing all 1s to all defined fields, then reading the value back. Unimplemented fields are read-only
-0.
-
-Software can discover implemented optional CTR entry fields by writing
-all 1s to all defined fields in the <<_entry_registers, Entry Registers>> at
-entry 0, then reading them back. Unimplemented fields are read-only 0.
 
