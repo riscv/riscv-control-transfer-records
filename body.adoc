@@ -265,7 +265,7 @@ _Exposing the WRPTR may also allow support for Linux perf's https://lwn.net/Arti
 
 [NOTE]
 ====
-_Because the ROI of CTR is perceived to be low for RV32 implementations, CTR does not fully support RV32.  While control flow transfers in RV32 can be recorded, RV32 cannot access_ `x__ctrcontrol__` _bits 63:32.  A future extension could add support for RV32, by adding 3 new CSRs (`mctrcontrolh`, `sctrcontrolh`, and `vsctrcontrolh`) to provide this access._
+_Because the ROI of CTR is perceived to be low for RV32 implementations, CTR does not fully support RV32.  While control flow transfers in RV32 can be recorded, RV32 cannot access bits 63:32 in_ `x__ctrcontrol__` _or `ctrdata`.  A future extension could add support for RV32 by adding 3 new CSRs (`mctrcontrolh`, `sctrcontrolh`, and `vsctrcontrolh`), and making `ctrdata`[63:32] accessible via mireg4._
 ====
 
 == Entry Registers
@@ -273,7 +273,7 @@ _Because the ROI of CTR is perceived to be low for RV32 implementations, CTR doe
 Control transfer records are stored in a CTR buffer, such that each buffer entry stores information about a single transfer.  The CTR buffer entries are logically accessed via the indirect register access mechanism defined by the
 https://github.com/riscv/riscv-indirect-csr-access/releases[[.underline]#Smcsrind/Sscsrind#]
 extension. The `miselect` index range 0x200 through 0x2FF is reserved for CTR
-entries 0 through 255. When `miselect` holds a value in this range, `mireg` provides access to <<_control_transfer_record_source_ctrsource, `ctrsource`>>, `mireg2` provides access to <<_control_transfer_record_target_ctrtarget, `ctrtarget`>>, and `mireg3` provides access to <<_control_transfer_record_source_ctrdata, `ctrdata`>>.  In RV32, `mireg4` accesses `ctrdata`[63:32], otherwise `mireg4`, `mireg5`, and `mireg6` are read-only 0.
+entries 0 through 255. When `miselect` holds a value in this range, `mireg` provides access to <<_control_transfer_record_source_ctrsource, `ctrsource`>>, `mireg2` provides access to <<_control_transfer_record_target_ctrtarget, `ctrtarget`>>, and `mireg3` provides access to <<_control_transfer_record_source_ctrdata, `ctrdata`>>.  `mireg4`, `mireg5`, and `mireg6` are read-only 0.
 
 The standard indirect register access rules specified by Smcsrind/Sscsrind apply for CTR.  S-mode is able to access CTR entries using the `siselect`/`sireg*` interface, with the same behavior described for M-mode above.  Similarly, VS-mode is able to access CTR entries using `siselect` (really `vsiselect`) and `sireg*` (really `vsireg*`).  See <<_state_enable_access_control, State Enable Access Control>> for cases where CTR accesses from S-mode and VS-mode may be restricted.  
 
@@ -292,16 +292,7 @@ data in `ctrsource`, `ctrtarget`, and `ctrdata` is valid for this entry.
 
 `ctrsource` is an MXLEN-bit WARL register that must be able to hold all valid virtual or physical addresses that can serve as a `pc`. It need not be able to hold any invalid addresses.  When XLEN < MXLEN, both explicit writes (by software) and implict writes (for recorded transfers) will be zero-extended.
 
-.Control Transfer Record Source Register Format (RV32)
-[wavedrom, , ]
-....
-{reg: [    
-    {bits:  1, name: 'V'},
-    {bits:  31, name: 'PC[31:1]'},
-], config:{lanes: 1, hspace: 1024}}
-....
-
-.Control Transfer Record Source Register Format (RV64)
+.Control Transfer Record Source Register Format
 [wavedrom, , ]
 ....
 {reg: [    
@@ -336,16 +327,7 @@ is read-only 0 when not implemented.
 
 `ctrtarget` is an MXLEN-bit WARL register that must be able to hold all valid virtual or physical addresses. It need not be able to hold any invalid addresses. When XLEN < MXLEN, both explicit writes (by software) and implict writes (by recorded transfers) will be zero-extended.
 
-.Control Transfer Record Target Register Format (RV32)
-[wavedrom, , ]
-....
-{reg: [    
-    {bits:  1, name: 'MISP'},
-    {bits:  31, name: 'PC[31:1]'},
-], config:{lanes: 1, hspace: 1024}}
-....
-
-.Control Transfer Record Target Register Format (RV64)
+.Control Transfer Record Target Register Format
 [wavedrom, , ]
 ....
 {reg: [    
