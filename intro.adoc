@@ -1,7 +1,7 @@
 [[intro]]
 == Introduction
 
-A method for recording control flow transfer history is valuable not only for performance profiling but also for debugging. Control flow transfers refer to jump instructions (including function calls and returns), taken branch instructions, traps, and trap returns.  Profiling tools, such as Linux perf, collect control transfer history when sampling software execution, enabling tools, like AutoFDO, to identify hot paths for optimization.
+A method for recording control flow transfer history is valuable not only for performance profiling but also for debugging. Control flow transfers refer to jump instructions (including function calls and returns), taken branch instructions, traps, and trap returns.  Profiling tools, such as Linux perf, collect control transfer history when sampling software execution, thereby enabling tools, like AutoFDO, to identify hot paths for optimization.
 
 Control flow trace capabilities offer very deep transfer history, but the volume of data produced can result in significant performance overheads due to memory bandwidth consumption, buffer management, and decoder overhead. The Control Transfer Records (CTR) extension provides a method to record a limited history in register-accessible internal chip storage, with the intent of dramatically reducing the performance overhead and complexity of collecting transfer history.
 
@@ -20,7 +20,7 @@ Recorded transfers are inserted to the head of the buffer, while older recorded 
 The CTR buffer is accessible through an indirect CSR interface, such that software can specify which logical entry in the buffer it wishes to read or write.  Logical entry 0 always corresponds to the youngest recorded transfer, followed by entry 1 as the next youngest, and so on.
 
 The machine-level extension, *Smctr*, encompasses all newly added
-Control Status Registers (CSRs) and behavior modifications for a hart across all
+Control Status Registers (CSRs), instructions, and behavior modifications for a hart across all
 privilege levels.  The corresponding supervisor-level extension, *Ssctr*, is essentially
 identical to Smctr, except that it excludes machine-level CSRs and behaviors not
 intended to be directly accessible at the supervisor level.
