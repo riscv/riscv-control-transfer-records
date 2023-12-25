@@ -421,30 +421,36 @@ _Like the <<_transfer_type_filtering, Transfer Type Filtering>> bits in `mctrcon
 ====
 
 == Instructions
-=== CTR Clear Operation
+=== Supervisor CTR Clear Instruction
 
 [WARNING]
 ====
 _Instruction opcode and format TBD_
 ====
 
-The CTRCLEAR instruction performs the following operations:
+The supervisor CTRCLEAR instruction performs the following operations:
 
 * Clears all <<_entry_registers, CTR entry registers>>, for all DEPTH values.
 * Clears <<_supervisor_control_transfer_records_status_sctrstatus, `sctrstatus`>>.
 * Clears the CTR cycle counter and CCV.  See <<_cycle_counting, Cycle Counting>> for details.
 
-If CTR is not active, any read of ctrsource, ctrtarget, ctrdata, or sctrstatus that follows CTRCLEAR will return the value 0.  Further, the next recorded transfer will have `ctrdata`.CCV=0.  
+If CTR is not active, any read of ctrsource, ctrtarget, ctrdata, or sctrstatus that follows CTRCLEAR will return the value 0.  Further, the next recorded transfer will have `ctrdata`.CCV=0. 
+
+CTRCLEAR raises an illegal-instruction exception in U-mode or VU-mode.
 
 == State Enable Access Control
 
-When Smstateen is implemented, the `mstateen0.CTR` bit controls access to CTR register state from privilege modes less privileged than M-mode.  When `mstateen0.CTR`=0 and the privilege mode is less privileged than M-mode, attempts to access `sctrcontrol`, `vsctrcontrol`, `sctrstatus`, `sireg*` when `siselect` is in 0x200..0x2FF, or `vsireg*` when `vsiselect` is in 0x200..0x2FF, raise an illegal instruction exception.  When `mstateen0.CTR`=1, accesses to CTR register state behave as described in <<_csrs, CSRs>> and <<_entry_registers, Entry Registers>> above.
+When Smstateen is implemented, the `mstateen0.CTR` bit controls access to CTR register state from privilege modes less privileged than M-mode.  When `mstateen0.CTR`=1, accesses to CTR register state behave as described in <<_csrs, CSRs>> and <<_entry_registers, Entry Registers>> above, while CTRCLEAR behaves as described in <<_supervisor_ctr_clear_instruction, Supervisor CTR Clear Instruction>>.  When `mstateen0.CTR`=0 and the privilege mode is less privileged than M-mode, the following operations raise an illegal-instruction exception:
+
+* Attempts to access `sctrcontrol`, `vsctrcontrol`, or `sctrstatus`
+* Attempts to access `sireg*` when `siselect` is in 0x200..0x2FF, or `vsireg*` when `vsiselect` is in 0x200..0x2FF
+* Execution of the CTRCLEAR instruction
 
 When `mstateen0.CTR`=0, qualified control transfers executed in privilege modes less privileged than M-mode will continue to implicitly update <<_entry_registers, Entry Registers>> and <<_machine_control_transfer_records_status_sctrstatus, `sctrstatus`>>.
 
 If the H extension is implemented and `mstateen0.CTR`=1, the `hstateen0.CTR` bit controls access to supervisor CTR state (`sctrcontrol`, `sctrstatus`, and `sireg*` when `siselect` is in 0x200..0x2FF) when V=1.  `hstateen0.CTR` is read-only 0 when `mstateen0.CTR`=0.
 
-When `mstateen0.CTR`=1 and `hstateen0.CTR`=1, VS-mode accesses to supervisor CTR state behave as described in <<_csrs, CSRs>> and <<_entry_registers, Entry Registers>> above.  When `mstateen0.CTR`=1 and `hstateen0.CTR`=0, VS-mode accesses to supervisor CTR state raise a virtual instruction exception.
+When `mstateen0.CTR`=1 and `hstateen0.CTR`=1, VS-mode accesses to supervisor CTR state behave as described in <<_csrs, CSRs>> and <<_entry_registers, Entry Registers>> above.  When `mstateen0.CTR`=1 and `hstateen0.CTR`=0, both VS-mode accesses to supervisor CTR state and VS-mode execution of CTRCLEAR raise a virtual instruction exception.
 
 When `hstateen0.CTR`=0, qualified control transfers executed while V=1 will continue to implicitly update <<_entry_registers, Entry Registers>> and <<_machine_control_transfer_records_status_sctrstatus, `sctrstatus`>>.
 
