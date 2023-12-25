@@ -434,9 +434,9 @@ The supervisor CTRCLEAR instruction performs the following operations:
 * Clears <<_supervisor_control_transfer_records_status_sctrstatus, `sctrstatus`>>.
 * Clears the CTR cycle counter and CCV.  See <<_cycle_counting, Cycle Counting>> for details.
 
-If CTR is not active, any read of ctrsource, ctrtarget, ctrdata, or sctrstatus that follows CTRCLEAR will return the value 0.  Further, the next recorded transfer will have `ctrdata`.CCV=0. 
+Any read of ctrsource, ctrtarget, ctrdata, or sctrstatus that follows CTRCLEAR, such that it precedes the next qualified control transfer or trap that causes CTR freeze, will return the value 0.  Further, the first recorded transfer following CTRCLEAR will have `ctrdata`.CCV=0. 
 
-CTRCLEAR raises an illegal-instruction exception in U-mode or VU-mode.
+CTRCLEAR raises an illegal-instruction exception in U-mode and VU-mode.
 
 == State Enable Access Control
 
