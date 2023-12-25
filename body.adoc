@@ -139,12 +139,12 @@ If the H extension is implemented, the `vsctrcontrol` register is a 64-bit read/
 ....
 {reg: [    
     {bits:  1, name: '<i>WPRI</i>'},
-    {bits:  1, name: 'VS'},
-    {bits:  1, name: 'VU'},
+    {bits:  1, name: 'S'},
+    {bits:  1, name: 'U'},
     {bits:  4, name: '<i>WPRI</i>'},
     {bits:  1, name: 'RASEMU'},
     {bits:  1, name: '<i>WPRI</i>'},
-    {bits:  1, name: 'VSTE'},
+    {bits:  1, name: 'STE'},
     {bits:  1, name: '<i>WPRI</i>'},
     {bits:  1, name: 'BPFRZ'},
     {bits:  1, name: 'LCOFIFRZ'},
@@ -173,23 +173,14 @@ If the H extension is implemented, the `vsctrcontrol` register is a 64-bit read/
 [width="100%",cols="20%,80%",options="header",]
 |===
 |Field |Description 
-|VS, VU |Enable transfer recording in the selected privileged mode(s).  
-
-|VSTE |Enables recording of traps to VS-mode when VS=0.  See <<_external_traps, External Traps>>.
-
+|S |Enable transfer recording in VS-mode.  
+|U |Enable transfer recording in VU-mode.  
+|STE |Enables recording of traps to VS-mode when S=0.  See <<_external_traps, External Traps>>.
 |BPFRZ |Set `sctrstatus`.FROZEN on a breakpoint exception that traps to VS-mode. See <<_freeze, Freeze>>.
-
 |LCOFIFRZ |Set `sctrstatus`.FROZEN on local counter overflow interrupt (LCOFI) that traps to VS-mode. See <<_freeze, Freeze>>.
-
 |DEPTH[2:0] |Provides read-only access to the `sctrcontrol`.DEPTH field  
 2+|Other field definitions match those of <<_supervisor_control_transfer_records_control_sctrcontrol, `sctrcontrol`>>.  The optional fields implemented in `vsctrcontrol` should match those implemented in `sctrcontrol`.
 |===
-
-[NOTE]
-[%unbreakable]
-====
-_Bit positions for VSTE, VS, and VU in `vsctrcontrol` match those for STE, S, and U in `sctrcontrol`, respectively. This is to accommodate an (unenlightened) guest OS that is unaware it is running with V=1._
-====
 
 [NOTE]
 [%unbreakable]
@@ -202,7 +193,7 @@ _Bit positions for VSTE, VS, and VU in `vsctrcontrol` match those for STE, S, an
 ====
 _The TG deemed that, unlike the CTR status register or the CTR entry registers, the CTR control register should have a VS-mode version.  This allows a guest to manage the CTR configuration directly, without requiring traps to HS-mode, while ensuring that the guest configuration (most notably the privilege mode enable bits) do not impact CTR behavior when V=0._
 
-_The TG considered making `vsctrcontrol` pass-through `sctrcontrol` fields other than VS, VU, and VSTE.  This would simplify behavior on traps and trap returns between V=0 and V=1, since those shared CTR configuration fields would not change.  But this would be undesirable for host + guest usages, since it would require switching `sctrcontrol` on each V transition._
+_The TG considered making `vsctrcontrol` pass-through `sctrcontrol` fields other than S, U, and STE.  This would simplify behavior on traps and trap returns between V=0 and V=1, since those shared CTR configuration fields would not change.  But this would be undesirable for host + guest usages, since it would require switching `sctrcontrol` on each V transition._
 ====
 
 === Supervisor Control Transfer Records Status (`sctrstatus`)
@@ -523,9 +514,9 @@ _If implementation of any transfer type filter bit results in reduced software p
 ==== External Traps
 
 External traps are traps from a privilege mode enabled for CTR recording to a privilege mode that is not enabled for CTR recording.  By default external traps are not recorded, but privileged software running in the target mode of the trap can opt-in to allowing CTR to record external traps into
-that mode. The MTE, STE, and VSTE bits allow M-mode, S-mode, and VS-mode, respectively, to opt-in.  
+that mode. The __x__TE bits allow M-mode, S-mode, and VS-mode to opt-in separately.  
 
-External trap recording depends not only on the target mode, but on any intervening modes.  For instance, recording an external trap from U-mode to M-mode requires that MTE=STE=1.  Similarly, recording an external trap from VU-mode to HS-mode requires that STE=VSTE=1.
+External trap recording depends not only on the target mode, but on any intervening modes.  For instance, recording an external trap from U-mode to M-mode requires that MTE=STE=1.  Similarly, recording an external trap from VU-mode to HS-mode requires that sctrcontrol.STE=vsctrcontrol.STE=1.
 
 In records for external traps, the `ctrtarget`.PC is 0.
 [NOTE]
@@ -562,7 +553,7 @@ mode and any intervening modes. `ctrtarget`.PC is 0, type is External Trap.
 |*Disabled* |Not recorded. |Not recorded.
 |===
 
-If external trap recording is implemented, MTE must be implemented, while STE must be implemented if S-mode is implemented, and VSTE must be implemented if the H extension is implemented.
+If external trap recording is implemented, MTE must be implemented, while sctrcontrol.STE must be implemented if S-mode is implemented, and vsctrcontrol.STE must be implemented if the H extension is implemented.
 
 === Cycle Counting
 
