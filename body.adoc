@@ -12,6 +12,7 @@ _CSR field specifications (such as WARL and WPRI) can be found in the link:https
 The `mctrcontrol` register is a 64-bit read/write register that enables and configures the CTR capability.
 
 .Machine Control Transfer Records Control Register Format
+[%unbreakable]
 [wavedrom, , ]
 ....
 {reg: [    
@@ -47,16 +48,17 @@ The `mctrcontrol` register is a 64-bit read/write register that enables and conf
 ....
 
 .Machine Control Transfer Records Control Field Definitions
+[%unbreakable]
 [width="100%",cols="20%,80%",options="header",]
 |===
 |Field |Description
 |M, S, U |Enable transfer recording in the selected privileged mode(s).  If the H extension is implemented, VS and VU modes can be enabled from <<_virtual_supervisor_control_transfer_records_control_vsctrcontrol, `vsctrcontrol`>>.  
 
-|RASEMU |Enables <<RAS (Return Address Stack) Emulation Mode>>.
+|RASEMU |Enables <<_ras_return_address_stack_emulation_mode, RAS (Return Address Stack) Emulation Mode>>.
 
-|MTE |Enables recording of traps to M-mode when M=0, if any intervening privilege modes are enabled for external traps as well.  See <<_external_traps, External Traps>>.
+|MTE |Enables recording of traps to M-mode when M=0.  See <<_external_traps, External Traps>>.
 
-|STE |Enables recording of traps to S-mode when S=0, if any intervening privilege modes are enabled for external traps as well.  See <<_external_traps, External Traps>>.
+|STE |Enables recording of traps to S-mode when S=0.  See <<_external_traps, External Traps>>.
 
 |BPFRZ |Set `sctrstatus`.FROZEN on a breakpoint exception that traps to M-mode or S-mode. See <<_freeze, Freeze>>.
 
@@ -121,7 +123,7 @@ _When reducing CTR depth, software should execute <<_ctr_clear_operation, CTRCLE
 
 [WARNING]
 ====
-_DEPTH encodings above 256 are reserved, in order to avoid needing to reserve up to 2048_  x`__iselect__` _values for CTR._
+_DEPTH encodings above 256 are reserved, in order to avoid needing to reserve up to 2048_ `x__iselect__` _values for CTR._
 ====
 
 === Supervisor Control Transfer Records Control (`sctrcontrol`)
@@ -135,6 +137,7 @@ Bits 0 and 8 in `sctrcontrol` are read-only 0. As a result, the M and MTE fields
 If the H extension is implemented, the `vsctrcontrol` register is a 64-bit read/write register that is VS-mode's version of supervisor register `sctrcontrol`.  When V=1, `vsctrcontrol` substitutes for the usual `sctrcontrol`, so instructions that normally read or modify `sctrcontrol` actually access `vsctrcontrol` instead.
 
 .Virtual Supervisor Control Transfer Records Control Register Format
+[%unbreakable]
 [wavedrom, , ]
 ....
 {reg: [    
@@ -170,6 +173,7 @@ If the H extension is implemented, the `vsctrcontrol` register is a 64-bit read/
 ....
 
 .Virtual Supervisor Control Transfer Records Control Field Definitions
+[%unbreakable]
 [width="100%",cols="20%,80%",options="header",]
 |===
 |Field |Description 
@@ -193,7 +197,7 @@ If the H extension is implemented, the `vsctrcontrol` register is a 64-bit read/
 ====
 _The TG deemed that, unlike the CTR status register or the CTR entry registers, the CTR control register should have a VS-mode version.  This allows a guest to manage the CTR configuration directly, without requiring traps to HS-mode, while ensuring that the guest configuration (most notably the privilege mode enable bits) do not impact CTR behavior when V=0._
 
-_The TG considered making `vsctrcontrol` pass-through `sctrcontrol` fields other than S, U, and STE.  This would simplify behavior on traps and trap returns between V=0 and V=1, since those shared CTR configuration fields would not change.  But this would be undesirable for host + guest usages, since it would require switching `sctrcontrol` on each V transition._
+_The TG considered making `vsctrcontrol` pass-through `sctrcontrol` fields other than S, U, and STE.  This would simplify behavior on traps and trap returns between V=0 and V=1, since those shared CTR configuration fields would not change.  But this would be undesirable for host + guest usages, since it would require switching `sctrcontrol` on each host/guest transition._
 ====
 
 === Supervisor Control Transfer Records Status (`sctrstatus`)
@@ -201,6 +205,7 @@ _The TG considered making `vsctrcontrol` pass-through `sctrcontrol` fields other
 The `sctrstatus` register grants access to CTR status information and is updated by the hardware whenever CTR is active.  CTR is active when the current privilege mode is enabled for recording and CTR is not frozen.
 
 .Supervisor Control Transfer Records Status Register Format
+[%unbreakable]
 [wavedrom, , ]
 ....
 {reg: [    
@@ -211,6 +216,7 @@ The `sctrstatus` register grants access to CTR status information and is updated
 ....
 
 .Supervisor Control Transfer Records Status Field Definitions
+[%unbreakable]
 [width="100%",cols="15%,75%,10%",options="header",]
 |===
 |Field |Description |Access
@@ -281,7 +287,8 @@ data in `ctrsource`, `ctrtarget`, and `ctrdata` is valid for this entry.
 
 `ctrsource` is an MXLEN-bit WARL register that must be able to hold all valid virtual or physical addresses that can serve as a `pc`. It need not be able to hold any invalid addresses.  When XLEN < MXLEN, both explicit writes (by software) and implict writes (for recorded transfers) will be zero-extended.
 
-.Control Transfer Record Source Register Format
+.Control Transfer Record Source Register Format for MXLEN=64
+[%unbreakable]
 [wavedrom, , ]
 ....
 {reg: [    
@@ -316,7 +323,8 @@ is read-only 0 when not implemented.
 
 `ctrtarget` is an MXLEN-bit WARL register that must be able to hold all valid virtual or physical addresses that can serve as a `pc`. It need not be able to hold any invalid addresses. When XLEN < MXLEN, both explicit writes (by software) and implict writes (by recorded transfers) will be zero-extended.
 
-.Control Transfer Record Target Register Format
+.Control Transfer Record Target Register Format for MXLEN=64
+[%unbreakable]
 [wavedrom, , ]
 ....
 {reg: [    
@@ -338,6 +346,7 @@ register must be implemented, though all fields within it are optional.
 Unimplemented fields are read-only 0.  `ctrdata` is a 64-bit register.  
 
 .Control Transfer Record Metadata Register Format
+[%unbreakable]
 [wavedrom, , ]
 ....
 {reg: [    
@@ -350,6 +359,7 @@ Unimplemented fields are read-only 0.  `ctrdata` is a 64-bit register.
 ....
 
 .Control Transfer Record Metadata Field Definitions
+[%unbreakable]
 [width="100%",cols="15%,75%,10%",options="header",]
 |===
 |Field |Description |Access 
@@ -408,7 +418,7 @@ This would help in cases where multiple privilege modes are recorded, and existi
 [NOTE]
 [%unbreakable]
 ====
-_Like the <<_transfer_type_filtering, Transfer Type Filtering>> bits in `mctrcontrol`, the ctrdata.TYPE bits leverage the E-trace itype encodings._
+_Like the <<_transfer_type_filtering, Transfer Type Filtering>> bits in `mctrcontrol`, the `ctrdata`.TYPE bits leverage the E-trace itype encodings._
 ====
 
 == Instructions
@@ -425,7 +435,7 @@ The supervisor CTRCLEAR instruction performs the following operations:
 * Clears <<_supervisor_control_transfer_records_status_sctrstatus, `sctrstatus`>>.
 * Clears the CTR cycle counter and CCV.  See <<_cycle_counting, Cycle Counting>> for details.
 
-Any read of ctrsource, ctrtarget, ctrdata, or sctrstatus that follows CTRCLEAR, such that it precedes the next qualified control transfer or trap that causes CTR freeze, will return the value 0.  Further, the first recorded transfer following CTRCLEAR will have `ctrdata`.CCV=0. 
+Any read of `ctrsource`, `ctrtarget`, `ctrdata`, or `sctrstatus` that follows CTRCLEAR, such that it precedes the next qualified control transfer or trap that causes CTR freeze, will return the value 0.  Further, the first recorded transfer following CTRCLEAR will have `ctrdata`.CCV=0. 
 
 CTRCLEAR raises an illegal-instruction exception in U-mode and VU-mode.
 
@@ -532,13 +542,14 @@ record._
 ====
 _Note that external trap recording does not depend on EXCINH/INTRINH.  Thus, when external traps are enabled, both external interrupts and external exceptions are recorded._
 
-_STE allows recording of traps from U-mode to S-mode as well as from VS/VU-mode to HS-mode.  The hypervisor can flip STE before entering a guest if it wants different behavior for U-to-S vs VS/VU-to-HS.  A separate HTE bit could be defined, but ideally it would live in an hctrcontrol CSR, which is otherwise unneeded.  We could put it in_ `x__ctrcontrol__`, _but the bit position would need special treatment in `vsctrcontrol` (writable but has no impact on behavior)._
+_STE allows recording of traps from U-mode to S-mode as well as from VS/VU-mode to HS-mode.  The hypervisor can flip STE before entering a guest if it wants different behavior for U-to-S vs VS/VU-to-HS.  A separate HTE bit could be defined, but ideally it would live in an `hctrcontrol` CSR, which is otherwise unneeded.  We could put it in_ `x__ctrcontrol__`, _but the bit position would need special treatment in `vsctrcontrol` (writable but has no impact on behavior)._
 ====
 
 The table below provides details on recording of privilege mode
-transfers. Standard dependencies on FROZEN and transfer type inhibits
-also apply, but are not covered by the table.
+transfers. Standard dependencies on FROZEN and transfer type inhibits also apply, but are not covered by the table.
 
+.Trap and Trap Return Recording
+[%unbreakable]
 [width="100%",cols="18%,17%,30%,35%",]
 |===
 .2+|*Transfer Type* .2+| *Source Mode* 2+|*Target Mode*
@@ -584,6 +595,8 @@ calls and returns.
 
 The size of the CtrCycleCounter required to support each CCE width is given in the table below.
 
+.Cycle Counter Size Options
+[%unbreakable]
 [width="60%", cols="10%,15%,15%", options="header",]
 |===
 | CCE bits | CtrCycleCounter bits | Max elapsed cycle value
@@ -645,7 +658,7 @@ when CCV=1, the CC field provides the elapsed cycles since the prior CTR
 entry was recorded. This introduces implementation challenges when
 RASEMU=1 because, for each recorded call, there may have been several
 recorded calls (and returns which “popped” them) since the prior
-remaining call entry was recorded (see <<RAS (Return Address Stack) Emulation Mode>>). The implication is that returns that
+remaining call entry was recorded (see <<_ras_return_address_stack_emulation_mode, RAS (Return Address Stack) Emulation Mode>>). The implication is that returns that
 pop a call entry not only do not reset the cycle counter, but instead
 add the CC field from the popped entry to the counter. For simplicity,
 an implementation may opt to record CCV=0 for all calls, or those whose parent call was popped, when RASEMU=1._
