@@ -27,8 +27,3 @@ intended to be directly accessible at the supervisor level.
 
 Smctr depends on the Smcsrind extension, while Ssctr depends on the
 Sscsrind extension.
-
-[WARNING]
-====
-_Text in warning blocks (such as this one) are comments for the reader, included while the spec is in development.  They will be resolved and removed before the spec is frozen._
-====
