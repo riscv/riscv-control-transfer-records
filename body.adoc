@@ -118,7 +118,9 @@ All fields are optional except for M, BPFRZ, and DEPTH.  All unimplemented field
 [NOTE]
 [%unbreakable]
 ====
-_When reducing CTR depth, software should execute <<_ctr_clear_operation, CTRCLEAR>>.  This ensures that newly accessible CTR entries have deterministic values._
+_When CTR depth is increased, it is recommended that software then execute CTRCLEAR, or write to all accessible entries, in order to ensure that all entries contain deterministic values._  
+
+_If CTR depth is decreased on a context switch, such that the new context could later increase the depth, the context switch flow should perform CTRCLEAR to ensure that records from the original context cannot be leaked via the entries above the new depth-1.  CTR depth can be changed by M-mode, and by S-mode if `mstateen0`.CTR=1 (see <<_state_enable_access_control, State Enable Access Control>>)._
 ====
 
 [WARNING]
@@ -192,12 +194,12 @@ If the H extension is implemented, the `vsctrcontrol` register is a 64-bit read/
 `__vsctrcontrol__`.__DEPTH__ _is a read-only copy of `sctrcontrol`.DEPTH in order to allow a hypervisor to dictate the depth used by a guest.  This simplifies VM (guest) migration, by providing the hypervisor a means to require the guest to use a depth supported across all systems in the datacenter._
 ====
 
-[WARNING]
+[NOTE]
 [%unbreakable]
 ====
 _The TG deemed that, unlike the CTR status register or the CTR entry registers, the CTR control register should have a VS-mode version.  This allows a guest to manage the CTR configuration directly, without requiring traps to HS-mode, while ensuring that the guest configuration (most notably the privilege mode enable bits) do not impact CTR behavior when V=0._
 
-_The TG considered making `vsctrcontrol` pass-through `sctrcontrol` fields other than S, U, and STE.  This would simplify behavior on traps and trap returns between V=0 and V=1, since those shared CTR configuration fields would not change.  But this would be undesirable for host + guest usages, since it would require switching `sctrcontrol` on each host/guest transition._
+_The TG considered making `vsctrcontrol` pass-through `sctrcontrol` fields other than S, U, and STE.  This would simplify behavior on traps and trap returns between V=0 and V=1, since those shared CTR configuration fields would not change.  But this would be undesirable for host + guest usages, since it would require the host to switch `sctrcontrol` on each host/guest transition._
 ====
 
 === Supervisor Control Transfer Records Status (`sctrstatus`)
@@ -249,6 +251,8 @@ _Exposing the WRPTR may also allow support for Linux perf's https://lwn.net/Arti
 
 === CSR Listing
 
+.CTR CSR List
+[%unbreakable]
 [width="100%",cols="^12%,18%,70%",options="header",]
 |===
 | CSR Number | Name | Description
@@ -308,11 +312,6 @@ _CTR entry registers are defined as MXLEN, despite the_ `x__ireg*__` _CSRs used 
 _A transfer from an invalid address (which could only occur on an exception) may report a valid address in `ctrsource`.PC._
 ====
 
-[WARNING]
-[%unbreakable]
-====
-_If we believe a future standard or custom extension may define 1-byte opcodes, then we should not use bit 0 of `ctrsource` for the V field, nor bit 0 of `ctrtarget` for MISP.  The V bit could be moved to `ctrdata`, but that would mean software would always need to read `ctrdata`._
-====
 === Control Transfer Record Target (`ctrtarget`)
 
 The `ctrtarget` register contains the target (destination) program counter
@@ -409,12 +408,6 @@ CC[15:12]) and Cycle Count Mantissa (CCM, in CC[11:0]). See
 
 Undefined bits in `ctrdata` are WPRI. Status fields may be added by future extensions, and software should ignore but preserve any fields that it does not recognize.  Undefined bits must be implemented as read-only 0, unless a <<_custom_extensions, custom extension>> is implemented and enabled.
 
-[WARNING]
-[%unbreakable]
-====
-_The TG has debated the merits of including a 3-bit privilege mode field in `ctrdata`.  
-This would help in cases where multiple privilege modes are recorded, and existing mechanisms for discerning the mode (addressing conventions and kernel mmaps) do not apply or are not available.  But it would require some complexity to avoid exposing the presence of virtualization to a guest that is using CTR, and there is question about the value given that existing tools that use similar capabilities from other architectures do not require this information.  The TG has thus far opted not to standardize bits for privilege mode, but consensus within the TG has not been reached._
-====
 [NOTE]
 [%unbreakable]
 ====
@@ -470,6 +463,7 @@ CTR records qualified control transfers.  Control transfers are qualified if the
 * The current privilege mode is enabled
 * The transfer type is not inhibited
 * `sctrstatus`.FROZEN is not set
+* The transfer completes/retires
 
 Such qualified transfers update the <<_entry_registers, Entry Registers>> at logical entry 0.  As a result, older entries are pushed down the stack: the record previously in entry 0
 moves to entry 1, the record in entry 1 moves to entry 2, and so on.  If the CTR buffer is full, the oldest recorded entry (previously at entry depth-1) is lost.
@@ -554,12 +548,12 @@ the trap handler (e.g., an emulator) the opportunity to modify the
 record._
 ====
 
-[WARNING]
+[NOTE]
 [%unbreakable]
 ====
 _Note that external trap recording does not depend on EXCINH/INTRINH.  Thus, when external traps are enabled, both external interrupts and external exceptions are recorded._
 
-_STE allows recording of traps from U-mode to S-mode as well as from VS/VU-mode to HS-mode.  The hypervisor can flip STE before entering a guest if it wants different behavior for U-to-S vs VS/VU-to-HS.  A separate HTE bit could be defined, but ideally it would live in an `hctrcontrol` CSR, which is otherwise unneeded.  We could put it in_ `x__ctrcontrol__`, _but the bit position would need special treatment in `vsctrcontrol` (writable but has no impact on behavior)._
+_STE allows recording of traps from U-mode to S-mode as well as from VS/VU-mode to HS-mode.  The hypervisor can flip `sctrcontrol`.STE before entering a guest if it wants different behavior for U-to-S vs VS/VU-to-HS._
 ====
 
 The table below provides details on recording of privilege mode
@@ -627,17 +621,13 @@ The size of the CtrCycleCounter required to support each CCE width is given in t
 [%unbreakable]
 ====
 _When CCE>1, the granularity of the reported cycle count is reduced. For example, when CCE=3, the bottom 2 bits of the cycle counter are not reported, and thus the reported value increments only every 4 cycles.  As a result, the reported value represents an undercount of elapsed cycles for most cases (when the unreported bits are non-zero).  On average, the undercount will be (2^CCE-1^-1)/2.  Software can reduce the average undercount to 0 by adding (2^CCE-1^-1)/2 to each computed cycle count value when CCE>1._
+
+_Though this compressed method of representation results in some imprecision for larger cycle count values, it produces meaningful area savings, reducing storage per entry from 27 bits to 16._
 ====
 
 The CC value saturates when all implemented bits in CCM and CCE are 1.
 
 The CC value is only valid when the Cycle Count Valid (CCV) bit is set.  If CCV=0, the CC value might not hold the correct count of elapsed active cycles since the last recorded transfer.  The next record will have CCV=0 after a write to `__x__ctrcontrol`, or execution of CTRCLEAR, since CtrCycleCounter is reset.  CCV should additionally be cleared after any other implementation-specific scenarios where active cycles might not be counted in CtrCycleCounter.
-
-[WARNING]
-[%unbreakable]
-====
-_The TG also considered the option of including an uncompressed 27-bit binary cycle counter value in `ctrdata`.  This would support the same maximum cycle value as the method described above, without any accuracy reduction.  However, it would consume all remaining bits in `ctrdata`[31:0], without adding meaningful value to users.  Though the uncompressed value would result in a slight reduction in hardware complexity, it would result in a non-trivial increase in area, to store an additional 11 bits per entry.  The TG agreed that the compressed mechanism is preferred._
-====
 
 === RAS (Return Address Stack) Emulation Mode
 
