@@ -118,14 +118,7 @@ All fields are optional except for M, BPFRZ, and DEPTH.  All unimplemented field
 [NOTE]
 [%unbreakable]
 ====
-_When CTR depth is increased, it is recommended that software then execute CTRCLEAR, or write to all accessible entries, in order to ensure that all entries contain deterministic values._  
-
-_If CTR depth is decreased on a context switch, such that the new context could later increase the depth, the context switch flow should perform CTRCLEAR to ensure that records from the original context cannot be leaked via the entries above the new depth-1.  CTR depth can be changed by M-mode, and by S-mode if `mstateen0`.CTR=1 (see <<_state_enable_access_control, State Enable Access Control>>)._
-====
-
-[WARNING]
-====
-_DEPTH encodings above 256 are reserved, in order to avoid needing to reserve up to 2048_ `x__iselect__` _values for CTR._
+_To avoid the use of CTR for side and/or covert channels, context switching routines should first update the CTR depth value to match that of the context being switched to, and then either clear the CTR entries or restore them with the values they previously held for that context. If the context being switched to can change the depth value then all CTR entries should be cleared unless all entries for the maximal depth value are being restored.  CTR depth can be modified only by M-mode and, depending on <<_state_enable_access_control, state enable>> configuration, S/HS-mode._
 ====
 
 === Supervisor Control Transfer Records Control (`sctrcontrol`)
@@ -278,10 +271,10 @@ The standard indirect register access rules specified by Smcsrind/Sscsrind apply
 
 For `__x__iselect` values in 0x200..0x2FF, `vsireg*` registers access the same entry register state as `mireg*` and `sireg*`, regardless of the privilege mode at the time of access.  There is not a separate set of entry registers for V=1.
 
-[WARNING]
+[NOTE]
 [%unbreakable]
 ====
-_Implementations may opt not to preserve CTR entry state across clock-gated low-power states.  A bit to indicate this should be added to the https://github.com/riscv-non-isa/riscv-acpi-ffh/pull/3/files[[.underline]#ACPI spec#] upon ratification._
+_This specification allows an implementation to not preserve CTR entry state across some or all low power states. The supervisor execution environment is recommended to provide this information to the supervisor using discovery mechanisms such as ACPI and device tree to enable the supervisor to preserve such state, if required, before requesting transition to such low power states._
 ====
 
 === Control Transfer Record Source (`ctrsource`)
