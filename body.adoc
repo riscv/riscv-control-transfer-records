@@ -526,9 +526,25 @@ _If implementation of any transfer type filter bit results in reduced software p
 External traps are traps from a privilege mode enabled for CTR recording to a privilege mode that is not enabled for CTR recording.  By default external traps are not recorded, but privileged software running in the target mode of the trap can opt-in to allowing CTR to record external traps into
 that mode. The __x__TE bits allow M-mode, S-mode, and VS-mode to opt-in separately.  
 
-External trap recording depends not only on the target mode, but on any intervening modes.  For instance, recording an external trap from U-mode to M-mode requires that MTE=STE=1.  Similarly, recording an external trap from VU-mode to HS-mode requires that sctrcontrol.STE=vsctrcontrol.STE=1.
+External trap recording depends not only on the target mode, but on any intervening modes, which are modes that are more privileged than the source mode but less privileged than the target mode.  Not only must the external trap enable bit for the target mode be set, but the external trap enable bit(s) for any intervening modes must also be set.  See the table below for details.
+
+.External Trap Enable Requirements
+[%unbreakable]
+[options="header",]
+|===
+|Source Mode |Target Mode |External Trap Enable(s) Required
+.2+|U-mode | S-mode | sctrcontrol.STE
+|M-mode | mctrcontrol.MTE, sctrcontrol.STE
+|S-mode | M-mode | mctrcontrol.MTE
+.3+|VU-mode | VS-mode | vsctrcontrol.STE
+| HS-mode | sctrcontrol.STE, vsctrcontrol.STE
+| M-mode | mctrcontrol.MTE, sctrcontrol.STE, vsctrcontrol.STE
+.2+| VS-mode | HS-mode | sctrcontrol.STE
+| M-mode | mctrcontrol.MTE, sctrcontrol.STE
+|===
 
 In records for external traps, the `ctrtarget`.PC is 0.
+
 [NOTE]
 [%unbreakable]
 ====
@@ -537,6 +553,7 @@ the external trap record includes all relevant information, and gives
 the trap handler (e.g., an emulator) the opportunity to modify the
 record._
 ====
+
 [WARNING]
 [%unbreakable]
 ====
