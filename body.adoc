@@ -191,8 +191,6 @@ If the H extension is implemented, the `vsctrcontrol` register is a 64-bit read/
 [%unbreakable]
 ====
 _Unlike the CTR status register or the CTR entry registers, the CTR control register has a VS-mode version.  This allows a guest to manage the CTR configuration directly, without requiring traps to HS-mode, while ensuring that the guest configuration (most notably the privilege mode enable bits) do not impact CTR behavior when V=0._
-
-_The TG considered making `vsctrcontrol` pass-through `sctrcontrol` fields other than S, U, and STE.  This would simplify behavior on traps and trap returns between V=0 and V=1, since those shared CTR configuration fields would not change.  But this would be undesirable for host + guest usages, since it would require the host to switch `sctrcontrol` on each host/guest transition._
 ====
 
 === Supervisor Control Transfer Records Status (`sctrstatus`)
