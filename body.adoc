@@ -118,7 +118,7 @@ All fields are optional except for M, BPFRZ, and DEPTH.  All unimplemented field
 [NOTE]
 [%unbreakable]
 ====
-_To avoid the use of CTR for side and/or covert channels, context switching routines should first update the CTR depth value to match that of the context being switched to, and then either clear the CTR entries or restore them with the values they previously held for that context. If the context being switched to can change the depth value then all CTR entries should be cleared unless all entries for the maximal depth value are being restored.  CTR depth can be modified only by M-mode and, depending on <<_state_enable_access_control, state enable>> configuration, S/HS-mode._
+_To avoid the use of CTR for side and/or covert channels, context switching routines should first update the CTR depth value to match that of the context being switched to, and then either clear the CTR entries or restore them with the values they previously held for that context. If the context being switched to can change the depth value then all CTR entries should be cleared unless all entries for the maximal depth value are being restored.  CTR depth can be modified only by M-mode and, depending on the <<_state_enable_access_control, state enable>> configuration, S/HS-mode._
 ====
 
 === Supervisor Control Transfer Records Control (`sctrcontrol`)
@@ -478,6 +478,23 @@ _If privileged software is configuring CTR on behalf of less privileged software
 
 Recording in Debug Mode is always inhibited. Transfers into and out of Debug Mode are never recorded.
 
+The table below provides details on recording of privilege mode transitions. Standard dependencies on FROZEN and transfer type inhibits also apply, but are not covered by the table.
+
+.Trap and Trap Return Recording
+[%unbreakable]
+[width="100%",cols="18%,17%,30%,35%",]
+|===
+.2+|*Transfer Type* .2+| *Source Mode* 2+|*Target Mode*
+|*Enabled* |*Disabled*
+.2+|*Trap* |*Enabled* |Recorded. |Recorded if __x__TE=1, for the target mode and any intervening modes. `ctrtarget`.PC is 0.  See <<_external_traps, External Traps>>.
+
+|*Disabled* |Recorded, `ctrsource`.PC is 0. |Not recorded.
+
+.2+|*Trap Return* |*Enabled* |Recorded. |Recorded, `ctrtarget`.PC is 0.
+
+|*Disabled* |Not recorded. |Not recorded.
+|===
+
 === Transfer Type Filtering
 
 Default CTR behavior, when all transfer type filter bits (`__x__ctrcontrol`[47:32]) are unimplemented or 0, is to record all control transfers within enabled privileged modes. By setting transfer type filter bits, software can opt out of recording select transfer types, or opt into recording non-default operations.  All transfer type filter bits are optional.
@@ -539,24 +556,6 @@ _Note that external trap recording does not depend on EXCINH/INTRINH.  Thus, whe
 
 _STE allows recording of traps from U-mode to S-mode as well as from VS/VU-mode to HS-mode.  The hypervisor can flip `sctrcontrol`.STE before entering a guest if it wants different behavior for U-to-S vs VS/VU-to-HS._
 ====
-
-The table below provides details on recording of privilege mode
-transfers. Standard dependencies on FROZEN and transfer type inhibits also apply, but are not covered by the table.
-
-.Trap and Trap Return Recording
-[%unbreakable]
-[width="100%",cols="18%,17%,30%,35%",]
-|===
-.2+|*Transfer Type* .2+| *Source Mode* 2+|*Target Mode*
-|*Enabled* |*Disabled*
-.2+|*Trap* |*Enabled* |Recorded. |Recorded if __x__TE=1, for the target mode and any intervening modes. `ctrtarget`.PC is 0, type is External Trap.
-
-|*Disabled* |Recorded, `ctrsource`.PC is 0. |Not recorded.
-
-.2+|*Trap Return* |*Enabled* |Recorded. |Recorded, `ctrtarget`.PC is 0.
-
-|*Disabled* |Not recorded. |Not recorded.
-|===
 
 If external trap recording is implemented, MTE must be implemented, while sctrcontrol.STE must be implemented if S-mode is implemented, and vsctrcontrol.STE must be implemented if the H extension is implemented.
 
