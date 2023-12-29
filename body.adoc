@@ -89,27 +89,27 @@ It is implementation-specific which DEPTH value(s) are supported.  An implementa
 
 |INTRINH |Inhibit recording of interrupts.  See <<Transfer Type Filtering>>.
 
-|TRETINH |Inhibit recording of trap return instructions.  See <<Transfer Type Filtering>>.
+|TRETINH |Inhibit recording of trap returns.  See <<Transfer Type Filtering>>.
 
-|NTBREN |Enable recording of not-taken branch instructions.  See <<Transfer Type Filtering>>.
+|NTBREN |Enable recording of not-taken branches.  See <<Transfer Type Filtering>>.
 
-|TKBRINH |Inhibit recording of taken branch instructions.  See <<Transfer Type Filtering>>.
+|TKBRINH |Inhibit recording of taken branches.  See <<Transfer Type Filtering>>.
 
-|INDCALLINH |Inhibit recording of indirect call instructions.  See <<Transfer Type Filtering>>.
+|INDCALLINH |Inhibit recording of indirect calls.  See <<Transfer Type Filtering>>.
 
-|DIRCALLINH |Inhibit recording of direct call instructions.  See <<Transfer Type Filtering>>.
+|DIRCALLINH |Inhibit recording of direct calls.  See <<Transfer Type Filtering>>.
 
-|INDJUMPINH |Inhibit recording of indirect jump instructions.  See <<Transfer Type Filtering>>.
+|INDJUMPINH |Inhibit recording of indirect jumps.  See <<Transfer Type Filtering>>.
 
-|DIRJUMPINH |Inhibit recording of direct jump instructions.  See <<Transfer Type Filtering>>.
+|DIRJUMPINH |Inhibit recording of direct jumps.  See <<Transfer Type Filtering>>.
 
-|CORSWAPINH |Inhibit recording of co-routine swap instructions.  See <<Transfer Type Filtering>>.
+|CORSWAPINH |Inhibit recording of co-routine swaps.  See <<Transfer Type Filtering>>.
 
-|RETINH |Inhibit recording of function return instructions.  See <<Transfer Type Filtering>>.
+|RETINH |Inhibit recording of function returns.  See <<Transfer Type Filtering>>.
 
-|INDOJMPINH |Inhibit recording of other indirect jump instructions.  See <<Transfer Type Filtering>>.
+|INDOJMPINH |Inhibit recording of other indirect jumps.  See <<Transfer Type Filtering>>.
 
-|DIROJMPINH |Inhibit recording of other direct jump instructions.  See <<Transfer Type Filtering>>.
+|DIROJMPINH |Inhibit recording of other direct jumps.  See <<Transfer Type Filtering>>.
 |Custom[3:0] | WARL bits designated for custom use.  The reset value must correspond to standard behavior.  See <<Custom Extensions>>.
 |===
 
