@@ -623,7 +623,7 @@ entry depth-1, and entries 1..depth-1 move to 0..depth-2.
 * Co-routine swaps affect both a return and a call. Entry 0 is
 overwritten.
 * Other transfer types are inhibited
-* <<_transfer_type_filtering, Transfer Type Filtering>> bits are ignored
+* <<_transfer_type_filtering, Transfer Type Filtering>> bits and <<_external_traps, External Trap>> enable bits are ignored (treated as 0)
 
 [NOTE]
 [%unbreakable]
