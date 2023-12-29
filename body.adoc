@@ -395,10 +395,16 @@ _Like the <<_transfer_type_filtering, Transfer Type Filtering>> bits in `mctrcon
 == Instructions
 === Supervisor CTR Clear Instruction
 
-[WARNING]
-====
-_Instruction opcode and format TBD_
-====
+[wavedrom, ,svg]
+....
+{reg: [
+  {bits: 7,  name: 'opcode',    attr: ['7', 'SYSTEM'], type: 8},
+  {bits: 5,  name: 'rd',    attr: ['5', '0'], type: 2},
+  {bits: 3,  name: 'funct3', attr: ['3', '0'], type: 8},
+  {bits: 5,  name: 'rs1',   attr: ['5', '0'], type: 4},
+  {bits: 12, name: 'func12', attr: ['12', 'CTRCLEAR (0x104)'], type: 8},
+]}
+....
 
 The supervisor CTRCLEAR instruction performs the following operations:
 
@@ -488,6 +494,8 @@ The table below provides details on recording of privilege mode transitions. Sta
 |*Disabled* |Not recorded. |Not recorded.
 |===
 
+Transitions between VS/VU-mode and M/HS-mode are unique in that they effect a change in the active CTR control register, and hence the CTR configuration.  Privilege mode enable bits (M, S, U) and external trap enable bits (MTE and STE, see <<External Traps>>) from both [ms]ctrcontrol and vsctrcontrol are applied.  For all other fields, the value from vsctrcontrol dictates what is recorded for all traps from VS/VU-mode, and all trap returns to VS/VU-mode.
+
 === Transfer Type Filtering
 
 Default CTR behavior, when all transfer type filter bits (`__x__ctrcontrol`[47:32]) are unimplemented or 0, is to record all control transfers within enabled privileged modes. By setting transfer type filter bits, software can opt out of recording select transfer types, or opt into recording non-default operations.  All transfer type filter bits are optional.
@@ -574,7 +582,7 @@ else:
 endif
 ----
 
-The CtrCycleCounter is reset on writes to `__x__ctrcontrol`, and on execution of <<_ctr_clear_operation, CTRCLEAR>>, to ensure that any accumulated cycle counts do not persist across a context switch.  
+The CtrCycleCounter is reset on writes to `__x__ctrcontrol`, and on execution of CTRCLEAR, to ensure that any accumulated cycle counts do not persist across a context switch.  
 
 An implementation that supports cycle counting must implement CCV and all
 CCM bits, but may implement 0..4 exponent bits in CCE. Unimplemented CCE
