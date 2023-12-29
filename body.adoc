@@ -113,7 +113,10 @@ It is implementation-specific which DEPTH value(s) are supported.  An implementa
 |Custom[3:0] | WARL bits designated for custom use.  The reset value must correspond to standard behavior.  See <<Custom Extensions>>.
 |===
 
+[%unbreakable]
+--
 All fields are optional except for M, BPFRZ, and DEPTH.  All unimplemented fields are read-only 0.  All implemented fields are writable, though DEPTH may contain some read-only bits.  S must be writable if S-mode is implemented, and U must be writable if U-mode is implemented.  If the Smcofpmf/Sscofpmf extension is implemented, LCOFIFRZ must be writable.
+--
 
 [NOTE]
 [%unbreakable]
@@ -240,6 +243,7 @@ _Exposing the WRPTR provides a more efficient means for synthesizing CTR entries
 _Exposing the WRPTR may also allow support for Linux perf's https://lwn.net/Articles/802821[[.underline]#stack stitching#] capability._
 ====
 
+[%unbreakable]
 === CSR Listing
 
 .CTR CSR List
