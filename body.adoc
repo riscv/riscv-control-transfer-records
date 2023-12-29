@@ -278,7 +278,7 @@ For `__x__iselect` values in 0x200..0x2FF, `vsireg*` registers access the same e
 The `ctrsource` register contains the source program counter, which is the `pc` of the recorded control transfer instruction, or the epc of the recorded trap.  The valid (V) bit is set by the hardware when a transfer is recorded in the selected CTR buffer entry, and implies that
 data in `ctrsource`, `ctrtarget`, and `ctrdata` is valid for this entry.
 
-`ctrsource` is an MXLEN-bit WARL register that must be able to hold all valid virtual or physical addresses that can serve as a `pc`. It need not be able to hold any invalid addresses.  When XLEN < MXLEN, both explicit writes (by software) and implict writes (for recorded transfers) will be zero-extended.
+`ctrsource` is an MXLEN-bit WARL register that must be able to hold all valid virtual or physical addresses that can serve as a `pc`. It need not be able to hold any invalid addresses; implementations may convert an invalid address into a valid address that the register is capable of holding.  When XLEN < MXLEN, both explicit writes (by software) and implict writes (for recorded transfers) will be zero-extended.
 
 .Control Transfer Record Source Register Format for MXLEN=64
 [%unbreakable]
@@ -295,11 +295,6 @@ data in `ctrsource`, `ctrtarget`, and `ctrdata` is valid for this entry.
 ====
 _CTR entry registers are defined as MXLEN, despite the_ `x__ireg*__` _CSRs used to access them being XLEN, to ensure that entries recorded in RV64 are not truncated, as a result of CSR Width Modulation, on a transition to RV32._
 ====
-[NOTE]
-[%unbreakable]
-====
-_A transfer from an invalid address (which could only occur on an exception) may report a valid address in `ctrsource`.PC._
-====
 
 === Control Transfer Record Target (`ctrtarget`)
 
@@ -309,7 +304,7 @@ when the recorded transfer is an instruction whose target or
 taken/not-taken direction was mispredicted by the branch predictor. MISP
 is read-only 0 when not implemented.
 
-`ctrtarget` is an MXLEN-bit WARL register that must be able to hold all valid virtual or physical addresses that can serve as a `pc`. It need not be able to hold any invalid addresses. When XLEN < MXLEN, both explicit writes (by software) and implict writes (by recorded transfers) will be zero-extended.
+`ctrtarget` is an MXLEN-bit WARL register that must be able to hold all valid virtual or physical addresses that can serve as a `pc`. It need not be able to hold any invalid addresses; implementations may convert an invalid address into a valid address that the register is capable of holding.  When XLEN < MXLEN, both explicit writes (by software) and implict writes (by recorded transfers) will be zero-extended.
 
 .Control Transfer Record Target Register Format for MXLEN=64
 [%unbreakable]
@@ -320,12 +315,6 @@ is read-only 0 when not implemented.
     {bits:  63, name: 'PC[63:1]'},
 ], config:{lanes: 2, hspace: 1024}}
 ....
-
-[NOTE]
-[%unbreakable]
-====
-_A transfer to an invalid address may report a valid address in `ctrtarget`.PC._
-====
 
 === Control Transfer Record Metadata (`ctrdata`)
 
