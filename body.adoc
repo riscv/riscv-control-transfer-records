@@ -485,7 +485,7 @@ The table below provides details on recording of privilege mode transitions. Sta
 |===
 .2+|*Transfer Type* .2+| *Source Mode* 2+|*Target Mode*
 |*Enabled* |*Disabled*
-.2+|*Trap* |*Enabled* |Recorded. | Not recorded by default, but can be.  See <<External Traps>>.
+.2+|*Trap* |*Enabled* |Recorded. | External trap.  Not recorded by default, but see <<External Traps>>.
 
 |*Disabled* |Recorded, `ctrsource`.PC is 0. |Not recorded.
 
