@@ -687,7 +687,7 @@ recording is desired._
 
 _LCOFI refers only to architectural traps directly caused by a local counter overflow. If a local counter overflow interrupt is recognized without a trap, for instance by reading mip, FROZEN is not automatically set._
 ====
-Similarly, on a breakpoint exception that traps to M-mode or S-mode with `msctrcontrol`.BPFRZ=1, FROZEN is set by hardware. The breakpoint exception itself is not recorded.  
+Similarly, on a breakpoint exception that traps to M-mode or S-mode with `sctrcontrol`.BPFRZ=1, FROZEN is set by hardware. The breakpoint exception itself is not recorded.  
 
 [NOTE]
 [%unbreakable]
