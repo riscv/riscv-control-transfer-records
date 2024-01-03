@@ -54,7 +54,7 @@ The `mctrcontrol` register is a 64-bit read/write register that enables and conf
 |Field |Description
 |M, S, U |Enable transfer recording in the selected privileged mode(s).  
 
-|RASEMU |Enables <<_ras_return_address_stack_emulation_mode, RAS (Return Address Stack) Emulation Mode>>.
+|RASEMU |Enables RAS (Return Address Stack) Emulation Mode.  See <<RAS (Return Address Stack) Emulation Mode>>.
 
 |MTE |Enables recording of traps to M-mode when M=0.  See <<External Traps>>.
 
@@ -81,7 +81,7 @@ WARL field that selects the depth of the CTR buffer. Encodings:
 
 The depth of the CTR buffer dictates the number of entries to which the 
 hardware records transfers. For a depth of N, the hardware
-records transfers to entries 0..N-1. All <<_entry_registers, entry registers>> read as '0' and are read-only when the selected entry is in the range N to 255.  When the depth is increased, the newly accessible entries contain unspecified but legal values.
+records transfers to entries 0..N-1. All <<_entry_registers, Entry Registers>> read as '0' and are read-only when the selected entry is in the range N to 255.  When the depth is increased, the newly accessible entries contain unspecified but legal values.
 
 It is implementation-specific which DEPTH value(s) are supported.  An implementation may opt to hardcode some or all of the bits in this field.
 
@@ -221,7 +221,7 @@ The `sctrstatus` register grants access to CTR status information and is updated
 |===
 
 Undefined bits in `sctrstatus` are WPRI. Status fields may be added by future extensions,
-and software should ignore but preserve any fields that it does not recognize.  Undefined  bits must be implemented as read-only 0, unless a <<_custom_extensions, custom extension>> is implemented and enabled.
+and software should ignore but preserve any fields that it does not recognize.  Undefined  bits must be implemented as read-only 0, unless a custom extension is implemented and enabled (see <<Custom Extensions>>).
 
 [NOTE]
 [%unbreakable]
@@ -243,7 +243,7 @@ _Exposing the WRPTR provides a more efficient means for synthesizing CTR entries
 _Exposing the WRPTR may also allow support for Linux perf's https://lwn.net/Articles/802821[[.underline]#stack stitching#] capability._
 ====
 
-[%unbreakable]
+<<<
 === CSR Listing
 
 .CTR CSR List
@@ -408,7 +408,7 @@ _Like the <<_transfer_type_filtering, Transfer Type Filtering>> bits in `mctrcon
 
 The supervisor CTRCLEAR instruction performs the following operations:
 
-* Zeroes all <<_entry_registers, CTR entry registers>>, for all DEPTH values
+* Zeroes all  CTR <<_entry_registers, Entry Registers>>, for all DEPTH values
 * Zeroes the CTR cycle counter and CCV (see <<Cycle Counting>>)
 
 Any read of `ctrsource`, `ctrtarget`, or `ctrdata` that follows CTRCLEAR, such that it precedes the next qualified control transfer, will return the value 0.  Further, the first recorded transfer following CTRCLEAR will have `ctrdata`.CCV=0. 
@@ -423,13 +423,13 @@ When Smstateen is implemented, the `mstateen0`.CTR bit controls access to CTR re
 * Attempts to access `sireg*` when `siselect` is in 0x200..0x2FF, or `vsireg*` when `vsiselect` is in 0x200..0x2FF
 * Execution of the CTRCLEAR instruction
 
-When `mstateen0`.CTR=0, qualified control transfers executed in privilege modes less privileged than M-mode will continue to implicitly update <<_entry_registers, Entry Registers>> and <<_machine_control_transfer_records_status_sctrstatus, `sctrstatus`>>.
+When `mstateen0`.CTR=0, qualified control transfers executed in privilege modes less privileged than M-mode will continue to implicitly update entry registers and `sctrstatus`.
 
 If the H extension is implemented and `mstateen0`.CTR=1, the `hstateen0`.CTR bit controls access to supervisor CTR state (`sctrcontrol`, `sctrstatus`, and `sireg*` when `siselect` is in 0x200..0x2FF) when V=1.  `hstateen0`.CTR is read-only 0 when `mstateen0`.CTR=0.
 
 When `mstateen0`.CTR=1 and `hstateen0`.CTR=1, VS-mode accesses to supervisor CTR state behave as described in <<CSRs>> and <<Entry Registers>> above, while CTRCLEAR behaves as described in <<Supervisor CTR Clear Instruction>>.  When `mstateen0`.CTR=1 and `hstateen0`.CTR=0, both VS-mode accesses to supervisor CTR state and VS-mode execution of CTRCLEAR raise a virtual-instruction exception.
 
-When `hstateen0`.CTR=0, qualified control transfers executed while V=1 will continue to implicitly update <<_entry_registers, Entry Registers>> and <<_machine_control_transfer_records_status_sctrstatus, `sctrstatus`>>.
+When `hstateen0`.CTR=0, qualified control transfers executed while V=1 will continue to implicitly update entry registers and `sctrstatus`.
 
 The CTR bit is bit 54 in `mstateen0` and `hstateen0`.
 
@@ -448,7 +448,7 @@ CTR records qualified control transfers.  Control transfers are qualified if the
 * `sctrstatus`.FROZEN is not set
 * The transfer completes/retires
 
-Such qualified transfers update the <<Entry Registers>> at logical entry 0.  As a result, older entries are pushed down the stack: the record previously in entry 0
+Such qualified transfers update the <<_entry_registers, Entry Registers>> at logical entry 0.  As a result, older entries are pushed down the stack: the record previously in entry 0
 moves to entry 1, the record in entry 1 moves to entry 2, and so on.  If the CTR buffer is full, the oldest recorded entry (previously at entry depth-1) is lost.
 
 Recorded transfers will set the `ctrsource`.V bit to 1, and will update all implemented record fields. 
@@ -505,7 +505,7 @@ Transitions between VS/VU-mode and M/HS-mode are unique in that they effect a ch
 
 [NOTE]
 ====
-_Consider an exception that traps from VU-mode to HS-mode, with vsctrcontrol.U=1 and sctrcontrol.S=1.  Because both the source mode and target mode are enabled for recording, whether the trap is recorded then depends on the remaining CTR configuration (e.g., the <<_transfer_type_filtering, transfer type filter>> bits) in `vsctrcontrol`, not in `sctrcontrol`._ 
+_Consider an exception that traps from VU-mode to HS-mode, with `vsctrcontrol`.U=1 and `sctrcontrol`.S=1.  Because both the source mode and target mode are enabled for recording, whether the trap is recorded then depends on the CTR configuration (e.g., the <<_transfer_type_filtering, transfer type filter>> bits) in `vsctrcontrol`, not in `sctrcontrol`._ 
 ====
 
 ==== External Traps
@@ -639,7 +639,7 @@ entry depth-1, and entries 1..depth-1 move to 0..depth-2.
 * Co-routine swaps affect both a return and a call. Entry 0 is
 overwritten.
 * Other transfer types are inhibited
-* <<_transfer_type_filtering, Transfer Type Filtering>> bits and <<_external_traps, External Trap>> enable bits are ignored (treated as 0)
+* Transfer type filtering bits (`__x__ctrcontrol`[47:32]) and external trap enable bits (`__x__ctrcontrol`.__x__TE) are ignored
 
 [NOTE]
 [%unbreakable]
@@ -706,5 +706,5 @@ _When a guest uses the SBI Supervisor Software Events (SSE) extension, the LCOFI
 
 == Custom Extensions
 
-Any custom CTR extension must be associated with a non-default value within the designated custom bits in `__x__ctrcontrol`.  When custom bits hold a value that enables the custom extension, the extension may alter standard CTR behavior, and may define new custom status fields within <<_supervisor_control_transfer_records_status_sctrstatus, `sctrstatus`>> or the <<_entry_registers, CTR entry registers>>.  All custom status fields, and standard status fields whose behavior is altered by the custom extension, must revert to standard behavior when the custom bits hold their default (reset) value.  This includes read-only 0 behavior for any bits undefined by any implemented standard extensions.
+Any custom CTR extension must be associated with a non-default value within the designated custom bits in `__x__ctrcontrol`.  When custom bits hold a value that enables the custom extension, the extension may alter standard CTR behavior, and may define new custom status fields within <<_supervisor_control_transfer_records_status_sctrstatus, `sctrstatus`>> or the CTR <<_entry_registers, Entry Registers>>.  All custom status fields, and standard status fields whose behavior is altered by the custom extension, must revert to standard behavior when the custom bits hold their default (reset) value.  This includes read-only 0 behavior for any bits undefined by any implemented standard extensions.
 
