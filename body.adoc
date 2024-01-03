@@ -485,7 +485,7 @@ The table below provides details on recording of privilege mode transitions. Sta
 |===
 .2+|*Transfer Type* .2+| *Source Mode* 2+|*Target Mode*
 |*Enabled* |*Disabled*
-.2+|*Trap* |*Enabled* |Recorded. |Recorded if __x__TE=1, for the target mode and any intervening modes. `ctrtarget`.PC is 0.  See <<External Traps>>.
+.2+|*Trap* |*Enabled* |Recorded. | Not recorded by default, but can be.  See <<External Traps>>.
 
 |*Disabled* |Recorded, `ctrsource`.PC is 0. |Not recorded.
 
@@ -494,33 +494,23 @@ The table below provides details on recording of privilege mode transitions. Sta
 |*Disabled* |Not recorded. |Not recorded.
 |===
 
-Transitions between VS/VU-mode and M/HS-mode are unique in that they effect a change in the active CTR control register, and hence the CTR configuration.  Privilege mode enable bits (M, S, U) and external trap enable bits (MTE and STE, see <<External Traps>>) from both [ms]ctrcontrol and vsctrcontrol are applied.  For all other fields, the value from vsctrcontrol dictates what is recorded for all traps from VS/VU-mode, and all trap returns to VS/VU-mode.
+==== Virtualization Mode Transitions
 
-=== Transfer Type Filtering
+Transitions between VS/VU-mode and M/HS-mode are unique in that they effect a change in the active CTR control register, and hence the CTR configuration.  What is recorded, if anything, on these virtualization mode transitions depends upon fields from both `[ms]ctrcontrol` and `vsctrcontrol`.
 
-Default CTR behavior, when all transfer type filter bits (`__x__ctrcontrol`[47:32]) are unimplemented or 0, is to record all control transfers within enabled privileged modes. By setting transfer type filter bits, software can opt out of recording select transfer types, or opt into recording non-default operations.  All transfer type filter bits are optional.
-
-[NOTE]
-[%unbreakable]
-====
-_Because not-taken branches are not recorded by default, the polarity of the associated enable bit (NTBREN) is the opposite of other bits associated with transfer type filtering (TKBRINH, RETINH, etc).  Non-default operations require opt-in rather than opt-out._
-====
-
-The transfer type filter bits leverage the type definitions specified
-in Table 4.4, and described in Section 4.1.1, of the
-https://github.com/riscv-non-isa/riscv-trace-spec/releases/download/v2.0rc2/riscv-trace-spec.pdf[[.underline]#RISC-V
-Efficient Trace Spec v2.0#]. 
+* `mctrcontrol`.M, `sctrcontrol`.{S,U}, and `vsctrcontrol`.{S,U} are used to determine whether the source and target modes are enabled;
+* `mctrcontrol`.MTE, `sctrcontrol`.STE, and `vsctrcontrol`.STE are used to determine whether an external trap is recorded (see <<External Traps>>);
+* `sctrcontrol`.LCOFIFRZ and `sctrcontrol`.BPFRZ determine whether CTR is frozen (see <<Freeze>>)
+* For all other `__x__ctrcontrol` fields, the value in `vsctrcontrol` is used.
 
 [NOTE]
-[%unbreakable]
 ====
-_If implementation of any transfer type filter bit results in reduced software performance, perhaps due to additional retirement restrictions, it is strongly recommended that this reduced performance apply only when the bit is set.  Alternatively, support for the bit may be omitted.  Maintaining software performance for the default CTR configuration, when all transfer type bits are cleared, is recommended._
+_Consider an exception that traps from VU-mode to HS-mode, with vsctrcontrol.U=1 and sctrcontrol.S=1.  Because both the source mode and target mode are enabled for recording, whether the trap is recorded then depends on the remaining CTR configuration (e.g., the <<_transfer_type_filtering, transfer type filter>> bits) in `vsctrcontrol`, not in `sctrcontrol`._ 
 ====
 
 ==== External Traps
 
-External traps are traps from a privilege mode enabled for CTR recording to a privilege mode that is not enabled for CTR recording.  By default external traps are not recorded, but privileged software running in the target mode of the trap can opt-in to allowing CTR to record external traps into
-that mode. The __x__TE bits allow M-mode, S-mode, and VS-mode to opt-in separately.  
+External traps are traps from a privilege mode enabled for CTR recording to a privilege mode that is not enabled for CTR recording.  By default external traps are not recorded, but privileged software running in the target mode of the trap can opt-in to allowing CTR to record external traps into that mode. The `__x__ctrcontrol`.__x__TE bits allow M-mode, S-mode, and VS-mode to opt-in separately.  
 
 External trap recording depends not only on the target mode, but on any intervening modes, which are modes that are more privileged than the source mode but less privileged than the target mode.  Not only must the external trap enable bit for the target mode be set, but the external trap enable bit(s) for any intervening modes must also be set.  See the table below for details.
 
@@ -563,6 +553,27 @@ If external trap recording is implemented:
 * `mctrcontrol`.MTE must be implemented;
 * `sctrcontrol`.STE must be implemented if S-mode is implemented;
 * `vsctrcontrol`.STE must be implemented if the H extension is implemented.
+
+=== Transfer Type Filtering
+
+Default CTR behavior, when all transfer type filter bits (`__x__ctrcontrol`[47:32]) are unimplemented or 0, is to record all control transfers within enabled privileged modes. By setting transfer type filter bits, software can opt out of recording select transfer types, or opt into recording non-default operations.  All transfer type filter bits are optional.
+
+[NOTE]
+[%unbreakable]
+====
+_Because not-taken branches are not recorded by default, the polarity of the associated enable bit (NTBREN) is the opposite of other bits associated with transfer type filtering (TKBRINH, RETINH, etc).  Non-default operations require opt-in rather than opt-out._
+====
+
+The transfer type filter bits leverage the type definitions specified
+in Table 4.4, and described in Section 4.1.1, of the
+https://github.com/riscv-non-isa/riscv-trace-spec/releases/download/v2.0rc2/riscv-trace-spec.pdf[[.underline]#RISC-V
+Efficient Trace Spec v2.0#]. 
+
+[NOTE]
+[%unbreakable]
+====
+_If implementation of any transfer type filter bit results in reduced software performance, perhaps due to additional retirement restrictions, it is strongly recommended that this reduced performance apply only when the bit is set.  Alternatively, support for the bit may be omitted.  Maintaining software performance for the default CTR configuration, when all transfer type bits are cleared, is recommended._
+====
 
 === Cycle Counting
 
@@ -662,7 +673,7 @@ an implementation may opt to record CCV=0 for all calls, or those whose parent c
 
 When `sctrstatus`.FROZEN=1, transfer recording is inhibited.  This bit can be set by hardware, as described below, or by software.
 
-When `mctrcontrol`.LCOFIFRZ=1 and a local counter overflow interrupt
+When `sctrcontrol`.LCOFIFRZ=1 and a local counter overflow interrupt
 (LCOFI) traps (as a result of an HPM counter overflow) to M-mode or to S-mode, `sctrstatus`.FROZEN is set by hardware. This inhibits CTR recording until software clears FROZEN. The LCOFI trap itself is not recorded.
 [NOTE]
 [%unbreakable]
@@ -676,7 +687,7 @@ recording is desired._
 
 _LCOFI refers only to architectural traps directly caused by a local counter overflow. If a local counter overflow interrupt is recognized without a trap, for instance by reading mip, FROZEN is not automatically set._
 ====
-Similarly, on a breakpoint exception that traps to M-mode or S-mode with `mctrcontrol`.BPFRZ=1, FROZEN is set by hardware. The breakpoint exception itself is not recorded.  
+Similarly, on a breakpoint exception that traps to M-mode or S-mode with `msctrcontrol`.BPFRZ=1, FROZEN is set by hardware. The breakpoint exception itself is not recorded.  
 
 [NOTE]
 [%unbreakable]
@@ -684,7 +695,7 @@ Similarly, on a breakpoint exception that traps to M-mode or S-mode with `mctrco
 _Breakpoint exception refers to synchronous exceptions with a cause value of Breakpoint (3), regardless of source (ebreak, c.ebreak, Sdtrig); it does not include entry into Debug Mode, even in cores where this is implemented as an exception._
 ====
 
-If the H extension is implemented, freeze behavior for LCOFIs and breakpoint exceptions that trap to VS-mode is determined by LCOFIFRZ and BPFRZ values, respectively, in `vsctrcontrol`.  This includes virtual LCOFIs pended by a hypervisor.
+If the H extension is implemented, freeze behavior for LCOFIs and breakpoint exceptions that trap to VS-mode is determined by the LCOFIFRZ and BPFRZ values, respectively, in `vsctrcontrol`.  This includes virtual LCOFIs pended by a hypervisor.
 
 [NOTE]
 [%unbreakable]
