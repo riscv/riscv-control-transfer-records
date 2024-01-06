@@ -7,7 +7,7 @@
 _CSR field specifications (such as WARL and WPRI) can be found in the link:https://riscv.org/technical/specifications/[RISC-V Instruction Set Manual] vol. II (Privileged Architecture), section 2.3._
 ====
 
-=== Machine Control Transfer Records Control (`mctrcontrol`)
+=== Machine Control Transfer Records Control Register (`mctrcontrol`)
 
 The `mctrcontrol` register is a 64-bit read/write register that enables and configures the CTR capability.
 
@@ -47,7 +47,7 @@ The `mctrcontrol` register is a 64-bit read/write register that enables and conf
 ], config:{lanes: 8, hspace:1024}}
 ....
 
-.Machine Control Transfer Records Control Field Definitions
+.Machine Control Transfer Records Control Register Field Definitions
 [%unbreakable]
 [width="100%",cols="20%,80%",options="header",]
 |===
@@ -124,13 +124,13 @@ All fields are optional except for M, BPFRZ, and DEPTH.  All unimplemented field
 _To avoid the use of CTR for side and/or covert channels, context switching routines should first update the CTR depth value to match that of the context being switched to, and then either clear the CTR entries or restore them with the values they previously held for that context. If the context being switched to can change the depth value then all CTR entries should be cleared unless all entries for the maximal depth value are being restored.  CTR depth can be modified only by M-mode and, depending on the <<_state_enable_access_control, state enable>> configuration, S/HS-mode._
 ====
 
-=== Supervisor Control Transfer Records Control (`sctrcontrol`)
+=== Supervisor Control Transfer Records Control Register (`sctrcontrol`)
 
 The `sctrcontrol` register provides supervisor mode access to a subset of <<_machine_control_transfer_records_control_mctrcontrol, `mctrcontrol`>>.
 
 Bits 0 and 8 in `sctrcontrol` are read-only 0. As a result, the M and MTE fields in `mctrcontrol` are not accessible through `sctrcontrol`.  All other `mctrcontrol` fields are accessible through `sctrcontrol`.
 
-=== Virtual Supervisor Control Transfer Records Control (`vsctrcontrol`)
+=== Virtual Supervisor Control Transfer Records Control Register (`vsctrcontrol`)
 
 If the H extension is implemented, the `vsctrcontrol` register is a 64-bit read/write register that is VS-mode's version of supervisor register `sctrcontrol`.  When V=1, `vsctrcontrol` substitutes for the usual `sctrcontrol`, so instructions that normally read or modify `sctrcontrol` actually access `vsctrcontrol` instead.
 
@@ -170,7 +170,7 @@ If the H extension is implemented, the `vsctrcontrol` register is a 64-bit read/
 ], config:{lanes: 8, hspace:1024}}
 ....
 
-.Virtual Supervisor Control Transfer Records Control Field Definitions
+.Virtual Supervisor Control Transfer Records Control Register Field Definitions
 [%unbreakable]
 [width="100%",cols="20%,80%",options="header",]
 |===
@@ -196,7 +196,7 @@ If the H extension is implemented, the `vsctrcontrol` register is a 64-bit read/
 _Unlike the CTR status register or the CTR entry registers, the CTR control register has a VS-mode version.  This allows a guest to manage the CTR configuration directly, without requiring traps to HS-mode, while ensuring that the guest configuration (most notably the privilege mode enable bits) do not impact CTR behavior when V=0._
 ====
 
-=== Supervisor Control Transfer Records Status (`sctrstatus`)
+=== Supervisor Control Transfer Records Status Register (`sctrstatus`)
 
 The `sctrstatus` register grants access to CTR status information and is updated by the hardware whenever CTR is active.  CTR is active when the current privilege mode is enabled for recording and CTR is not frozen.
 
@@ -211,7 +211,7 @@ The `sctrstatus` register grants access to CTR status information and is updated
 ], config:{lanes: 2, hspace:1024}}
 ....
 
-.Supervisor Control Transfer Records Status Field Definitions
+.Supervisor Control Transfer Records Status Register Field Definitions
 [%unbreakable]
 [width="100%",cols="15%,75%,10%",options="header",]
 |===
@@ -273,7 +273,7 @@ The standard indirect register access rules specified by Smcsrind/Sscsrind apply
 
 For `__x__iselect` values in 0x200..0x2FF, `vsireg*` registers access the same entry register state as `mireg*` and `sireg*`, regardless of the privilege mode at the time of access.  There is not a separate set of entry registers for V=1.
 
-=== Control Transfer Record Source (`ctrsource`)
+=== Control Transfer Record Source Register (`ctrsource`)
 
 The `ctrsource` register contains the source program counter, which is the `pc` of the recorded control transfer instruction, or the epc of the recorded trap.  The valid (V) bit is set by the hardware when a transfer is recorded in the selected CTR buffer entry, and implies that
 data in `ctrsource`, `ctrtarget`, and `ctrdata` is valid for this entry.
@@ -296,7 +296,7 @@ data in `ctrsource`, `ctrtarget`, and `ctrdata` is valid for this entry.
 _CTR entry registers are defined as MXLEN, despite the_ `x__ireg*__` _CSRs used to access them being XLEN, to ensure that entries recorded in RV64 are not truncated, as a result of CSR Width Modulation, on a transition to RV32._
 ====
 
-=== Control Transfer Record Target (`ctrtarget`)
+=== Control Transfer Record Target Register (`ctrtarget`)
 
 The `ctrtarget` register contains the target (destination) program counter
 of the recorded transfer. The optional MISP bit is set by the hardware
@@ -316,7 +316,7 @@ is read-only 0 when not implemented.
 ], config:{lanes: 2, hspace: 1024}}
 ....
 
-=== Control Transfer Record Metadata (`ctrdata`)
+=== Control Transfer Record Metadata Register (`ctrdata`)
 
 The `ctrdata` register contains metadata for the recorded transfer. This
 register must be implemented, though all fields within it are optional.
@@ -335,7 +335,7 @@ Unimplemented fields are read-only 0.  `ctrdata` is a 64-bit register.
 ], config:{lanes: 2, hspace: 1024}}
 ....
 
-.Control Transfer Record Metadata Field Definitions
+.Control Transfer Record Metadata Register Field Definitions
 [%unbreakable]
 [width="100%",cols="15%,75%,10%",options="header",]
 |===
