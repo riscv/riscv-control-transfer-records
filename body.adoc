@@ -13,7 +13,7 @@ The `mctrcontrol` register is a 64-bit read/write register that enables and conf
 
 .Machine Control Transfer Records Control Register Format
 [%unbreakable]
-[wavedrom, , ]
+[wavedrom, , svg]
 ....
 {reg: [    
     {bits:  1, name: 'M'},
@@ -136,7 +136,7 @@ If the H extension is implemented, the `vsctrcontrol` register is a 64-bit read/
 
 .Virtual Supervisor Control Transfer Records Control Register Format
 [%unbreakable]
-[wavedrom, , ]
+[wavedrom, , svg]
 ....
 {reg: [    
     {bits:  1, name: '<i>WPRI</i>'},
@@ -202,7 +202,7 @@ The `sctrstatus` register grants access to CTR status information and is updated
 
 .Supervisor Control Transfer Records Status Register Format
 [%unbreakable]
-[wavedrom, , ]
+[wavedrom, , svg]
 ....
 {reg: [    
     {bits:  8, name: 'WRPTR'},
@@ -282,7 +282,7 @@ data in `ctrsource`, `ctrtarget`, and `ctrdata` is valid for this entry.
 
 .Control Transfer Record Source Register Format for MXLEN=64
 [%unbreakable]
-[wavedrom, , ]
+[wavedrom, , svg]
 ....
 {reg: [    
     {bits:  1, name: 'V'},
@@ -308,7 +308,7 @@ is read-only 0 when not implemented.
 
 .Control Transfer Record Target Register Format for MXLEN=64
 [%unbreakable]
-[wavedrom, , ]
+[wavedrom, , svg]
 ....
 {reg: [    
     {bits:  1, name: 'MISP'},
@@ -324,7 +324,7 @@ Unimplemented fields are read-only 0.  `ctrdata` is a 64-bit register.
 
 .Control Transfer Record Metadata Register Format
 [%unbreakable]
-[wavedrom, , ]
+[wavedrom, , svg]
 ....
 {reg: [    
     {bits:  4, name: 'TYPE'},
