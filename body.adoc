@@ -16,13 +16,13 @@ The `mctrctl` register is a 64-bit read/write register that enables and configur
 [wavedrom, , svg]
 ....
 {reg: [    
-    {bits:  1, name: 'M'},
-    {bits:  1, name: 'S'},
     {bits:  1, name: 'U'},
+    {bits:  1, name: 'S'},
+    {bits:  1, name: 'M'},
     {bits:  4, name: '<i>WPRI</i>'},
     {bits:  1, name: 'RASEMU'},
-    {bits:  1, name: 'MTE'},
     {bits:  1, name: 'STE'},
+    {bits:  1, name: 'MTE'},
     {bits:  1, name: '<i>WPRI</i>'},
     {bits:  1, name: 'BPFRZ'},
     {bits:  1, name: 'LCOFIFRZ'},
@@ -139,14 +139,12 @@ If the H extension is implemented, the `vsctrctl` register is a 64-bit read/writ
 [wavedrom, , svg]
 ....
 {reg: [    
-    {bits:  1, name: '<i>WPRI</i>'},
-    {bits:  1, name: 'S'},
     {bits:  1, name: 'U'},
-    {bits:  4, name: '<i>WPRI</i>'},
+    {bits:  1, name: 'S'},
+    {bits:  5, name: '<i>WPRI</i>'},
     {bits:  1, name: 'RASEMU'},
-    {bits:  1, name: '<i>WPRI</i>'},
     {bits:  1, name: 'STE'},
-    {bits:  1, name: '<i>WPRI</i>'},
+    {bits:  2, name: '<i>WPRI</i>'},
     {bits:  1, name: 'BPFRZ'},
     {bits:  1, name: 'LCOFIFRZ'},
     {bits:  3, name: 'DEPTH'},
