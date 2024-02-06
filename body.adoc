@@ -198,7 +198,7 @@ _Unlike the CTR status register or the CTR entry registers, the CTR control regi
 
 === Supervisor Control Transfer Records Status Register (`sctrstatus`)
 
-The `sctrstatus` register grants access to CTR status information and is updated by the hardware whenever CTR is active.  CTR is active when the current privilege mode is enabled for recording and CTR is not frozen.
+The 32-bit `sctrstatus` register grants access to CTR status information and is updated by the hardware whenever CTR is active.  CTR is active when the current privilege mode is enabled for recording and CTR is not frozen.
 
 .Supervisor Control Transfer Records Status Register Format
 [%unbreakable]
