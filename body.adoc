@@ -249,10 +249,10 @@ _Exposing the WRPTR may also allow support for Linux perf's https://lwn.net/Arti
 [width="100%",cols="^12%,18%,70%",options="header",]
 |===
 | CSR Number | Name | Description
-| 0x181 | `sctrctl` | Supervisor Control Transfer Records Control Register
-| 0x183 | `sctrstatus` | Supervisor Control Transfer Records Status Register
-| 0x281 | `vsctrctl` | Virtual Supervisor Control Transfer Records Control Register
-| 0x381 | `mctrctl` | Machine Control Transfer Records Control Register
+| 0x14E | `sctrctl` | Supervisor Control Transfer Records Control Register
+| 0x14F | `sctrstatus` | Supervisor Control Transfer Records Status Register
+| 0x24E | `vsctrctl` | Virtual Supervisor Control Transfer Records Control Register
+| 0x34E | `mctrctl` | Machine Control Transfer Records Control Register
 |===
 
 [NOTE]
