@@ -512,6 +512,14 @@ External traps are traps from a privilege mode enabled for CTR recording to a pr
 
 External trap recording depends not only on the target mode, but on any intervening modes, which are modes that are more privileged than the source mode but less privileged than the target mode.  Not only must the external trap enable bit for the target mode be set, but the external trap enable bit(s) for any intervening modes must also be set.  See the table below for details.
 
+[NOTE]
+[%unbreakable]
+====
+_Requiring intervening modes to be enabled for external traps simplifies software management of CTR.  Consider a scenario where S-mode software is configuring CTR for U-mode contexts A and B, such that external traps (to any mode) are enabled for A but not for B.  When switching between the two contexts, S-mode can simply toggle sctrctl.STE, rather than requiring a trap to M-mode to additionally toggle mctrctl.MTE._
+
+_This method does not provide the flexibility to record external traps to a more privileged mode but not to all intervening mode(s).  Because it is expected that profiling tools generally wish to observe all external traps or none, this is not considered a meaningful limitation._
+====
+
 .External Trap Enable Requirements
 [%unbreakable]
 [options="header",]
