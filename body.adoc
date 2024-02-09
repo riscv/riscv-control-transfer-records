@@ -110,7 +110,7 @@ It is implementation-specific which DEPTH value(s) are supported.  An implementa
 |INDLJMPINH |Inhibit recording of other indirect jumps with linkage.  See <<Transfer Type Filtering>>.
 
 |DIRLJMPINH |Inhibit recording of other direct jumps with linkage.  See <<Transfer Type Filtering>>.
-|Custom[3:0] | WARL bits designated for custom use.  The reset value must be 0, corresponding to standard behavior.  See <<Custom Extensions>>.
+|Custom[3:0] | WARL bits designated for custom use.  The value 0 must correspond to standard behavior.  See <<Custom Extensions>>.
 |===
 
 [%unbreakable]
@@ -761,7 +761,5 @@ _When a guest uses the SBI Supervisor Software Events (SSE) extension, the LCOFI
 
 == Custom Extensions
 
-Any custom CTR extension must be associated with a non-zero value within the designated custom bits in `__x__ctrctl`.  The reset value of these custom bits must be zero.
-
-When the custom bits hold a non-zero value that enables a custom extension, the extension may alter standard CTR behavior, and may define new custom status fields within <<_supervisor_control_transfer_records_status_sctrstatus, `sctrstatus`>> or the CTR <<_entry_registers, Entry Registers>>.  All custom status fields, and standard status fields whose behavior is altered by the custom extension, must revert to standard behavior when the custom bits hold zero.  This includes read-only 0 behavior for any bits undefined by any implemented standard extensions.
+Any custom CTR extension must be associated with a non-zero value within the designated custom bits in `__x__ctrctl`.  When the custom bits hold a non-zero value that enables a custom extension, the extension may alter standard CTR behavior, and may define new custom status fields within <<_supervisor_control_transfer_records_status_sctrstatus, `sctrstatus`>> or the CTR <<_entry_registers, Entry Registers>>.  All custom status fields, and standard status fields whose behavior is altered by the custom extension, must revert to standard behavior when the custom bits hold zero.  This includes read-only 0 behavior for any bits undefined by any implemented standard extensions.
 
