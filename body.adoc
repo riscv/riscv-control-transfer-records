@@ -496,7 +496,7 @@ The table below provides details on recording of privilege mode transitions. Sta
 
 Transitions between VS/VU-mode and M/HS-mode are unique in that they effect a change in the active CTR control register, and hence the CTR configuration.  What is recorded, if anything, on these virtualization mode transitions depends upon fields from both `[ms]ctrctl` and `vsctrctl`.
 
-* `mctrctl`.M, `sctrctl`.{S,U}, and `vsctrctl`.{S,U} are used to determine whether the source and target modes are enabled;
+* `mctrctl`.M, `sctrctl`.S, and `vsctrctl`.{S,U} are used to determine whether the source and target modes are enabled;
 * `mctrctl`.MTE, `sctrctl`.STE, and `vsctrctl`.STE are used to determine whether an external trap is recorded (see <<External Traps>>);
 * `sctrctl`.LCOFIFRZ and `sctrctl`.BPFRZ determine whether CTR is frozen (see <<Freeze>>)
 * For all other `__x__ctrctl` fields, the value in `vsctrctl` is used.
