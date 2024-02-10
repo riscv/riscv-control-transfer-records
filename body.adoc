@@ -267,9 +267,9 @@ https://github.com/riscv/riscv-indirect-csr-access/releases[[.underline]#Smcsrin
 extension. The `miselect` index range 0x200 through 0x2FF is reserved for CTR
 entries 0 through 255. When `miselect` holds a value in this range, `mireg` provides access to <<_control_transfer_record_source_ctrsource, `ctrsource`>>, `mireg2` provides access to <<_control_transfer_record_target_ctrtarget, `ctrtarget`>>, and `mireg3` provides access to <<_control_transfer_record_source_ctrdata, `ctrdata`>>.  `mireg4`, `mireg5`, and `mireg6` are read-only 0.
 
-The standard indirect register access rules specified by Smcsrind/Sscsrind apply for CTR.  S-mode is able to access CTR entries using the `siselect`/`sireg*` interface, with the same behavior described for M-mode above.  Similarly, VS-mode is able to access CTR entries using `siselect` (really `vsiselect`) and `sireg*` (really `vsireg*`).  See <<State Enable Access Control>> for cases where CTR accesses from S-mode and VS-mode may be restricted.  
+When `siselect` holds a value in 0x200..0x2FF, the `sireg*` registers provide access to the same CTR entry register state as the analogous `mireg*` registers described above.  Similarly, when `vsiselect` holds a value in 0x200..0x2FF, the `vsireg*` registers provide access to the same CTR entry register state as the analogous `mireg*` and `sireg*` registers.  There is not a separate set of entry registers for V=1.
 
-For `__x__iselect` values in 0x200..0x2FF, `vsireg*` registers access the same entry register state as `mireg*` and `sireg*`, regardless of the privilege mode at the time of access.  There is not a separate set of entry registers for V=1.
+See <<State Enable Access Control>> for cases where CTR accesses from S-mode and VS-mode may be restricted.  
 
 === Control Transfer Record Source Register (`ctrsource`)
 
