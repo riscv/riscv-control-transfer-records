@@ -689,7 +689,7 @@ When the optional `mctrctl`.RASEMU bit is implemented and set to 1, transfer rec
 
 * Indirect and direct calls are recorded as normal
 * Function returns pop the most recent call, by invalidating entry 0 (setting `ctrsource`.V=0)
-and rotating the CTR buffer, such that (invalidated) entry 0 moves to
+and decrementing the WRPTR, such that (invalidated) entry 0 moves to
 entry depth-1, and entries 1..depth-1 move to 0..depth-2.
 * Co-routine swaps affect both a return and a call. Entry 0 is
 overwritten.
