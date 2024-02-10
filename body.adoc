@@ -83,7 +83,7 @@ The depth of the CTR buffer dictates the number of entries to which the
 hardware records transfers. For a depth of N, the hardware
 records transfers to entries 0..N-1. All <<_entry_registers, Entry Registers>> read as '0' and are read-only when the selected entry is in the range N to 255.  When the depth is increased, the newly accessible entries contain unspecified but legal values.
 
-It is implementation-specific which DEPTH value(s) are supported.  An implementation may opt to hardcode some or all of the bits in this field.
+It is implementation-specific which DEPTH value(s) are supported.
 
 |EXCINH |Inhibit recording of exceptions.  See <<Transfer Type Filtering>>.
 
@@ -115,7 +115,7 @@ It is implementation-specific which DEPTH value(s) are supported.  An implementa
 
 [%unbreakable]
 --
-All fields are optional except for M, BPFRZ, and DEPTH.  All unimplemented fields are read-only 0.  All implemented fields are writable, though DEPTH may contain some read-only bits.  S must be writable if S-mode is implemented, and U must be writable if U-mode is implemented.  If the Smcofpmf/Sscofpmf extension is implemented, LCOFIFRZ must be writable.
+All fields are optional except for M, BPFRZ, and DEPTH.  All unimplemented fields are read-only 0, while all implemented fields are writable.  S must be writable if S-mode is implemented, and U must be writable if U-mode is implemented.  If the Smcofpmf/Sscofpmf extension is implemented, LCOFIFRZ must be writable.
 --
 
 [NOTE]
