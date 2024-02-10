@@ -498,7 +498,7 @@ Transitions between VS/VU-mode and M/HS-mode are unique in that they effect a ch
 
 * `mctrctl`.M, `sctrctl`.S, and `vsctrctl`.{S,U} are used to determine whether the source and target modes are enabled;
 * `mctrctl`.MTE, `sctrctl`.STE, and `vsctrctl`.STE are used to determine whether an external trap is recorded (see <<External Traps>>);
-* `sctrctl`.LCOFIFRZ and `sctrctl`.BPFRZ determine whether CTR is frozen (see <<Freeze>>)
+* `sctrctl`.LCOFIFRZ and `sctrctl`.BPFRZ determine whether CTR becomes frozen (see <<Freeze>>)
 * For all other `__x__ctrctl` fields, the value in `vsctrctl` is used.
 
 [NOTE]
