@@ -25,5 +25,4 @@ privilege levels.  The corresponding supervisor-level extension, *Ssctr*, is ess
 identical to Smctr, except that it excludes machine-level CSRs and behaviors not
 intended to be directly accessible at the supervisor level.
 
-Smctr depends on the Smcsrind extension, while Ssctr depends on the
-Sscsrind extension.
+Smctr depends on the Smcsrind extension, while Ssctr depends on the Sscsrind extension.  Further, both Smctr and Ssctr depend upon implementation of S-mode.  See <<Supervisor Control Transfer Records Status Register (`sctrstatus`)>> for details.

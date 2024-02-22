@@ -99,17 +99,17 @@ It is implementation-specific which DEPTH value(s) are supported.
 
 |DIRCALLINH |Inhibit recording of direct calls.  See <<Transfer Type Filtering>>.
 
-|INDJMPINH |Inhibit recording of indirect jumps without linkage.  See <<Transfer Type Filtering>>.
+|INDJMPINH |Inhibit recording of indirect jumps (without linkage).  See <<Transfer Type Filtering>>.
 
-|DIRJMPINH |Inhibit recording of direct jumps without linkage.  See <<Transfer Type Filtering>>.
+|DIRJMPINH |Inhibit recording of direct jumps (without linkage).  See <<Transfer Type Filtering>>.
 
 |CORSWAPINH |Inhibit recording of co-routine swaps.  See <<Transfer Type Filtering>>.
 
 |RETINH |Inhibit recording of function returns.  See <<Transfer Type Filtering>>.
 
-|INDLJMPINH |Inhibit recording of other indirect jumps with linkage.  See <<Transfer Type Filtering>>.
+|INDLJMPINH |Inhibit recording of other indirect jumps (with linkage).  See <<Transfer Type Filtering>>.
 
-|DIRLJMPINH |Inhibit recording of other direct jumps with linkage.  See <<Transfer Type Filtering>>.
+|DIRLJMPINH |Inhibit recording of other direct jumps (with linkage).  See <<Transfer Type Filtering>>.
 |Custom[3:0] | WARL bits designated for custom use.  The value 0 must correspond to standard behavior.  See <<Custom Extensions>>.
 |===
 
@@ -233,6 +233,12 @@ _Because the `sctrstatus` register is updated by hardware, writes should be perf
 
 _When restoring CTR state, `sctrstatus` should be written before CTR entry state is restored.  This ensures that the software writes to logical CTR entries modify the proper physical entries._
 ====
+[NOTE]
+[%unbreakable]
+====
+_This register is a supervisor CSR because all of the state it contains can be exposed to both machine and supervisor mode.  However, this means that Smctr/Ssctr depends upon implementation of S-mode.  If, in the future, it becomes desirable to remove this dependency, a simple extension could add an `mctrstatus` CSR that reflects the same state as `sctrstatus`._
+====
+
 [NOTE]
 [%unbreakable]
 ====
@@ -361,17 +367,17 @@ Identifies the type of the control flow transfer recorded in the entry. Implemen
 
 1001 - Direct call
 
-1010 - Indirect jump without linkage
+1010 - Indirect jump (without linkage)
 
-1011 - Direct jump without linkage
+1011 - Direct jump (without linkage)
 
 1100 - Co-routine swap
 
 1101 - Return
 
-1110 - Other indirect jump with linkage
+1110 - Other indirect jump (with linkage)
 
-1111 - Other direct jump with linkage
+1111 - Other direct jump (with linkage)
 
 |WARL 
 
@@ -576,7 +582,7 @@ https://github.com/riscv-non-isa/riscv-trace-spec/releases/download/v2.0rc2/risc
 
 .Control Transfer Type Definitions
 [%unbreakable]
-[width="55%", cols="10%,90%", options="header",]
+[width="60%", cols="22%,78%", options="header",]
 |===
 | Encoding | Transfer Type Name 
 | 0 | _Not used by CTR_
@@ -589,19 +595,19 @@ https://github.com/riscv-non-isa/riscv-trace-spec/releases/download/v2.0rc2/risc
 | 7 | _reserved_ 
 | 8 | Indirect call 
 | 9 | Direct call 
-| 10 | Indirect jump without linkage 
-| 11 | Direct jump without linkage 
+| 10 | Indirect jump (without linkage) 
+| 11 | Direct jump (without linkage) 
 | 12 | Co-routine swap 
 | 13 | Function return 
-| 14 | Other indirect jump with linkage 
-| 15 | Other direct jump with linkage 
+| 14 | Other indirect jump (with linkage) 
+| 15 | Other direct jump (with linkage) 
 |===
 
 Encodings 8 through 15 refer to various encodings of JAL and JALR instructions.  The types are distinguished as described below.
 
 .Control Transfer Type Definitions
 [%unbreakable]
-[cols="32%,68%", options="header",]
+[cols="37%,63%", options="header",]
 |===
 | Transfer Type Name | Associated Opcodes
 .3+| Indirect call | JALR _x1_, _rs_ where _rs_ != _x5_
@@ -610,17 +616,17 @@ Encodings 8 through 15 refer to various encodings of JAL and JALR instructions. 
 .3+| Direct call | JAL _x1_
 | JAL _x5_
 | C.JAL
-.2+| Indirect jump without linkage | JALR _x0_, _rs_ where _rs_ != _x1_ and _rs_ != _x5_
-| C.JR _rs1_ where _rs1_ != _x1_ and _rs1_ != _x5_
-.2+| Direct jump without linkage | JAL _x0_
+.2+| Indirect jump (without linkage) | JALR _x0_, _rs_ where _rs_ != (_x1_ or _x5_)
+| C.JR _rs1_ where _rs1_ != (_x1_ or _x5_)
+.2+| Direct jump (without linkage) | JAL _x0_
 | C.J
 .3+| Co-routine swap | JALR _x1_, _x5_
 | JALR _x5_, _x1_
 | C.JALR _x5_
-.2+| Function return | JALR _rd_, _rs_ where (_rs_ == _x1_ or _rs_ == _x5_) and _rd_ != _x1_ and _rd_ != _x5_
-| C.JR _rs1_ where _rs1_ == _x1_ or _rs1_ == _x5_
-| Other indirect jump with linkage | JALR _rd_, _rs_ where _rs_ != _x1_ and _rs_ != _x5_ and _rd_ != _x0_ and _rd_ != _x1_ and _rd_ != _x5_
-| Other direct jump with linkage | JAL _rd_ where _rd_ != _x0_ and _rd_ != _x1_ and _rd_ != _x5_
+.2+| Function return | JALR _rd_, _rs_ where _rs_ == (_x1_ or _x5_) and _rd_ != (_x1_ or _x5_)
+| C.JR _rs1_ where _rs1_ == (_x1_ or _x5_)
+| Other indirect jump (with linkage) | JALR _rd_, _rs_ where _rs_ != (_x1_ or _x5_) and _rd_ != (_x0_, _x1_, or _x5_)
+| Other direct jump (with linkage) | JAL _rd_ where _rd_ != (_x0_, _x1_, or _x5_)
 |===
 
 
