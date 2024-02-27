@@ -169,7 +169,7 @@ The 32-bit `sctrdepth` register specifies the depth of the CTR buffer.
 {reg: [    
     {bits:  3, name: 'DEPTH'},
     {bits:  29, name: '<i>WPRI</i>'},
-], config:{lanes: 2, hspace:1024}}
+], config:{lanes: 1, hspace:1024}}
 ....
 
 .Supervisor Control Transfer Records Depth Register Field Definitions
@@ -290,7 +290,7 @@ https://github.com/riscv/riscv-indirect-csr-access/releases[[.underline]#Smcsrin
 extension. The `siselect` index range 0x200 through 0x2FF is reserved for CTR
 entries 0 through 255. When `siselect` holds a value in this range, `sireg` provides access to <<_control_transfer_record_source_ctrsource, `ctrsource`>>, `sireg2` provides access to <<_control_transfer_record_target_ctrtarget, `ctrtarget`>>, and `sireg3` provides access to <<_control_transfer_record_source_ctrdata, `ctrdata`>>.  `sireg4`, `sireg5`, and `sireg6` are read-only 0.
 
-When `vsiselect` holds a value in 0x200..0x2FF, the `vsireg*` registers provide access to the same CTR entry register state as the analogous `sireg*` and `sireg*` registers.  There is not a separate set of entry registers for V=1.
+When `vsiselect` holds a value in 0x200..0x2FF, the `vsireg*` registers provide access to the same CTR entry register state as the analogous `sireg*` registers.  There is not a separate set of entry registers for V=1.
 
 See <<State Enable Access Control>> for cases where CTR accesses from S-mode and VS-mode may be restricted.  
 
