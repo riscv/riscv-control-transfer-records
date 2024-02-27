@@ -279,7 +279,7 @@ _Because the ROI of CTR is perceived to be low for RV32 implementations, CTR doe
 [NOTE]
 [%unbreakable]
 ====
-_The `sctrdepth` and `sctrstatus` registers are supervisor CSRs because all of the state they contain can be exposed to both machine and supervisor mode.  As a result, Smctr/Ssctr depends upon implementation of S-mode.  If, in the future, it becomes desirable to remove this dependency, a simple extension could add `mctrdepth` and `mctrstatus` CSRs that reflect the same state as `sctrdepth` and `sctrstatus`, respectively._
+_Smctr/Ssctr depends upon implementation of S-mode because much of CTR state is accessible only through S-mode CSRs.  If, in the future, it becomes desirable to remove this dependency, an extension could add `mctrdepth` and `mctrstatus` CSRs that reflect the same state as `sctrdepth` and `sctrstatus`, respectively.  Further, such an extension should make CTR entries accessible via `miselect`/`mireg*`.  See <<Entry Registers>>._
 ====
 
 
