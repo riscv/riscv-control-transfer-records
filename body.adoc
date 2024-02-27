@@ -239,7 +239,7 @@ and software should ignore but preserve any fields that it does not recognize.  
 [NOTE]
 [%unbreakable]
 ====
-_Logical entry 0, accessed via `mireg*` when `miselect`=0x200, is always the physical entry preceding the WRPTR entry ((WRPTR-1) % depth), where depth = 2^(DEPTH+4)^._
+_Logical entry 0, accessed via `sireg*` when `siselect`=0x200, is always the physical entry preceding the WRPTR entry ((WRPTR-1) % depth), where depth = 2^(DEPTH+4)^._
 ====
 [NOTE]
 [%unbreakable]
@@ -287,10 +287,10 @@ _The `sctrdepth` and `sctrstatus` registers are supervisor CSRs because all of t
 
 Control transfer records are stored in a CTR buffer, such that each buffer entry stores information about a single transfer.  The CTR buffer entries are logically accessed via the indirect register access mechanism defined by the
 https://github.com/riscv/riscv-indirect-csr-access/releases[[.underline]#Smcsrind/Sscsrind#]
-extension. The `miselect` index range 0x200 through 0x2FF is reserved for CTR
-entries 0 through 255. When `miselect` holds a value in this range, `mireg` provides access to <<_control_transfer_record_source_ctrsource, `ctrsource`>>, `mireg2` provides access to <<_control_transfer_record_target_ctrtarget, `ctrtarget`>>, and `mireg3` provides access to <<_control_transfer_record_source_ctrdata, `ctrdata`>>.  `mireg4`, `mireg5`, and `mireg6` are read-only 0.
+extension. The `siselect` index range 0x200 through 0x2FF is reserved for CTR
+entries 0 through 255. When `siselect` holds a value in this range, `sireg` provides access to <<_control_transfer_record_source_ctrsource, `ctrsource`>>, `sireg2` provides access to <<_control_transfer_record_target_ctrtarget, `ctrtarget`>>, and `sireg3` provides access to <<_control_transfer_record_source_ctrdata, `ctrdata`>>.  `sireg4`, `sireg5`, and `sireg6` are read-only 0.
 
-When `siselect` holds a value in 0x200..0x2FF, the `sireg*` registers provide access to the same CTR entry register state as the analogous `mireg*` registers described above.  Similarly, when `vsiselect` holds a value in 0x200..0x2FF, the `vsireg*` registers provide access to the same CTR entry register state as the analogous `mireg*` and `sireg*` registers.  There is not a separate set of entry registers for V=1.
+When `vsiselect` holds a value in 0x200..0x2FF, the `vsireg*` registers provide access to the same CTR entry register state as the analogous `sireg*` and `sireg*` registers.  There is not a separate set of entry registers for V=1.
 
 See <<State Enable Access Control>> for cases where CTR accesses from S-mode and VS-mode may be restricted.  
 
