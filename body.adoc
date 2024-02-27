@@ -26,8 +26,7 @@ The `mctrctl` register is a 64-bit read/write register that enables and configur
     {bits:  1, name: '<i>WPRI</i>'},
     {bits:  1, name: 'BPFRZ'},
     {bits:  1, name: 'LCOFIFRZ'},
-    {bits:  3, name: 'DEPTH'},
-    {bits:  17, name: '<i>WPRI</i>'},
+    {bits:  20, name: '<i>WPRI</i>'},
     {bits:  1, name: 'EXCINH'},
     {bits:  1, name: 'INTRINH'},
     {bits:  1, name: 'TRETINH'},
@@ -64,27 +63,6 @@ The `mctrctl` register is a 64-bit read/write register that enables and configur
 
 |LCOFIFRZ |Set `sctrstatus`.FROZEN on local counter overflow interrupt (LCOFI) that traps to M-mode or S-mode. See <<Freeze>>.
 
-|DEPTH[2:0] a|
-WARL field that selects the depth of the CTR buffer. Encodings:
-
-‘000 - 16
-
-‘001 - 32
-
-‘010 - 64
-
-‘011 - 128
-
-‘100 - 256
-
-'11x - reserved
-
-The depth of the CTR buffer dictates the number of entries to which the 
-hardware records transfers. For a depth of N, the hardware
-records transfers to entries 0..N-1. All <<_entry_registers, Entry Registers>> read as '0' and are read-only when the selected entry is in the range N to 255.  When the depth is increased, the newly accessible entries contain unspecified but legal values.
-
-It is implementation-specific which DEPTH value(s) are supported.
-
 |EXCINH |Inhibit recording of exceptions.  See <<Transfer Type Filtering>>.
 
 |INTRINH |Inhibit recording of interrupts.  See <<Transfer Type Filtering>>.
@@ -115,14 +93,8 @@ It is implementation-specific which DEPTH value(s) are supported.
 
 [%unbreakable]
 --
-All fields are optional except for M, BPFRZ, and DEPTH.  All unimplemented fields are read-only 0, while all implemented fields are writable.  S must be writable if S-mode is implemented, and U must be writable if U-mode is implemented.  If the Smcofpmf/Sscofpmf extension is implemented, LCOFIFRZ must be writable.
+All fields are optional except for M, S, and BPFRZ.  All unimplemented fields are read-only 0, while all implemented fields are writable.  U must be writable if U-mode is implemented.  If the Smcofpmf/Sscofpmf extension is implemented, LCOFIFRZ must be writable.
 --
-
-[NOTE]
-[%unbreakable]
-====
-_To avoid the use of CTR for side and/or covert channels, context switching routines should first update the CTR depth value to match that of the context being switched to, and then either clear the CTR entries or restore them with the values they previously held for that context. If the context being switched to can change the depth value then all CTR entries should be cleared unless all entries for the maximal depth value are being restored.  CTR depth can be modified only by M-mode and, depending on the <<_state_enable_access_control, state enable>> configuration, S/HS-mode._
-====
 
 === Supervisor Control Transfer Records Control Register (`sctrctl`)
 
@@ -147,8 +119,7 @@ If the H extension is implemented, the `vsctrctl` register is a 64-bit read/writ
     {bits:  2, name: '<i>WPRI</i>'},
     {bits:  1, name: 'BPFRZ'},
     {bits:  1, name: 'LCOFIFRZ'},
-    {bits:  3, name: 'DEPTH'},
-    {bits:  17, name: '<i>WPRI</i>'},
+    {bits:  20, name: '<i>WPRI</i>'},
     {bits:  1, name: 'EXCINH'},
     {bits:  1, name: 'INTRINH'},
     {bits:  1, name: 'TRETINH'},
@@ -178,20 +149,64 @@ If the H extension is implemented, the `vsctrctl` register is a 64-bit read/writ
 |STE |Enables recording of traps to VS-mode when S=0.  See <<External Traps>>.
 |BPFRZ |Set `sctrstatus`.FROZEN on a breakpoint exception that traps to VS-mode. See <<Freeze>>.
 |LCOFIFRZ |Set `sctrstatus`.FROZEN on local counter overflow interrupt (LCOFI) that traps to VS-mode. See <<Freeze>>.
-|DEPTH[2:0] |Provides read-only access to the `sctrctl`.DEPTH field  
 2+|Other field definitions match those of <<_supervisor_control_transfer_records_control_sctrctl, `sctrctl`>>.  The optional fields implemented in `vsctrctl` should match those implemented in `sctrctl`.
 |===
 
 [NOTE]
 [%unbreakable]
 ====
-`__vsctrctl__`.__DEPTH__ _is a read-only copy of `sctrctl`.DEPTH in order to allow a hypervisor to dictate the depth used by a guest.  This simplifies VM (guest) migration, by providing the hypervisor a means to require the guest to use a depth supported across all systems in the datacenter._
+_Unlike the CTR status register or the CTR entry registers, the CTR control register has a VS-mode version.  This allows a guest to manage the CTR configuration directly, without requiring traps to HS-mode, while ensuring that the guest configuration (most notably the privilege mode enable bits) do not impact CTR behavior when V=0._
 ====
+
+=== Supervisor Control Transfer Records Depth Register (`sctrdepth`)
+
+The 32-bit `sctrdepth` register specifies the depth of the CTR buffer.
+
+.Supervisor Control Transfer Records Depth Register Format
+[%unbreakable]
+[wavedrom, , svg]
+....
+{reg: [    
+    {bits:  3, name: 'DEPTH'},
+    {bits:  29, name: '<i>WPRI</i>'},
+], config:{lanes: 2, hspace:1024}}
+....
+
+.Supervisor Control Transfer Records Depth Register Field Definitions
+[%unbreakable]
+[width="100%",cols="15%,75%,10%",options="header",]
+|===
+|Field |Description |Access
+|DEPTH |Selects the depth of the CTR buffer. Encodings:
+
+‘000 - 16
+
+‘001 - 32
+
+‘010 - 64
+
+‘011 - 128
+
+‘100 - 256
+
+'11x - reserved
+
+The depth of the CTR buffer dictates the number of entries to which the hardware records transfers. For a depth of N, the hardware records transfers to entries 0..N-1. All <<_entry_registers, Entry Registers>> read as '0' and are read-only when the selected entry is in the range N to 255.  When the depth is increased, the newly accessible entries contain unspecified but legal values.
+
+It is implementation-specific which DEPTH value(s) are supported.
+|WARL
+|===
+
+Attempts to access `sctrdepth` from VS-mode raise a virtual-instruction exception, unless CTR state enable access restrictions apply.  See <<State Enable Access Control>>.
 
 [NOTE]
 [%unbreakable]
 ====
-_Unlike the CTR status register or the CTR entry registers, the CTR control register has a VS-mode version.  This allows a guest to manage the CTR configuration directly, without requiring traps to HS-mode, while ensuring that the guest configuration (most notably the privilege mode enable bits) do not impact CTR behavior when V=0._
+_It is expected that kernels will access `sctrdepth` only at boot, to select the maximum supported depth value.  More frequent accesses may result in reduced performance in virtualization scenarios, as a result of traps from VS-mode incurred._
+
+_There may be scenarios where software chooses to operate on only a subset of the entries, to reduce overhead.  In such cases tools may choose to read only the lower entries, and kernels may choose to save/restore only on the lower entries while using SCTRCLR to clear the others._
+
+_The value in configurable depth lies in supporting VM migration.  It is expected that a platform spec may specify that one or more CTR depth values must be supported.  A hypervisor may wish to restrict guests to using one of these required depths, in order to ensure that such guests can be migrated to any system that complies with the platform spec.  The trapping behavior specified for VS-mode accesses to `sctrdepth` ensures that the hypervisor can impose such restrictions._
 ====
 
 === Supervisor Control Transfer Records Status Register (`sctrstatus`)
@@ -233,11 +248,6 @@ _Because the `sctrstatus` register is updated by hardware, writes should be perf
 
 _When restoring CTR state, `sctrstatus` should be written before CTR entry state is restored.  This ensures that the software writes to logical CTR entries modify the proper physical entries._
 ====
-[NOTE]
-[%unbreakable]
-====
-_This register is a supervisor CSR because all of the state it contains can be exposed to both machine and supervisor mode.  However, this means that Smctr/Ssctr depends upon implementation of S-mode.  If, in the future, it becomes desirable to remove this dependency, a simple extension could add an `mctrstatus` CSR that reflects the same state as `sctrstatus`._
-====
 
 [NOTE]
 [%unbreakable]
@@ -247,7 +257,6 @@ _Exposing the WRPTR provides a more efficient means for synthesizing CTR entries
 _Exposing the WRPTR may also allow support for Linux perf's https://lwn.net/Articles/802821[[.underline]#stack stitching#] capability._
 ====
 
-<<<
 === CSR Listing
 
 .CTR CSR List
@@ -257,6 +266,7 @@ _Exposing the WRPTR may also allow support for Linux perf's https://lwn.net/Arti
 | CSR Number | Name | Description
 | 0x14E | `sctrctl` | Supervisor Control Transfer Records Control Register
 | 0x14F | `sctrstatus` | Supervisor Control Transfer Records Status Register
+| 0x15F | `sctrdepth` | Supervisor Control Transfer Records Depth Register
 | 0x24E | `vsctrctl` | Virtual Supervisor Control Transfer Records Control Register
 | 0x34E | `mctrctl` | Machine Control Transfer Records Control Register
 |===
@@ -265,6 +275,13 @@ _Exposing the WRPTR may also allow support for Linux perf's https://lwn.net/Arti
 ====
 _Because the ROI of CTR is perceived to be low for RV32 implementations, CTR does not fully support RV32.  While control flow transfers in RV32 can be recorded, RV32 cannot access_ `x__ctrctl__` _bits 63:32.  A future extension could add support for RV32 by adding 3 new CSRs (`mctrctlh`, `sctrctlh`, and `vsctrctlh`) to provide this access._
 ====
+
+[NOTE]
+[%unbreakable]
+====
+_The `sctrdepth` and `sctrstatus` registers are supervisor CSRs because all of the state they contain can be exposed to both machine and supervisor mode.  As a result, Smctr/Ssctr depends upon implementation of S-mode.  If, in the future, it becomes desirable to remove this dependency, a simple extension could add `mctrdepth` and `mctrstatus` CSRs that reflect the same state as `sctrdepth` and `sctrstatus`, respectively._
+====
+
 
 == Entry Registers
 
@@ -423,13 +440,13 @@ SCTRCLR raises an illegal-instruction exception in U-mode, and a virtual-instruc
 
 When Smstateen is implemented, the `mstateen0`.CTR bit controls access to CTR register state from privilege modes less privileged than M-mode.  When `mstateen0`.CTR=1, accesses to CTR register state behave as described in <<CSRs>> and <<Entry Registers>> above, while SCTRCLR behaves as described in <<Supervisor CTR Clear Instruction>>.  When `mstateen0`.CTR=0 and the privilege mode is less privileged than M-mode, the following operations raise an illegal-instruction exception:
 
-* Attempts to access `sctrctl`, `vsctrctl`, or `sctrstatus`
+* Attempts to access `sctrctl`, `vsctrctl`, `sctrdepth`, or `sctrstatus`
 * Attempts to access `sireg*` when `siselect` is in 0x200..0x2FF, or `vsireg*` when `vsiselect` is in 0x200..0x2FF
 * Execution of the SCTRCLR instruction
 
 When `mstateen0`.CTR=0, qualified control transfers executed in privilege modes less privileged than M-mode will continue to implicitly update entry registers and `sctrstatus`.
 
-If the H extension is implemented and `mstateen0`.CTR=1, the `hstateen0`.CTR bit controls access to supervisor CTR state when V=1.  This state includes `sctrctl` (really vsctrctl), `sctrstatus`, and `sireg*` (really `vsireg*`) when `siselect` (really `vsiselect`) is in 0x200..0x2FF.  `hstateen0`.CTR is read-only 0 when `mstateen0`.CTR=0.
+If the H extension is implemented and `mstateen0`.CTR=1, the `hstateen0`.CTR bit controls access to supervisor CTR state when V=1.  This state includes `sctrctl` (really vsctrctl), `sctrdepth`, `sctrstatus`, and `sireg*` (really `vsireg*`) when `siselect` (really `vsiselect`) is in 0x200..0x2FF.  `hstateen0`.CTR is read-only 0 when `mstateen0`.CTR=0.
 
 When `mstateen0`.CTR=1 and `hstateen0`.CTR=1, VS-mode accesses to supervisor CTR state behave as described in <<CSRs>> and <<Entry Registers>> above, while SCTRCLR behaves as described in <<Supervisor CTR Clear Instruction>>.  When `mstateen0`.CTR=1 and `hstateen0`.CTR=0, both VS-mode accesses to supervisor CTR state and VS-mode execution of SCTRCLR raise a virtual-instruction exception.
 
