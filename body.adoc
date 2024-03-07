@@ -577,11 +577,7 @@ _Note that external trap recording does not depend on EXCINH/INTRINH.  Thus, whe
 _STE allows recording of traps from U-mode to S-mode as well as from VS/VU-mode to HS-mode.  The hypervisor can flip `sctrctl`.STE before entering a guest if it wants different behavior for U-to-S vs VS/VU-to-HS._
 ====
 
-If external trap recording is implemented:
-
-* `mctrctl`.MTE must be implemented;
-* `sctrctl`.STE must be implemented if S-mode is implemented;
-* `vsctrctl`.STE must be implemented if the H extension is implemented.
+If external trap recording is implemented, `mctrctl`.MTE and `sctrctl`.STE must be implemented, while `vsctrctl`.STE must be implemented if the H extension is implemented.
 
 === Transfer Type Filtering
 
