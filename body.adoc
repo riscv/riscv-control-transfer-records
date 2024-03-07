@@ -93,7 +93,7 @@ The `mctrctl` register is a 64-bit read/write register that enables and configur
 
 [%unbreakable]
 --
-All fields are optional except for M, S, and BPFRZ.  All unimplemented fields are read-only 0, while all implemented fields are writable.  U must be writable if U-mode is implemented.  If the Smcofpmf/Sscofpmf extension is implemented, LCOFIFRZ must be writable.
+All fields are optional except for M, S, U, and BPFRZ.  All unimplemented fields are read-only 0, while all implemented fields are writable.  If the Smcofpmf/Sscofpmf extension is implemented, LCOFIFRZ must be writable.
 --
 
 === Supervisor Control Transfer Records Control Register (`sctrctl`)
