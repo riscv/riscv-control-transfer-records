@@ -362,40 +362,7 @@ Unimplemented fields are read-only 0.  `ctrdata` is a 64-bit register.
 |===
 |Field |Description |Access 
 |TYPE[3:0] a|
-Identifies the type of the control flow transfer recorded in the entry. Implementations that do not support this field will report 0.
-
-0000 - Reserved
-
-0001 - Exception
-
-0010 - Interrupt
-
-0011 - Trap return
-
-0100 - Not-taken branch
-
-0101 - Taken branch
-
-0110 - Reserved
-
-0111 - Reserved
-
-1000 - Indirect call
-
-1001 - Direct call
-
-1010 - Indirect jump (without linkage)
-
-1011 - Direct jump (without linkage)
-
-1100 - Co-routine swap
-
-1101 - Return
-
-1110 - Other indirect jump (with linkage)
-
-1111 - Other direct jump (with linkage)
-
+Identifies the type of the control flow transfer recorded in the entry, using the encodings listed in xref:transfer-type-defs[xrefstyle=short].  Implementations that do not support this field will report 0.
 |WARL 
 
 |CCV |Cycle Count Valid. See <<Cycle Counting>>. |WARL 
@@ -545,7 +512,7 @@ _This method does not provide the flexibility to record external traps to a more
 
 .External Trap Enable Requirements
 [%unbreakable]
-[options="header",]
+[options="header", width="85%", cols="23%,23%,54%"]
 |===
 |Source Mode |Target Mode |External Trap Enable(s) Required
 .2+|U-mode | S-mode | `sctrctl`.STE
@@ -594,6 +561,7 @@ in the
 https://github.com/riscv-non-isa/riscv-trace-spec/releases/download/v2.0rc2/riscv-trace-spec.pdf[[.underline]#RISC-V Efficient Trace Spec v2.0#] (Table 4.4 and Section 4.1.1).  For completeness, the definitions are reproduced below.
 
 .Control Transfer Type Definitions
+[#transfer-type-defs]
 [%unbreakable]
 [width="60%", cols="22%,78%", options="header",]
 |===
@@ -680,7 +648,7 @@ The size of the CtrCycleCounter required to support each CCE width is given in t
 
 .Cycle Counter Size Options
 [%unbreakable]
-[width="60%", cols="10%,15%,15%", options="header",]
+[width="70%", cols="20%,38%,42%", options="header",]
 |===
 | CCE bits | CtrCycleCounter bits | Max elapsed cycle value
 | 0 | 12 | 4095
