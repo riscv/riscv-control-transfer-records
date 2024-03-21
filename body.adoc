@@ -174,10 +174,10 @@ The 32-bit `sctrdepth` register specifies the depth of the CTR buffer.
 
 .Supervisor Control Transfer Records Depth Register Field Definitions
 [%unbreakable]
-[width="100%",cols="15%,75%,10%",options="header",]
+[width="100%",cols="15%,85%",options="header",]
 |===
-|Field |Description |Access
-|DEPTH |Selects the depth of the CTR buffer. Encodings:
+|Field |Description
+|DEPTH |WARL field that selects the depth of the CTR buffer. Encodings:
 
 ‘000 - 16
 
@@ -194,7 +194,6 @@ The 32-bit `sctrdepth` register specifies the depth of the CTR buffer.
 The depth of the CTR buffer dictates the number of entries to which the hardware records transfers. For a depth of N, the hardware records transfers to entries 0..N-1. All <<_entry_registers, Entry Registers>> read as '0' and are read-only when the selected entry is in the range N to 255.  When the depth is increased, the newly accessible entries contain unspecified but legal values.
 
 It is implementation-specific which DEPTH value(s) are supported.
-|WARL
 |===
 
 Attempts to access `sctrdepth` from VS-mode or VU-mode raise a virtual-instruction exception, unless CTR state enable access restrictions apply.  See <<State Enable Access Control>>.
@@ -226,11 +225,11 @@ The 32-bit `sctrstatus` register grants access to CTR status information and is 
 
 .Supervisor Control Transfer Records Status Register Field Definitions
 [%unbreakable]
-[width="100%",cols="15%,75%,10%",options="header",]
+[width="100%",cols="15%,85%",options="header",]
 |===
-|Field |Description |Access
-|WRPTR |Indicates the physical CTR buffer entry to be written next.  Incremented on new transfers recorded (see <<Behavior>>), and decremented on qualified returns when `mctrctl`.RASEMU=1 (see <<RAS (Return Address Stack) Emulation Mode>>).  For a given CTR depth (where depth = 2^(DEPTH+4)^), WRPTR wraps to 0 on an increment when the value matches depth-1, and to depth-1 on a decrement when the value is 0.  Bits above those needed to represent depth-1 (e.g., bits 7:4 for a depth of 16) are read-only 0. On depth changes, WRPTR holds an unspecified but legal value. |WARL 
-|FROZEN |Inhibit transfer recording. See <<Freeze>>. |WARL
+|Field |Description
+|WRPTR |WARL field that indicates the physical CTR buffer entry to be written next.  Incremented on new transfers recorded (see <<Behavior>>), and decremented on qualified returns when `mctrctl`.RASEMU=1 (see <<RAS (Return Address Stack) Emulation Mode>>).  For a given CTR depth (where depth = 2^(DEPTH+4)^), WRPTR wraps to 0 on an increment when the value matches depth-1, and to depth-1 on a decrement when the value is 0.  Bits above those needed to represent depth-1 (e.g., bits 7:4 for a depth of 16) are read-only 0. On depth changes, WRPTR holds an unspecified but legal value.
+|FROZEN |Inhibit transfer recording. See <<Freeze>>.
 |===
 
 Undefined bits in `sctrstatus` are WPRI. Status fields may be added by future extensions,
