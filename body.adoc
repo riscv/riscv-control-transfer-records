@@ -201,9 +201,9 @@ Attempts to access `sctrdepth` from VS-mode or VU-mode raise a virtual-instructi
 [NOTE]
 [%unbreakable]
 ====
-_It is expected that kernels will access `sctrdepth` only at boot, to select the maximum supported depth value.  More frequent accesses may result in reduced performance in virtualization scenarios, as a result of traps from VS-mode incurred._
+_It is expected that operating systems (OSs) will access `sctrdepth` only at boot, to select the maximum supported depth value.  More frequent accesses may result in reduced performance in virtualization scenarios, as a result of traps from VS-mode incurred._
 
-_There may be scenarios where software chooses to operate on only a subset of the entries, to reduce overhead.  In such cases tools may choose to read only the lower entries, and kernels may choose to save/restore only on the lower entries while using SCTRCLR to clear the others._
+_There may be scenarios where software chooses to operate on only a subset of the entries, to reduce overhead.  In such cases tools may choose to read only the lower entries, and OSs may choose to save/restore only on the lower entries while using SCTRCLR to clear the others._
 
 _The value in configurable depth lies in supporting VM migration.  It is expected that a platform spec may specify that one or more CTR depth values must be supported.  A hypervisor may wish to restrict guests to using one of these required depths, in order to ensure that such guests can be migrated to any system that complies with the platform spec.  The trapping behavior specified for VS-mode accesses to `sctrdepth` ensures that the hypervisor can impose such restrictions._
 ====
