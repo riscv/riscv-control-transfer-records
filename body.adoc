@@ -401,7 +401,7 @@ The SCTRCLR instruction performs the following operations:
 
 Any read of `ctrsource`, `ctrtarget`, or `ctrdata` that follows SCTRCLR, such that it precedes the next qualified control transfer, will return the value 0.  Further, the first recorded transfer following SCTRCLR will have `ctrdata`.CCV=0. 
 
-SCTRCLR raises an illegal-instruction exception in U-mode, and a virtual-instruction exception in VU-mode.
+SCTRCLR raises an illegal-instruction exception in U-mode, and a virtual-instruction exception in VU-mode, unless CTR state enable access restrictions apply.  See <<State Enable Access Control>>.
 
 == State Enable Access Control
 
