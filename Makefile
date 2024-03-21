@@ -14,7 +14,7 @@
 
 DATE ?= $(shell date +%Y-%m-%d)
 VERSION ?= v0.0.0
-REVMARK ?= Draft
+REVMARK ?= Stable
 DOCKER_RUN := docker run --rm -v ${PWD}:/build -w /build \
 riscvintl/riscv-docs-base-container-image:latest
 
