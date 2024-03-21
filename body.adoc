@@ -197,7 +197,7 @@ It is implementation-specific which DEPTH value(s) are supported.
 |WARL
 |===
 
-Attempts to access `sctrdepth` from VS-mode raise a virtual-instruction exception, unless CTR state enable access restrictions apply.  See <<State Enable Access Control>>.
+Attempts to access `sctrdepth` from VS-mode or VU-mode raise a virtual-instruction exception, unless CTR state enable access restrictions apply.  See <<State Enable Access Control>>.
 
 [NOTE]
 [%unbreakable]
