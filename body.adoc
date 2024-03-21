@@ -414,13 +414,13 @@ When `mstateen0`.CTR=0, qualified control transfers executed in privilege modes 
 
 If the H extension is implemented and `mstateen0`.CTR=1, the `hstateen0`.CTR bit controls access to supervisor CTR state when V=1.  This state includes `sctrctl` (really vsctrctl), `sctrstatus`, and `sireg*` (really `vsireg*`) when `siselect` (really `vsiselect`) is in 0x200..0x2FF.  `hstateen0`.CTR is read-only 0 when `mstateen0`.CTR=0.
 
+When `mstateen0`.CTR=1 and `hstateen0`.CTR=1, VS-mode accesses to supervisor CTR state behave as described in <<CSRs>> and <<Entry Registers>> above, while SCTRCLR behaves as described in <<Supervisor CTR Clear Instruction>>.  When `mstateen0`.CTR=1 and `hstateen0`.CTR=0, both VS-mode accesses to supervisor CTR state and VS-mode execution of SCTRCLR raise a virtual-instruction exception.
+
 [NOTE]
 [%unbreakable]
 ====
 `__sctrdepth__` _is not included in the above list of supervisor CTR state controlled by `hstateen0`.CTR since accesses to `sctrdepth` from VS-mode raise a virtual-instruction exception regardless of the value of `hstateen0`.CTR._
 ====
-
-When `mstateen0`.CTR=1 and `hstateen0`.CTR=1, VS-mode accesses to supervisor CTR state behave as described in <<CSRs>> and <<Entry Registers>> above, while SCTRCLR behaves as described in <<Supervisor CTR Clear Instruction>>.  When `mstateen0`.CTR=1 and `hstateen0`.CTR=0, both VS-mode accesses to supervisor CTR state and VS-mode execution of SCTRCLR raise a virtual-instruction exception.
 
 When `hstateen0`.CTR=0, qualified control transfers executed while V=1 will continue to implicitly update entry registers and `sctrstatus`.
 
