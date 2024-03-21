@@ -100,7 +100,7 @@ All fields are optional except for M, S, U, and BPFRZ.  All unimplemented fields
 
 The `sctrctl` register provides supervisor mode access to a subset of <<_machine_control_transfer_records_control_mctrctl, `mctrctl`>>.
 
-Bits 0 and 8 in `sctrctl` are read-only 0. As a result, the M and MTE fields in `mctrctl` are not accessible through `sctrctl`.  All other `mctrctl` fields are accessible through `sctrctl`.
+Bits 2 and 9 in `sctrctl` are read-only 0. As a result, the M and MTE fields in `mctrctl` are not accessible through `sctrctl`.  All other `mctrctl` fields are accessible through `sctrctl`.
 
 === Virtual Supervisor Control Transfer Records Control Register (`vsctrctl`)
 
