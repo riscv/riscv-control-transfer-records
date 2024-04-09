@@ -565,6 +565,11 @@ The transfer type filter bits leverage the type definitions specified
 in the
 https://github.com/riscv-non-isa/riscv-trace-spec/releases/download/v2.0rc2/riscv-trace-spec.pdf[[.underline]#RISC-V Efficient Trace Spec v2.0#] (Table 4.4 and Section 4.1.1).  For completeness, the definitions are reproduced below.
 
+[NOTE]
+====
+_Here "indirect" is used interchangeably with "uninferrable", which is used in the trace spec.  Both imply that the target of the jump is not encoded in the opcode._
+====
+
 .Control Transfer Type Definitions
 [#transfer-type-defs]
 [%unbreakable]
@@ -589,7 +594,7 @@ https://github.com/riscv-non-isa/riscv-trace-spec/releases/download/v2.0rc2/risc
 | 15 | Other direct jump (with linkage) 
 |===
 
-Encodings 8 through 15 refer to various encodings of JAL and JALR instructions.  The types are distinguished as described below.
+Encodings 8 through 15 refer to various encodings of jump instructions.  The types are distinguished as described below.
 
 .Control Transfer Type Definitions
 [%unbreakable]
@@ -599,18 +604,21 @@ Encodings 8 through 15 refer to various encodings of JAL and JALR instructions. 
 .3+| Indirect call | JALR _x1_, _rs_ where _rs_ != _x5_
 | JALR _x5_, _rs_ where _rs_ != _x1_
 | C.JALR _rs1_ where _rs1_ != _x5_
-.3+| Direct call | JAL _x1_
+.4+| Direct call | JAL _x1_
 | JAL _x5_
 | C.JAL
+| CM.JALT _index_
 .2+| Indirect jump (without linkage) | JALR _x0_, _rs_ where _rs_ != (_x1_ or _x5_)
 | C.JR _rs1_ where _rs1_ != (_x1_ or _x5_)
-.2+| Direct jump (without linkage) | JAL _x0_
+.3+| Direct jump (without linkage) | JAL _x0_
 | C.J
+| CM.JT _index_
 .3+| Co-routine swap | JALR _x1_, _x5_
 | JALR _x5_, _x1_
 | C.JALR _x5_
-.2+| Function return | JALR _rd_, _rs_ where _rs_ == (_x1_ or _x5_) and _rd_ != (_x1_ or _x5_)
+.3+| Function return | JALR _rd_, _rs_ where _rs_ == (_x1_ or _x5_) and _rd_ != (_x1_ or _x5_)
 | C.JR _rs1_ where _rs1_ == (_x1_ or _x5_)
+| CM.POPRET(Z)
 | Other indirect jump (with linkage) | JALR _rd_, _rs_ where _rs_ != (_x1_ or _x5_) and _rd_ != (_x0_, _x1_, or _x5_)
 | Other direct jump (with linkage) | JAL _rd_ where _rd_ != (_x0_, _x1_, or _x5_)
 |===
