@@ -285,7 +285,7 @@ _Smctr/Ssctr depends upon implementation of S-mode because much of CTR state is 
 == Entry Registers
 
 Control transfer records are stored in a CTR buffer, such that each buffer entry stores information about a single transfer.  The CTR buffer entries are logically accessed via the indirect register access mechanism defined by the
-https://github.com/riscv/riscv-indirect-csr-access/releases[[.underline]#Smcsrind/Sscsrind#]
+https://github.com/riscv/riscv-indirect-csr-access/releases[[.underline]#Sscsrind#]
 extension. The `siselect` index range 0x200 through 0x2FF is reserved for CTR
 entries 0 through 255. When `siselect` holds a value in this range, `sireg` provides access to <<_control_transfer_record_source_ctrsource, `ctrsource`>>, `sireg2` provides access to <<_control_transfer_record_target_ctrtarget, `ctrtarget`>>, and `sireg3` provides access to <<_control_transfer_record_source_ctrdata, `ctrdata`>>.  `sireg4`, `sireg5`, and `sireg6` are read-only 0.
 
@@ -429,7 +429,7 @@ The CTR bit is bit 54 in `mstateen0` and `hstateen0`.
 [NOTE]
 [%unbreakable]
 ====
-_See the https://github.com/riscv/riscv-indirect-csr-access[[.underline]#Smcsrind/Sscsrind spec#] for how bit 60 in mstateen0 and hstateen0 can also restrict access to `sireg*`/`siselect` and `vsireg*`/`vsiselect` from privilege modes less privileged than M-mode._
+_See the https://github.com/riscv/riscv-indirect-csr-access[[.underline]#Sscsrind spec#] for how bit 60 in mstateen0 and hstateen0 can also restrict access to `sireg*`/`siselect` and `vsireg*`/`vsiselect` from privilege modes less privileged than M-mode._
 ====
 
 == Behavior
