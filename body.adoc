@@ -238,7 +238,7 @@ and software should ignore but preserve any fields that it does not recognize.  
 [NOTE]
 [%unbreakable]
 ====
-_Logical entry 0, accessed via `sireg*` when `siselect`=0x200, is always the physical buffer entry preceding the WRPTR entry.  More generally, the physical buffer entry Y associated with logical entry X can be determined using the formula Y = (WRPTR - X - 1) % depth, where depth = 2^(DEPTH+4)^._
+_Logical entry 0, accessed via `sireg*` when `siselect`=0x200, is always the physical buffer entry preceding the WRPTR entry.  More generally, the physical buffer entry Y associated with logical entry X (X < depth) can be determined using the formula Y = (WRPTR - X - 1) % depth, where depth = 2^(DEPTH+4)^.  Logical entries >= depth are read-only 0._
 ====
 [NOTE]
 [%unbreakable]
