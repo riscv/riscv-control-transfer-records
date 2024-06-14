@@ -228,7 +228,7 @@ The 32-bit `sctrstatus` register grants access to CTR status information and is 
 [width="100%",cols="15%,85%",options="header",]
 |===
 |Field |Description
-|WRPTR |WARL field that indicates the physical CTR buffer entry to be written next.  Incremented on new transfers recorded (see <<Behavior>>), and decremented on qualified returns when `mctrctl`.RASEMU=1 (see <<RAS (Return Address Stack) Emulation Mode>>).  For a given CTR depth (where depth = 2^(DEPTH+4)^), WRPTR wraps to 0 on an increment when the value matches depth-1, and to depth-1 on a decrement when the value is 0.  Bits above those needed to represent depth-1 (e.g., bits 7:4 for a depth of 16) are read-only 0. On depth changes, WRPTR holds an unspecified but legal value.
+|WRPTR |WARL field that indicates the physical CTR buffer entry to be written next.  Incremented after new transfers are recorded (see <<Behavior>>), though there are exceptions when `mctrctl`.RASEMU=1, see <<RAS (Return Address Stack) Emulation Mode>>).  For a given CTR depth (where depth = 2^(DEPTH+4)^), WRPTR wraps to 0 on an increment when the value matches depth-1, and to depth-1 on a decrement when the value is 0.  Bits above those needed to represent depth-1 (e.g., bits 7:4 for a depth of 16) are read-only 0. On depth changes, WRPTR holds an unspecified but legal value.
 |FROZEN |Inhibit transfer recording. See <<Freeze>>.
 |===
 
@@ -251,7 +251,7 @@ _When restoring CTR state, `sctrstatus` should be written before CTR entry state
 [NOTE]
 [%unbreakable]
 ====
-_Exposing the WRPTR provides a more efficient means for synthesizing CTR entries.  If a qualified control transfer is emulated, the emulator can simply increment the WRPTR, then write the synthesized record to entry 0.  If a qualified function return is emulated while RASEMU=1, the emulator can clear `ctrsource`.V for entry 0, then decrement the WRPTR._
+_Exposing the WRPTR provides a more efficient means for synthesizing CTR entries.  If a qualified control transfer is emulated, the emulator can simply increment the WRPTR, then write the synthesized record to logical entry 0.  If a qualified function return is emulated while RASEMU=1, the emulator can clear `ctrsource`.V for logical entry 0, then decrement the WRPTR._
 
 _Exposing the WRPTR may also allow support for Linux perf's https://lwn.net/Articles/802821[[.underline]#stack stitching#] capability._
 ====
@@ -441,8 +441,7 @@ CTR records qualified control transfers.  Control transfers are qualified if the
 * `sctrstatus`.FROZEN is not set
 * The transfer completes/retires
 
-Such qualified transfers update the <<_entry_registers, Entry Registers>> at logical entry 0.  As a result, older entries are pushed down the stack: the record previously in entry 0
-moves to entry 1, the record in entry 1 moves to entry 2, and so on.  If the CTR buffer is full, the oldest recorded entry (previously at entry depth-1) is lost.
+Such qualified transfers update the <<_entry_registers, Entry Registers>> at logical entry 0.  As a result, older entries are pushed down the stack; the record previously in logical entry 0 moves to logical entry 1, the record in logical entry 1 moves to logical entry 2, and so on.  If the CTR buffer is full, the oldest recorded entry (previously at entry depth-1) is lost.
 
 Recorded transfers will set the `ctrsource`.V bit to 1, and will update all implemented record fields. 
 
@@ -688,11 +687,9 @@ The CC value is only valid when the Cycle Count Valid (CCV) bit is set.  If CCV=
 When the optional `mctrctl`.RASEMU bit is implemented and set to 1, transfer recording behavior is altered to emulate the behavior of a return-address stack (RAS).
 
 * Indirect and direct calls are recorded as normal
-* Function returns pop the most recent call, by invalidating entry 0 (setting `ctrsource`.V=0)
-and decrementing the WRPTR, such that (invalidated) entry 0 moves to
-entry depth-1, and entries 1..depth-1 move to 0..depth-2.
-* Co-routine swaps affect both a return and a call. Entry 0 is
-overwritten.
+* Function returns pop the most recent call, by invalidating logical entry 0 (by setting `ctrsource`.V=0) and decrementing the WRPTR, such that (invalidated) logical entry 0 moves to logical entry depth-1, and logical entries 1..depth-1 move to 0..depth-2.
+* Co-routine swaps affect both a return and a call. Logical entry 0 is
+overwritten, and WRPTR is not modified.
 * Other transfer types are inhibited
 * Transfer type filtering bits (`__x__ctrctl`[47:32]) and external trap enable bits (`__x__ctrctl`.__x__TE) are ignored
 
