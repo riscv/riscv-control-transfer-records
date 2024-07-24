@@ -332,7 +332,8 @@ is read-only 0 when not implemented.
 ....
 {reg: [    
     {bits:  1, name: 'MISP'},
-    {bits:  63, name: 'PC[63:1]'},
+    {bits:  31, name: 'PC[31:1]'},
+    {bits:  32, name: 'PC[63:32]'},
 ], config:{lanes: 2, hspace: 1024}}
 ....
 
