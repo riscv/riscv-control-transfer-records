@@ -1,0 +1,65 @@
+[[header]]
+:description: RISC-V Control Transfer Records (Smctr/Ssctr)
+:company: RISC-V.org
+:revdate: 08/25/2023
+:revnumber: 1.0
+:revremark: This document is Frozen.
+:url-riscv: http://riscv.org
+:doctype: book
+:preface-title: Preamble
+:colophon:
+:appendix-caption: Appendix
+:imagesdir: docs-resources/images
+:title-logo-image: image:risc-v_logo.svg[pdfwidth=3.25in,align=center]
+// Settings:
+:experimental:
+:reproducible:
+// needs to be changed? bug discussion started
+//:WaveDromEditorApp: app/wavedrom-editor.app
+:imagesoutdir: docs-resources/images
+:bibtex-file: example.bib
+:bibtex-order: alphabetical
+:bibtex-style: apa
+:icons: font
+:lang: en
+:listing-caption: Listing
+:sectnums:
+:toc: left
+:toclevels: 4
+:source-highlighter: pygments
+ifdef::backend-pdf[]
+:source-highlighter: coderay
+endif::[]
+:data-uri:
+:hide-uri-scheme:
+:stem: latexmath
+:footnote:
+:xrefstyle: short
+
+= RISC-V Control Transfer Records (Smctr/Ssctr)
+RISC-V Control Transfer Records TG
+
+// Preamble
+[WARNING]
+.This document is in the link:http://riscv.org/spec-state[Frozen state]
+====
+Change is extremely unlikely. A high threshold will be used, and a change will only occur because of some truly critical issue being identified during the public review cycle. Any other desired or needed changes can be the subject of a follow-on new extension.
+====
+
+[preface]
+== Copyright and license information
+This specification is licensed under the Creative Commons
+Attribution 4.0 International License (CC-BY 4.0). The full
+license text is available at
+https://creativecommons.org/licenses/by/4.0/.
+
+Copyright 2024 by RISC-V International.
+
+[preface]
+include::contributors.adoc[]
+
+include::intro.adoc[]
+include::body.adoc[]
+//the index must precede the bibliography
+//include::index.adoc[]
+//include::bibliography.adoc[]
