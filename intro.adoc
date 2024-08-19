@@ -15,7 +15,7 @@ _Software may opt to use a depth less than the maximum supported in order to red
 
 Only qualified transfers are recorded.  Qualified transfers are those that meet the filtering criteria, which include the privilege mode and the transfer type.
 
-Recorded transfers are inserted to the head of the buffer, while older recorded transfers may be overwritten once the buffer is full. Or the user can enable RAS (Return Address Stack) emulation mode, where only function calls are recorded, and function returns pop the last call record.  The source PC, target PC, and some optional metadata (transfer type, elapsed cycles) are stored for each recorded transfer.
+Recorded transfers are inserted at the write pointer, which is then incremented, while older recorded transfers may be overwritten once the buffer is full. Or the user can enable RAS (Return Address Stack) emulation mode, where only function calls are recorded, and function returns pop the last call record.  The source PC, target PC, and some optional metadata (transfer type, elapsed cycles) are stored for each recorded transfer.
 
 The CTR buffer is accessible through an indirect CSR interface, such that software can specify which logical entry in the buffer it wishes to read or write.  Logical entry 0 always corresponds to the youngest recorded transfer, followed by entry 1 as the next youngest, and so on.
 
