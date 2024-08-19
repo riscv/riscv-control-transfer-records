@@ -688,7 +688,7 @@ The CC value is only valid when the Cycle Count Valid (CCV) bit is set.  If CCV=
 When the optional `mctrctl`.RASEMU bit is implemented and set to 1, transfer recording behavior is altered to emulate the behavior of a return-address stack (RAS).
 
 * Indirect and direct calls are recorded as normal
-* Function returns pop the most recent call, by invalidating logical entry 0 (by setting `ctrsource`.V=0) and decrementing the WRPTR, such that (invalidated) logical entry 0 moves to logical entry depth-1, and logical entries 1..depth-1 move to 0..depth-2.
+* Function returns pop the most recent call, by decrementing the WRPTR then invalidating the WRPTR entry (by setting ctrsource.V=0).  As a result, logical entry 0 is invalidated and moves to logical entry depth-1, while logical entries 1..depth-1 move to 0..depth-2.
 * Co-routine swaps affect both a return and a call. Logical entry 0 is
 overwritten, and WRPTR is not modified.
 * Other transfer types are inhibited
