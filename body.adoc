@@ -93,7 +93,7 @@ The `mctrctl` register is a 64-bit read/write register that enables and configur
 
 [%unbreakable]
 --
-All fields are optional except for M, S, U, and BPFRZ.  All unimplemented fields are read-only 0, while all implemented fields are writable.  If the Smcofpmf/Sscofpmf extension is implemented, LCOFIFRZ must be writable.
+All fields are optional except for M, S, U, and BPFRZ.  All unimplemented fields are read-only 0, while all implemented fields are writable.  If the Sscofpmf extension is implemented, LCOFIFRZ must be writable.
 --
 
 === Supervisor Control Transfer Records Control Register (`sctrctl`)
@@ -413,7 +413,7 @@ When Smstateen is implemented, the `mstateen0`.CTR bit controls access to CTR re
 
 When `mstateen0`.CTR=0, qualified control transfers executed in privilege modes less privileged than M-mode will continue to implicitly update entry registers and `sctrstatus`.
 
-If the H extension is implemented and `mstateen0`.CTR=1, the `hstateen0`.CTR bit controls access to supervisor CTR state when V=1.  This state includes `sctrctl` (really vsctrctl), `sctrstatus`, and `sireg*` (really `vsireg*`) when `siselect` (really `vsiselect`) is in 0x200..0x2FF.  `hstateen0`.CTR is read-only 0 when `mstateen0`.CTR=0.
+If the H extension is implemented and `mstateen0`.CTR=1, the `hstateen0`.CTR bit controls access to supervisor CTR state when V=1.  This state includes `sctrctl` (really `vsctrctl`), `sctrstatus`, and `sireg*` (really `vsireg*`) when `siselect` (really `vsiselect`) is in 0x200..0x2FF.  `hstateen0`.CTR is read-only 0 when `mstateen0`.CTR=0.
 
 When `mstateen0`.CTR=1 and `hstateen0`.CTR=1, VS-mode accesses to supervisor CTR state behave as described in <<CSRs>> and <<Entry Registers>> above, while SCTRCLR behaves as described in <<Supervisor CTR Clear Instruction>>.  When `mstateen0`.CTR=1 and `hstateen0`.CTR=0, both VS-mode accesses to supervisor CTR state and VS-mode execution of SCTRCLR raise a virtual-instruction exception.
 
@@ -430,7 +430,7 @@ The CTR bit is bit 54 in `mstateen0` and `hstateen0`.
 [NOTE]
 [%unbreakable]
 ====
-_See the https://github.com/riscv/riscv-indirect-csr-access[[.underline]#Sscsrind spec#] for how bit 60 in mstateen0 and hstateen0 can also restrict access to `sireg*`/`siselect` and `vsireg*`/`vsiselect` from privilege modes less privileged than M-mode._
+_See the https://github.com/riscv/riscv-indirect-csr-access[[.underline]#Sscsrind spec#] for how bit 60 in `mstateen0` and `hstateen0` can also restrict access to `sireg*`/`siselect` and `vsireg*`/`vsiselect` from privilege modes less privileged than M-mode._
 ====
 
 == Behavior
@@ -510,7 +510,7 @@ External trap recording depends not only on the target mode, but on any interven
 [NOTE]
 [%unbreakable]
 ====
-_Requiring intervening modes to be enabled for external traps simplifies software management of CTR.  Consider a scenario where S-mode software is configuring CTR for U-mode contexts A and B, such that external traps (to any mode) are enabled for A but not for B.  When switching between the two contexts, S-mode can simply toggle sctrctl.STE, rather than requiring a trap to M-mode to additionally toggle mctrctl.MTE._
+_Requiring intervening modes to be enabled for external traps simplifies software management of CTR.  Consider a scenario where S-mode software is configuring CTR for U-mode contexts A and B, such that external traps (to any mode) are enabled for A but not for B.  When switching between the two contexts, S-mode can simply toggle `sctrctl`.STE, rather than requiring a trap to M-mode to additionally toggle `mctrctl`.MTE._
 
 _This method does not provide the flexibility to record external traps to a more privileged mode but not to all intervening mode(s).  Because it is expected that profiling tools generally wish to observe all external traps or none, this is not considered a meaningful limitation._
 ====
