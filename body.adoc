@@ -228,7 +228,7 @@ The 32-bit `sctrstatus` register grants access to CTR status information and is 
 [width="100%",cols="15%,85%",options="header",]
 |===
 |Field |Description
-|WRPTR |WARL field that indicates the physical CTR buffer entry to be written next.  It is incremented after new transfers are recorded (see <<Behavior>>), though there are exceptions when `mctrctl`.RASEMU=1, see <<RAS (Return Address Stack) Emulation Mode>>.  For a given CTR depth (where depth = 2^(DEPTH+4)^), WRPTR wraps to 0 on an increment when the value matches depth-1, and to depth-1 on a decrement when the value is 0.  Bits above those needed to represent depth-1 (e.g., bits 7:4 for a depth of 16) are read-only 0. On depth changes, WRPTR holds an unspecified but legal value.
+|WRPTR |WARL field that indicates the physical CTR buffer entry to be written next.  It is incremented after new transfers are recorded (see <<Behavior>>), though there are exceptions when `__x__ctrctl`.RASEMU=1, see <<RAS (Return Address Stack) Emulation Mode>>.  For a given CTR depth (where depth = 2^(DEPTH+4)^), WRPTR wraps to 0 on an increment when the value matches depth-1, and to depth-1 on a decrement when the value is 0.  Bits above those needed to represent depth-1 (e.g., bits 7:4 for a depth of 16) are read-only 0. On depth changes, WRPTR holds an unspecified but legal value.
 |FROZEN |Inhibit transfer recording. See <<Freeze>>.
 |===
 
@@ -685,7 +685,7 @@ The CC value is only valid when the Cycle Count Valid (CCV) bit is set.  If CCV=
 
 === RAS (Return Address Stack) Emulation Mode
 
-When the optional `mctrctl`.RASEMU bit is implemented and set to 1, transfer recording behavior is altered to emulate the behavior of a return-address stack (RAS).
+When the optional `__x__ctrctl`.RASEMU bit is implemented and set to 1, transfer recording behavior is altered to emulate the behavior of a return-address stack (RAS).
 
 * Indirect and direct calls are recorded as normal
 * Function returns pop the most recent call, by decrementing the WRPTR then invalidating the WRPTR entry (by setting ctrsource.V=0).  As a result, logical entry 0 is invalidated and moves to logical entry depth-1, while logical entries 1..depth-1 move to 0..depth-2.
